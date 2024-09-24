@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dataguard"
+version = "0.0.1"
+description = "Data Guard is a powerful tool against data quality issues."
+authors = [
+    { name = "Sumz" },
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "Apache Software License (Apache 2.0)"}
+keywords = [
+    "data quality",
+    "data engineering",
+]
+classifiers = [
+    "Development Status :: 4 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dynamic = ["readme", "version"]
+
+[project.optional-dependencies]
+dev = [
+  "black==24.8.0",
+  "ruff==0.6.4",
+  "pre-commit==3.8.0",
+]
+pandas = [
+  "cuallee[pandas]~=0.14.0"
+]
+pyspark = [
+  "cuallee[pyspark]~=0.14.0"
+]
+snowpark = [
+  "cuallee[snowpark]~=0.14.0",
+]
+test = [
+  "pytest",
+  "pytest-cov",
+  "pendulum >= 2.1.2"
+]
+all = [
+  "cuallee[dev,pyspark,snowpark,pandas,test]"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/SumzCol/dataguard"
+"Bug Tracker" = "https://github.com/SumzCol/dataguard"
