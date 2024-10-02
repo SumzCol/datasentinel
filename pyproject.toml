@@ -48,7 +48,7 @@ test = [
   "cuallee~=0.14.0",
 ]
 all = [
-  "cuallee[dev,pyspark,snowpark,pandas,test]"
+  "dataguard[dev,pyspark,snowpark,pandas,test]"
 ]
 
 [project.urls]
