@@ -1,0 +1,2 @@
+class ValidationSessionException(Exception):
+    pass
