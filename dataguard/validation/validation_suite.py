@@ -7,11 +7,17 @@ class ValidationSuite:
     def __init__(
             self,
             name: str,
+            table_name: str,
+            schema_name: str | None = None,
+            metadata: Dict[str, Any] | None = None,
             check_list: Dict[str, Any] | None = None,
             metric_stores: List[str] | None = None,
             notifier: List[str] | None = None,
     ):
         self._name = name
+        self._table_name = table_name
+        self._schema_name = schema_name
+        self._metadata = {} if metadata is None else metadata
         self._check_list = {} if check_list is None else check_list
         self._metric_stores = [] if metric_stores is None else metric_stores
         self._notifiers = [] if notifier is None else notifier

@@ -27,3 +27,14 @@ class AbstractCheckResult(ABC):
     @abstractmethod
     def get_failed_rows(self, top: int = 100) -> List[Dict[str, Any]] | None:
         pass
+
+
+class AbstractBadRecordsDataset(ABC):
+
+    @abstractmethod
+    def count(self) -> int:
+        pass
+
+    @abstractmethod
+    def to_dict(self, top: int = 1000) -> List[Dict[str, Any]]:
+        pass

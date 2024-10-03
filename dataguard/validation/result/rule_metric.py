@@ -4,14 +4,12 @@ from typing import Union, List, Any
 
 from cuallee import CheckLevel
 
-from dataguard.validation.result.core import Status
+from dataguard.validation.result.core import Status, AbstractBadRecordsDataset
 
 
 @dataclass
 class RuleMetric:
     id: int
-    table: str
-    layer: Union[str, None]
     timestamp: datetime
     check: str
     level: CheckLevel
@@ -23,3 +21,4 @@ class RuleMetric:
     pass_rate: float
     pass_threshold: float
     status: Status
+    bad_records: AbstractBadRecordsDataset | None

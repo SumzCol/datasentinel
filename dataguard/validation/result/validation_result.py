@@ -1,10 +1,18 @@
 from dataclasses import dataclass
-from typing import Dict
+from datetime import datetime
+from typing import List, Dict, Any
 
-from dataguard.validation.result.core import Status, AbstractCheckResult
+from dataguard.validation.result.check_result import CheckResult
+from dataguard.validation.result.core import Status
 
 
 @dataclass
-class ValidationResult:
+class ValidationSuiteResult:
+    name: str
+    table_name: str
+    schema_name: str | None
+    metadata: Dict[str, Any] | None
+    start_time: datetime
+    end_time: datetime
+    check_results: List[CheckResult]
     status: Status
-    check_results: Dict[str, AbstractCheckResult]
