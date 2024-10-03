@@ -2,14 +2,12 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, List, Any
 
-from markdown_it.common.html_re import attribute
-
 from dataguard.validation.result.rule_metric import RuleMetric
 
 
 class Status(Enum):
-    FAIL = "fail"
-    PASS = "pass"
+    FAIL = "FAIL"
+    PASS = "PASS"
 
 
 class AbstractCheckResult(ABC):
