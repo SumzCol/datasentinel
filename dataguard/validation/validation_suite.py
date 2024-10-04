@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 
-from dataguard.validation.result import ValidationResult
+from dataguard.validation.result import ValidationSuiteResult
 
 
 class ValidationSuite:
@@ -32,5 +32,5 @@ class ValidationSuite:
     def add_notifier(self, name: str):
         self._notifiers.append(name)
 
-    def validate(self, data: Any) -> ValidationResult:
+    def validate(self, data: Any) -> ValidationSuiteResult:
         pass
