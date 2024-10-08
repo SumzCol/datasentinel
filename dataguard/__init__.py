@@ -1,7 +1,4 @@
-from dataguard.session import ValidationSession
+from dataguard.session import get_session
 
 
-__all__ = [
-    "ValidationSession",
-]
-
+__all__ = ["get_session"]

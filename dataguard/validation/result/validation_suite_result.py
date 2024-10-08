@@ -8,6 +8,7 @@ from dataguard.validation.result.core import Status
 
 @dataclass
 class ValidationSuiteResult:
+    id: str
     name: str
     table_name: str
     schema_name: str | None
