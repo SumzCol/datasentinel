@@ -23,7 +23,8 @@ classifiers = [
 ]
 dynamic = ["readme", "version"]
 dependencies = [
-  "cuallee~=0.14.0",
+  "cuallee~=0.15.0",
+  "python-ulid~=2.7.0"
 ]
 
 [project.optional-dependencies]
@@ -33,22 +34,22 @@ dev = [
   "pre-commit==3.8.0",
 ]
 pandas = [
-  "cuallee[pandas]~=0.14.0"
+  "cuallee[pandas]~=0.15.0"
 ]
 pyspark = [
-  "cuallee[pyspark]~=0.14.0"
+  "cuallee[pyspark]~=0.15.0"
 ]
 snowpark = [
-  "cuallee[snowpark]~=0.14.0",
+  "cuallee[snowpark]~=0.15.0",
 ]
 test = [
   "pytest",
   "pytest-cov",
   "pendulum >= 2.1.2",
-  "cuallee~=0.14.0",
+  "cuallee~=0.15.0",
 ]
 all = [
-  "cuallee[dev,pyspark,snowpark,pandas,test]"
+  "dataguard[dev,pyspark,snowpark,pandas,test]"
 ]
 
 [project.urls]
