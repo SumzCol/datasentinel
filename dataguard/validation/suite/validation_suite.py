@@ -1,23 +1,23 @@
 from typing import Dict, Any, List
 
 from dataguard.validation.check.core import AbstractCheck
-from dataguard.validation.result import ValidationSuiteResult
+from dataguard.validation.suite.result import ValidationSuiteResult
 
 
 class ValidationSuite:
     def __init__(
             self,
             name: str,
-            table_name: str,
-            schema_name: str | None = None,
+            table: str,
+            schema: str | None = None,
             metadata: Dict[str, Any] | None = None,
             check_list: List[AbstractCheck] | None = None,
             metric_stores: List[str] | None = None,
             notifier: List[str] | None = None,
     ):
         self._name = name
-        self._table_name = table_name
-        self._schema_name = schema_name
+        self._table = table
+        self._schema = schema
         self._metadata = {} if metadata is None else metadata
         self._check_list = {} if check_list is None else check_list
         self._metric_stores = [] if metric_stores is None else metric_stores
@@ -28,12 +28,12 @@ class ValidationSuite:
         return self._name
 
     @property
-    def table_name(self) -> str:
-        return self._table_name
+    def table(self) -> str:
+        return self._table
 
     @property
-    def schema_name(self) -> str | None:
-        return self._schema_name
+    def schema(self) -> str | None:
+        return self._schema
 
     @property
     def metadata(self) -> Dict[str, Any]:
@@ -57,5 +57,4 @@ class ValidationSuite:
         self._check_list.append(check)
 
     def validate(self, data: Any) -> ValidationSuiteResult:
-        for check in self._check_list:
-            check_result = check.check(data)
+        pass

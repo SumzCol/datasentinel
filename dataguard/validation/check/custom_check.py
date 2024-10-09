@@ -1,7 +1,8 @@
 from typing import Any
 
 from dataguard.validation.check.check import Check
-from dataguard.validation.check.core import AbstractCheck, CheckLevel
+from dataguard.validation.check.core import AbstractCheck
+from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.result.check_result import CheckResult
 
 

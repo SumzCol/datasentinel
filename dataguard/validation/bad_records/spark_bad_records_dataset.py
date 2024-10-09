@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 
 from pyspark.sql import DataFrame
 
-from dataguard.validation.result.core import AbstractBadRecordsDataset
+from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
 
 
 class SparkBadRecordsDataset(AbstractBadRecordsDataset):

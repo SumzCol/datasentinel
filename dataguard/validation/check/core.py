@@ -1,13 +1,8 @@
 from abc import ABC, abstractmethod
-from enum import Enum
 from typing import Any
 
-from dataguard.validation.result.check_result import CheckResult
-
-
-class CheckLevel(Enum):
-    ERROR = 0
-    WARNING = 1
+from dataguard.validation.check.level import CheckLevel
+from dataguard.validation.check.result import CheckResult
 
 
 class AbstractCheck(ABC):

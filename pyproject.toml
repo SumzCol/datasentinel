@@ -24,6 +24,7 @@ classifiers = [
 dynamic = ["readme", "version"]
 dependencies = [
   "cuallee~=0.15.0",
+  "python-ulid~=2.7.0"
 ]
 
 [project.optional-dependencies]

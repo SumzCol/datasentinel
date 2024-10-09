@@ -2,8 +2,10 @@ from typing import List, Dict, Any
 
 from pandas import DataFrame
 
+from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
 
-class PandasBadRecordsDataset:
+
+class PandasBadRecordsDataset(AbstractBadRecordsDataset):
     def __init__(self, raw_data: DataFrame):
         self._raw_data = raw_data
 

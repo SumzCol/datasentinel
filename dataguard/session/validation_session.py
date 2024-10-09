@@ -5,10 +5,10 @@ from typing import Union, Any, Dict
 from dataguard.session.core import ValidationSessionException
 from dataguard.session.manager import NotifierManager, MetricStoreManager
 from dataguard.session.session_configuration import SessionConfiguration
-from dataguard.validation.check.core import CheckLevel
-from dataguard.validation.result.validation_suite_result import ValidationSuiteResult
-from dataguard.validation.result.core import Status
-from dataguard.validation.validation_suite import ValidationSuite
+from dataguard.validation.check.level import CheckLevel
+from dataguard.validation.suite.result import ValidationSuiteResult
+from dataguard.validation.status import Status
+from dataguard.validation.suite.validation_suite import ValidationSuite
 
 
 class ValidationSession:
