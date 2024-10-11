@@ -1,4 +1,7 @@
 from abc import ABC
+from typing import Dict
+
+from dataguard.notification.notifier.core import AbstractNotifier
 
 
 class MetricStoreManagerException(Exception):
@@ -36,16 +39,18 @@ class MetricStoreManager:
 class NotifierManager:
 
     def __init__(self):
-        self._notifiers = {}
+        self._notifiers: Dict[str, AbstractNotifier] = {}
 
-    def get(self, name: str):
+    def get(self, name: str) -> AbstractNotifier:
         if name in self._notifiers:
             return self._notifiers[name]
         else:
             raise NotifierManagerException(f"Notifier '{name}' does not exist.")
 
-    def register(self, name: str, notifier):
-        self._notifiers[name] = notifier
+    def register(self, notifier: AbstractNotifier):
+        if notifier.name in self._notifiers:
+            raise NotifierManagerException(f"Notifier '{notifier.name}' already exists.")
+        self._notifiers[notifier.name] = notifier
 
     def remove(self, name: str):
         if name in self._notifiers:

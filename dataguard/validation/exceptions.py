@@ -1,2 +1,2 @@
-class CheckFailedException(Exception):
+class FailedCheckException(Exception):
     pass

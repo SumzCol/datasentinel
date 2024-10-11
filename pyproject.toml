@@ -37,7 +37,8 @@ pandas = [
   "cuallee[pandas]~=0.15.0"
 ]
 pyspark = [
-  "cuallee[pyspark]~=0.15.0"
+  "cuallee[pyspark]~=0.15.0",
+  "delta-spark~=3.1.0"
 ]
 snowpark = [
   "cuallee[snowpark]~=0.15.0",

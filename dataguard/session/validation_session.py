@@ -1,11 +1,15 @@
 import logging
 import threading
-from typing import Union, Any, Dict
+from typing import Union, Any, Dict, List
 
+from dataguard.notification.notifier.exceptions import NotificationException
+from dataguard.notification.notify_event import NotifyOnEvent
+from dataguard.notification.notifier.core import AbstractNotifier
 from dataguard.session.core import ValidationSessionException
 from dataguard.session.manager import NotifierManager, MetricStoreManager
 from dataguard.session.session_configuration import SessionConfiguration
 from dataguard.validation.check.level import CheckLevel
+from dataguard.validation.exceptions import FailedCheckException
 from dataguard.validation.suite.result import ValidationSuiteResult
 from dataguard.validation.status import Status
 from dataguard.validation.suite.validation_suite import ValidationSuite
@@ -53,8 +57,8 @@ class ValidationSession:
             else:
                 return cls(name, **configurations)
 
-    def register_notifier(self, name: str, notifier) -> None:
-        self._notifier_manager.register(name, notifier)
+    def register_notifier(self, notifier: AbstractNotifier) -> None:
+        self._notifier_manager.register(notifier)
 
     def register_metric_store(self, name: str, metric_store) -> None:
         self._metric_store_manager.register(name, metric_store)
@@ -74,51 +78,89 @@ class ValidationSession:
         validation_suite = self._validation_suites[name]
         validation_suite_result = validation_suite.validate(data)
 
-        for metric_store_name in validation_suite.metric_stores:
-            self._store_result_metrics(metric_store_name, validation_suite_result)
+        if validation_suite_result.status == Status.PASS:
+            self.logger.info(
+                f"Validation suite '{name}' passed on table '{validation_suite.table}'."
+            )
+        else:
+            self.logger.error(
+                f"Validation suite '{name}' failed on table '{validation_suite.table}'. "
+                f"Failed checks: {','.join(validation_suite_result.failed_checks_name())}"
+            )
 
-        for notifier_name in validation_suite.notifiers:
-            self._notify(notifier_name, validation_suite_result)
+        self._store_result_metrics(validation_suite, validation_suite_result)
 
-        for check_result in validation_suite_result.check_results:
-            if (
-                    check_result.status == Status.FAIL
-                    and check_result.level == CheckLevel.ERROR
-            ):
-                raise ValidationSessionException(
-                    f"Check '{check_result.name}' failed."
-                )
+        self._notify(validation_suite, validation_suite_result)
+
+
+        if validation_suite_result.count_failed_checks(level=CheckLevel.ERROR) > 0:
+            failed_checks = validation_suite_result.failed_checks_name(level=CheckLevel.ERROR)
+            raise FailedCheckException(
+                f"Error level checks ({','.join(failed_checks)}) "
+                f"failed in validation suite '{name}' "
+                f"on table '{validation_suite.table}'."
+            )
 
     def _store_result_metrics(
             self,
-            metric_store_name: str,
+            validation_suite: ValidationSuite,
             validation_suite_result: ValidationSuiteResult
     ) -> None:
-        if not self._metric_store_manager.exists(metric_store_name):
-            self.logger.warning(
-                f"Metric store '{metric_store_name}' does not exist.")
-            return
-        metric_store = self._metric_store_manager.get(metric_store_name)
-        try:
-            metric_store.save(validation_suite_result)
-        except Exception as e:
-            self.logger.exception(e)
+        for metric_store_name in validation_suite.metric_stores:
+            if not self._metric_store_manager.exists(metric_store_name):
+                self.logger.warning(
+                    f"Metric store '{metric_store_name}' does not exist.")
+                return
+            metric_store = self._metric_store_manager.get(metric_store_name)
+            try:
+                metric_store.store(validation_suite_result)
+            except Exception as e:
+                self.logger.exception(e)
 
     def _notify(
             self,
-            notifier_name: str,
+            validation_suite: ValidationSuite,
             validation_suite_result: ValidationSuiteResult
     ) -> None:
-        if not self._notifier_manager.exists(notifier_name):
-            self.logger.warning(
-                f"Notifier '{notifier_name}' does not exist, skipping notification."
+        if validation_suite_result.status == Status.FAIL:
+            self._send_notifications(
+                notifiers=validation_suite.get_notifiers_by_event(NotifyOnEvent.FAILURE),
+                validation_suite_result=validation_suite_result
             )
-            return
-        notifier = self._notifier_manager.get(notifier_name)
-        try:
-            notifier.notify(validation_suite_result)
-        except Exception as e:
-            self.logger.exception(e)
+        elif validation_suite_result.status == Status.PASS:
+            self._send_notifications(
+                notifiers=validation_suite.get_notifiers_by_event(NotifyOnEvent.SUCCESS),
+                validation_suite_result=validation_suite_result
+            )
+        self._send_notifications(
+            notifiers=validation_suite.get_notifiers_by_event(NotifyOnEvent.ALL),
+            validation_suite_result=validation_suite_result
+        )
+
+    def _send_notifications(
+            self,
+            notifiers: List[str],
+            validation_suite_result: ValidationSuiteResult
+    ) -> None:
+        for notifier_name in notifiers:
+            if not self._notifier_manager.exists(notifier_name):
+                self.logger.warning(
+                    f"Notifier '{notifier_name}' does not exist, skipping notification."
+                )
+                return
+            notifier = self._notifier_manager.get(notifier_name)
+
+            if notifier.disabled:
+                self.logger.warning(
+                    f"Notifier '{notifier_name}' is disabled, skipping notification."
+                )
+                return
+            try:
+                notifier.notify(validation_suite_result)
+            except NotificationException as e:
+                self.logger.error(
+                    f"Failed to send notification via notifier '{notifier_name}': {str(e)}"
+                )
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.name}, configuration={self._configuration})"
+        return f"{self.__class__.__name__}(name={self.name}, conf={self._configuration})"
