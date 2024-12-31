@@ -8,21 +8,23 @@ from dataguard.validation.check.result import CheckResult
 class AbstractCheck(ABC):
 
     def __init__(
-            self,
-            level: CheckLevel,
-            name: str,
+        self,
+        level: CheckLevel,
+        name: str,
     ):
         self._level = level
         self._name = name
 
     @property
     def name(self) -> str:
+        """Return the name of the check."""
         return self._name
 
     @property
     def level(self) -> CheckLevel:
+        """Return the level of the check."""
         return self._level
 
     @abstractmethod
-    def check(self, data: Any) -> CheckResult:
-        pass
+    def evaluate(self, data: Any) -> CheckResult:
+        """Evaluate the given data against the check rules."""

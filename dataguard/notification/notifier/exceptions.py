@@ -1,2 +1,0 @@
-class NotificationException(Exception):
-    pass

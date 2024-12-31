@@ -1,6 +1,22 @@
 from abc import ABC, abstractmethod
 
-from dataguard.validation.suite.result import ValidationSuiteResult
+from dataguard.validation.node.result import ValidationNodeResult
+
+
+class NotifierError(Exception):
+    pass
+
+
+class NotifierManagerError(Exception):
+    pass
+
+
+class NotifierAlreadyExistsError(NotifierManagerError):
+    pass
+
+
+class NotifierNotFoundError(NotifierManagerError):
+    pass
 
 
 class AbstractNotifier(ABC):
@@ -18,5 +34,5 @@ class AbstractNotifier(ABC):
         return self._disabled
 
     @abstractmethod
-    def notify(self, validation_suite_result: ValidationSuiteResult):
+    def notify(self, result: ValidationNodeResult):
         pass

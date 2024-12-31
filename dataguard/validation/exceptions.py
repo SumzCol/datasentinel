@@ -1,2 +1,0 @@
-class FailedCheckException(Exception):
-    pass

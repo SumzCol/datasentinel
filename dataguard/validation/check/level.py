@@ -2,5 +2,6 @@ from enum import Enum
 
 
 class CheckLevel(Enum):
-    ERROR = 0
-    WARNING = 1
+    WARNING = 0
+    ERROR = 1
+    CRITICAL = 2

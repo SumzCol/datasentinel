@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dataguard"
 version = "0.0.1"
-description = "Data Guard is a powerful tool to combat and monitor data quality issues."
+description = "Data Guard is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
     { name = "Sumz" },
 ]
@@ -21,9 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["readme", "version"]
 dependencies = [
-  "cuallee~=0.15.0",
+  "cuallee~=0.15.2",
   "python-ulid~=2.7.0"
 ]
 
@@ -34,20 +33,20 @@ dev = [
   "pre-commit==3.8.0",
 ]
 pandas = [
-  "cuallee[pandas]~=0.15.0"
+  "cuallee[pandas]~=0.15.2"
 ]
 pyspark = [
-  "cuallee[pyspark]~=0.15.0",
+  "cuallee[pyspark]~=0.15.2",
   "delta-spark~=3.1.0"
 ]
 snowpark = [
-  "cuallee[snowpark]~=0.15.0",
+  "cuallee[snowpark]~=0.15.2",
 ]
 test = [
   "pytest",
   "pytest-cov",
   "pendulum >= 2.1.2",
-  "cuallee~=0.15.0",
+  "cuallee~=0.15.2",
 ]
 all = [
   "dataguard[dev,pyspark,snowpark,pandas,test]"

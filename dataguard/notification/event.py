@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class NotifyOnEvent(Enum):
-    FAILURE = "FAILURE"
-    SUCCESS = "SUCCESS"
+    FAIL = "FAIL"
+    PASS = "PASS"
     ALL = "ALL"
