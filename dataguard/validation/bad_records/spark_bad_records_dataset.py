@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict, Any
 
 from pyspark.sql import DataFrame
@@ -5,15 +6,22 @@ from pyspark.sql import DataFrame
 from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
 
 
-class SparkBadRecordsDataset(AbstractBadRecordsDataset):
-    def __init__(self, raw_data: DataFrame):
-        self._raw_data = raw_data
+class SparkBadRecordsDataset(AbstractBadRecordsDataset[DataFrame]):
+    def __init__(self, data: DataFrame):
+        super().__init__(data)
 
     def count(self) -> int:
-        return self._raw_data.count()
+        return self._data.count()
 
-    def to_dict(self, top: int = 1000) -> List[Dict[str, Any]]:
+    def to_dict(self, limit: int = None) -> List[Dict[str, Any]]:
+        if limit is not None and not limit > 0:
+            raise ValueError("Limit must be greater than 0")
+
+        data = self._data.limit(limit) if limit is not None else self._data
         return [
-            dict(row)
-            for row in self._raw_data.limit(top).collect()
+            row.asDict()
+            for row in data.collect()
         ]
+
+    def to_json(self, limit: int = None) -> str:
+        return json.dumps(self.to_dict(limit))

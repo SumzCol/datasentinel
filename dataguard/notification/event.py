@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Status(Enum):
+class NotifyOnEvent(Enum):
     FAIL = "FAIL"
     PASS = "PASS"
-    NO_RUN = "NO_RUN"
+    ALL = "ALL"

@@ -1,13 +1,36 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict, Any, TypeVar, Generic
+
+T = TypeVar('T')
 
 
-class AbstractBadRecordsDataset(ABC):
+class AbstractBadRecordsDataset(ABC, Generic[T]):
+    def __init__(self, data: T):
+        self._data = data
+
+    @property
+    def data(self) -> T:
+        """Return bad records in their native format"""
+        return self._data
 
     @abstractmethod
     def count(self) -> int:
-        pass
+        """Returns the number of bad records"""
 
     @abstractmethod
-    def to_dict(self, top: int = 1000) -> List[Dict[str, Any]]:
-        pass
+    def to_dict(self, limit: int = None) -> List[Dict[str, Any]]:
+        """
+        Returns bad records as a list of dictionaries
+
+        Args:
+            limit: Limits the number of bad records to return
+        """
+
+    @abstractmethod
+    def to_json(self, limit: int = None) -> str:
+        """
+        Returns bad records as JSON string
+
+        Args:
+            limit: Limits the number of bad records to return
+        """
