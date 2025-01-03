@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TypeVar, Generic
 
 from dataguard.validation.node.result import ValidationNodeResult
 
 
-class AbstractRenderer(ABC):
+T = TypeVar('T')
+
+
+class AbstractRenderer(ABC, Generic[T]):
     @abstractmethod
-    def render(self, result: ValidationNodeResult) -> Any:
+    def render(self, result: ValidationNodeResult) -> T:
         pass

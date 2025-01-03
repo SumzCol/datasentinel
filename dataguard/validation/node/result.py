@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Dict, Any
 
+from pandas.core.groupby.ops import check_result_array
 from ulid import ULID
 
+from dataguard.validation import check
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.status import Status
@@ -29,36 +31,18 @@ class ValidationNodeResult:
         )
 
     @property
-    def error_level_check_failed(self) -> bool:
-        return any([
-            check.level == CheckLevel.ERROR and check.status == Status.FAIL
-            for check in self.check_results
-        ])
-
-    def get_failed_checks(self) -> List[CheckResult]:
+    def failed_checks(self) -> List[CheckResult]:
         return [
-            check
-            for check in self.check_results
-            if check.status == Status.FAIL
+            check_result
+            for check_result in self.check_results
+            if check_result.status == Status.FAIL
         ]
 
-    def get_failed_checks_name(self):
+    def failed_checks_by_level(self, level: CheckLevel) -> List[CheckResult]:
         return [
-            check.name
-            for check in self.get_failed_checks()
-        ]
-
-    def get_failed_checks_by_level(self, level: CheckLevel) -> List[CheckResult]:
-        return [
-            check
-            for check in self.check_results
-            if check.status == Status.FAIL and check.level == level
-        ]
-
-    def get_failed_checks_name_by_level(self, level: CheckLevel) -> List[str]:
-        return [
-            check.name
-            for check in self.get_failed_checks_by_level(level)
+            check_result
+            for check_result in self.failed_checks
+            if check_result.level == level
         ]
 
     def to_dict(self) -> Dict[str, Any]:

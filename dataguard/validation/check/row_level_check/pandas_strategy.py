@@ -5,6 +5,7 @@ import pandas as pd
 
 from dataguard.validation.bad_records.pandas_bad_records_dataset import PandasBadRecordsDataset
 from dataguard.validation.check.row_level_check.rule import Rule
+from dataguard.validation.check.row_level_check.utils import evaluate_pass_rate
 from dataguard.validation.check.row_level_check.validation_strategy import ValidationStrategy
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
@@ -69,7 +70,7 @@ class PandasValidationStrategy(ValidationStrategy):
         rule_metrics = []
         for index, (hash_key, rule) in enumerate(rules.items(), 1):
             bad_records_count = bad_records[hash_key].shape[0]
-            pass_rate = self._evaluate_pass_rate(rows, bad_records_count)
+            pass_rate = evaluate_pass_rate(rows, bad_records_count)
             rule_metrics.append(
                 RuleMetric(
                     id=index,

@@ -39,7 +39,7 @@ class CSVResultStore(AbstractResultStore):
             "rule_bad_records",
             "rule_status",
         ]
-        validation_node_result_dict = result.to_dict(limit=self._bad_records_limit)
+        validation_node_result_dict = result.to_dict()
         file_exists = os.path.isfile(self._filepath)
         with open(self._filepath, mode='a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -76,9 +76,9 @@ class CSVResultStore(AbstractResultStore):
                                 else None
                             ),
                             "rule_bad_records": (
-                                json.dumps(rule_metric["bad_records"])
+                                rule_metric["bad_records"].to_json(limit=self._bad_records_limit)
                                 if rule_metric["bad_records"] is not None
-                                else ""
+                                else None
                             ),
                             "rule_status": rule_metric["status"],
                         }

@@ -2,7 +2,8 @@ import csv
 import os
 from typing import List
 
-from dataguard.store.audit.core import AbstractAuditStore, AuditRow, AuditStoreError
+from dataguard.store.audit.core import AbstractAuditStore, AuditStoreError
+from dataguard.store.audit.row import AuditRow
 
 
 class CSVAuditStore(AbstractAuditStore):

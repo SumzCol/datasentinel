@@ -24,11 +24,12 @@ class CheckResult:
             else Status.FAIL
         )
 
+    @property
     def failed_rules(self) -> List[RuleMetric]:
         return [metric for metric in self.rule_metrics if metric.status == Status.FAIL]
 
-    def count_failed_rules(self) -> int:
-        return len(self.failed_rules())
+    def failed_rules_count(self) -> int:
+        return len(self.failed_rules)
 
     def to_dict(self) -> Dict[str, Any]:
         return {

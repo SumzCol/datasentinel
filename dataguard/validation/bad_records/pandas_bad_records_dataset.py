@@ -6,7 +6,7 @@ from pandas import DataFrame
 from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
 
 
-class PandasBadRecordsDataset(AbstractBadRecordsDataset):
+class PandasBadRecordsDataset(AbstractBadRecordsDataset[DataFrame]):
     def __init__(self, data: DataFrame):
         super().__init__(data)
 

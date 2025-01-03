@@ -9,6 +9,7 @@ from cuallee import Check, CheckLevel as CualleeCheckLevel
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
+from dataguard.validation.check.utils import _get_df_type
 from dataguard.validation.rule.metric import RuleMetric
 
 
@@ -425,7 +426,7 @@ class CualleeCheck(AbstractCheck):
             start_time: datetime,
             end_time: datetime
     ) -> CheckResult:
-        dtype = first(re.match(r".*'(.*)'", str(type(cuallee_result))).groups())
+        dtype = _get_df_type(cuallee_result)
 
         if "pyspark" in dtype:
             rule_metrics = self._get_rule_metrics_pyspark(cuallee_result=cuallee_result)
@@ -443,9 +444,12 @@ class CualleeCheck(AbstractCheck):
             rule_metrics=rule_metrics,
         )
 
-    def evaluate(self, data: Any) -> CheckResult:
+    def evaluate(self, df: Any) -> CheckResult:
+        if "delta" in _get_df_type(df):
+            df = df.toDF()
+
         start_time = datetime.now()
-        result = self._check.validate(data)
+        result = self._check.validate(df)
         end_time = datetime.now()
 
         return self._to_check_result(

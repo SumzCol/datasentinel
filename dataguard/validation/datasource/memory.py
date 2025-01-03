@@ -10,5 +10,5 @@ class MemoryDatasource(AbstractDatasource[Any]):
 
     def load(self) -> Any:
         if self._data is None:
-            raise ValueError("Data for MemoryDataset has not been saved yet.")
+            raise ValueError("Data for MemoryDatasource has not been saved yet.")
         return self._data

@@ -6,19 +6,19 @@ from dataguard.notification.notifier.core import NotifierError
 from dataguard.store.result.core import (
     AbstractResultStore,
     ResultStoreNotFoundError,
-    ResultStoreAlreadyExistsError,
+    ResultStoreAlreadyExistsError, AbstractResultStoreManager,
 )
 from dataguard.validation.node.result import ValidationNodeResult
 
 
-class ResultStoreManager:
+class ResultStoreManager(AbstractResultStoreManager):
     _lock = threading.Lock()
     def __init__(self):
         self._metric_stores: Dict[str, AbstractResultStore] = {}
 
     @property
-    def _logger(self) -> logging.Logger:
-        return logging.getLogger(__name__)
+    def count(self) -> int:
+        return len(self._metric_stores)
 
     def get(self, name: str) -> AbstractResultStore:
         if not self.exists(name):

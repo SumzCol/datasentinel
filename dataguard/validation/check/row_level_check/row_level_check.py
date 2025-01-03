@@ -1,9 +1,7 @@
 import importlib
-import re
 from datetime import datetime
 from typing import Any, Dict, List, Callable
 
-from toolz import first
 
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.check.level import CheckLevel
@@ -11,6 +9,7 @@ from dataguard.validation.check.result import CheckResult
 from dataguard.validation.check.row_level_check.utils import are_id_columns_in_rule_columns
 from dataguard.validation.check.row_level_check.validation_strategy import ValidationStrategy
 from dataguard.validation.check.row_level_check.rule import Rule, CheckDataType
+from dataguard.validation.check.utils import _get_df_type
 
 
 class RowLevelCheck(AbstractCheck):
@@ -60,10 +59,13 @@ class RowLevelCheck(AbstractCheck):
         Rule("is_custom", None, None, fn, CheckDataType.AGNOSTIC, pct, options) >> self._rules
         return self
 
-    def evaluate(self, data: Any) -> CheckResult:
+    def evaluate(self, df: Any) -> CheckResult:
         assert not len(self.rules) == 0, "Check is empty. Try adding some rules?"
 
-        dtype = first(re.match(r".*'(.*)'", str(type(data))).groups())
+        if "delta" in _get_df_type(df):
+            df = df.toDF()
+
+        dtype = _get_df_type(df)
 
         if "pyspark" in dtype:
             validation_strategy: ValidationStrategy = importlib.import_module(
@@ -76,9 +78,9 @@ class RowLevelCheck(AbstractCheck):
         else:
             raise ValueError(f"Unsupported dataframe type: {dtype}")
 
-        validation_strategy.validate_data_types(data, self._rules)
+        validation_strategy.validate_data_types(df, self._rules)
         start_time = datetime.now()
-        rule_metrics = validation_strategy.compute(data, self._rules)
+        rule_metrics = validation_strategy.compute(df, self._rules)
         end_time = datetime.now()
 
         return CheckResult(

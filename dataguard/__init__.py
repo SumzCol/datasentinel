@@ -1,4 +1,1 @@
-from dataguard.session import get_session
-
-
-__all__ = ["get_session"]
+__version__ = "0.0.1"

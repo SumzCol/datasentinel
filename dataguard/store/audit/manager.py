@@ -5,11 +5,12 @@ from typing import Dict, List
 from dataguard.store.audit.core import (
     AbstractAuditStore,
     AuditStoreNotFoundError,
-    AuditStoreAlreadyExistsError, AuditRow, AuditStoreError,
+    AuditStoreAlreadyExistsError, AuditStoreError, AbstractAuditStoreManager,
 )
+from dataguard.store.audit.row import AuditRow
 
 
-class AuditStoreManager:
+class AuditStoreManager(AbstractAuditStoreManager):
     _lock = threading.Lock()
     def __init__(self):
         self._audit_stores: Dict[str, AbstractAuditStore] = {}

@@ -5,7 +5,7 @@ import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
 
 from dataguard.validation.bad_records.spark_bad_records_dataset import SparkBadRecordsDataset
-from dataguard.validation.check.row_level_check.utils import value
+from dataguard.validation.check.row_level_check.utils import value, evaluate_pass_rate
 from dataguard.validation.check.row_level_check.validation_strategy import ValidationStrategy
 from dataguard.validation.check.row_level_check.rule import Rule
 from dataguard.validation.rule.metric import RuleMetric
@@ -124,7 +124,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         rule_metrics = []
         for index, (hash_key, rule) in enumerate(rules.items(), 1):
             bad_records_count = bad_records[hash_key].count()
-            pass_rate = self._evaluate_pass_rate(rows, bad_records_count)
+            pass_rate = evaluate_pass_rate(rows, bad_records_count)
             rule_metrics.append(
                 RuleMetric(
                     id=index,

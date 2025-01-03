@@ -26,5 +26,5 @@ class AbstractCheck(ABC):
         return self._level
 
     @abstractmethod
-    def evaluate(self, data: Any) -> CheckResult:
-        """Evaluate the given data against the check rules."""
+    def evaluate(self, df: Any) -> CheckResult:
+        """Evaluate the given dataframe against the check rules."""

@@ -6,22 +6,22 @@ from dataguard.notification.event import NotifyOnEvent
 from dataguard.notification.notifier.core import (
     AbstractNotifier,
     NotifierAlreadyExistsError,
-    NotifierNotFoundError,
+    NotifierNotFoundError, AbstractNotifierManager,
 )
 from dataguard.store.result.core import ResultStoreError
 from dataguard.validation.node.result import ValidationNodeResult
 from dataguard.validation.status import Status
 
 
-class NotifierManager:
+class NotifierManager(AbstractNotifierManager):
     _lock = threading.Lock()
 
     def __init__(self):
         self._notifiers: Dict[str, AbstractNotifier] = {}
 
     @property
-    def logger(self) -> logging.Logger:
-        return logging.getLogger(__name__)
+    def count(self) -> int:
+        return len(self._notifiers)
 
     def get(self, name: str) -> AbstractNotifier:
         if not self.exists(name):
@@ -71,14 +71,14 @@ class NotifierManager:
         result: ValidationNodeResult
     ):
         if notifier.disabled:
-            self.logger.warning(
+            self._logger.warning(
                 f"Notifier '{notifier.name}' is disabled, skipping sending notification."
             )
             return
         try:
             notifier.notify(result=result)
         except ResultStoreError as e:
-            self.logger.error(
+            self._logger.error(
                 f"There was an error while trying to send notification "
                 f"using notifier '{notifier.name}'. Error: {str(e)}"
             )
