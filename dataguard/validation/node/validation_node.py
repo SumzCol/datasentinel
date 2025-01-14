@@ -3,14 +3,14 @@ from typing import List, Dict, Any, Set
 
 from dataguard.notification.event import NotifyOnEvent
 from dataguard.validation.check.core import AbstractCheck
-from dataguard.validation.datasource.core import AbstractDatasource
+from dataguard.validation.data_asset.core import AbstractDataAsset
 
 
 @dataclass
 class ValidationNode:
     name: str
     check_list: List[AbstractCheck]
-    datasource: AbstractDatasource | None = None
+    data_asset: AbstractDataAsset | None = None
     result_stores: List[str] | None = None
     notifiers_by_events: Dict[NotifyOnEvent, List[str]] | None = None
     metadata: Dict[str, Any] | None = None

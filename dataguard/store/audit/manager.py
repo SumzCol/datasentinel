@@ -19,9 +19,12 @@ class AuditStoreManager(AbstractAuditStoreManager):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
-    def count(self) -> int:
-        return len(self._audit_stores)
+    def count(self, enabled_only: bool = False) -> int:
+        return len([
+            store
+            for store in self._audit_stores.values()
+            if not enabled_only or (enabled_only and not store.disabled)
+        ])
 
     def get(self, name: str) -> AbstractAuditStore:
         if not self.exists(name):
@@ -59,7 +62,7 @@ class AuditStoreManager(AbstractAuditStoreManager):
     ):
         if audit_store.disabled:
             self._logger.warning(
-                f"Audit store '{audit_store.name}' is disabled, skipping appending row."
+                f"Audit store '{audit_store.name}' is disabled, skipping appending audit row."
             )
             return
         try:

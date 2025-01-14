@@ -12,7 +12,7 @@ from dataguard.store.result.manager import ResultStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from unittest.mock import Mock
 from dataguard.validation.node.validation_node import ValidationNode
-from dataguard.validation.datasource.core import AbstractDatasource
+from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
@@ -157,7 +157,7 @@ class TestDataGuardSession:
     def test_run_validation_node(self):
         session = DataGuardSession(name="test_session")
         validation_node = Mock(spec=ValidationNode)
-        dataset = Mock(spec=AbstractDatasource)
+        dataset = Mock(spec=AbstractDataAsset)
         runner = Mock(spec=SimpleRunner)
 
         session.run_validation_node(validation_node, dataset, runner)
