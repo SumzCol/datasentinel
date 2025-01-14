@@ -51,10 +51,15 @@ class AbstractAuditStoreManager(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
     @abstractmethod
-    def count(self) -> int:
-        """Return the number of registered audit stores."""
+    def count(self, enabled_only: bool = False) -> int:
+        """Return the number of registered audit stores
+
+        Args:
+            enabled_only: Whether to only consider enabled audit stores.
+        Returns:
+            The number of registered audit stores
+        """
 
     @abstractmethod
     def get(self, name: str) -> AbstractAuditStore:

@@ -2,10 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Dict, Any
 
-from pandas.core.groupby.ops import check_result_array
 from ulid import ULID
 
-from dataguard.validation import check
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.status import Status

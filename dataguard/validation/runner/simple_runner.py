@@ -2,7 +2,7 @@ from datetime import datetime
 
 from ulid import ULID
 
-from dataguard.validation.datasource.core import AbstractDatasource
+from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.node.result import ValidationNodeResult
 from dataguard.validation.node.validation_node import ValidationNode
 from dataguard.validation.runner.core import (
@@ -14,10 +14,10 @@ class SimpleRunner(AbstractRunner):
     def _run(
         self,
         validation_node: ValidationNode,
-        datasource: AbstractDatasource
+        data_asset: AbstractDataAsset
     ) -> ValidationNodeResult:
         start_time = datetime.now()
-        data = datasource.load()
+        data = data_asset.load()
         check_results = [
             check.evaluate(data)
             for check in validation_node.check_list
@@ -27,8 +27,8 @@ class SimpleRunner(AbstractRunner):
         return ValidationNodeResult(
             run_id=ULID(),
             name=validation_node.name,
-            data_asset=datasource.data_asset,
-            data_asset_schema=datasource.data_asset_schema,
+            data_asset=data_asset.name,
+            data_asset_schema=data_asset.schema,
             start_time=start_time,
             end_time=end_time,
             check_results=check_results,

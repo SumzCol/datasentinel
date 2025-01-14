@@ -13,7 +13,7 @@ from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
-from dataguard.validation.datasource.core import AbstractDatasource
+from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.node.validation_node import ValidationNode
 from dataguard.validation.runner.core import AbstractRunner
 from dataguard.validation.runner.simple_runner import SimpleRunner
@@ -89,13 +89,13 @@ class DataGuardSession:
     def run_validation_node(
         self,
         validation_node: ValidationNode,
-        dataset: AbstractDatasource | None = None,
+        data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None
     ):
         runner = runner or SimpleRunner()
         runner.run(
             validation_node=validation_node,
-            datasource=dataset,
+            data_asset=data_asset,
             notifier_manager=self._notifier_manager,
             result_store_manager=self._result_store_manager
         )

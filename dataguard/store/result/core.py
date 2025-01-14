@@ -45,10 +45,15 @@ class AbstractResultStoreManager(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
     @abstractmethod
-    def count(self) -> int:
-        """Return the number registered result stores"""
+    def count(self, enabled_only: bool = False) -> int:
+        """Return the number of registered result stores
+
+        Args:
+            enabled_only: Whether to only consider enabled result stores.
+        Returns:
+            The number of registered result stores
+        """
 
     @abstractmethod
     def get(self, name: str) -> AbstractResultStore:

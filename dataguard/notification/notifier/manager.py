@@ -19,9 +19,12 @@ class NotifierManager(AbstractNotifierManager):
     def __init__(self):
         self._notifiers: Dict[str, AbstractNotifier] = {}
 
-    @property
-    def count(self) -> int:
-        return len(self._notifiers)
+    def count(self, enabled_only: bool = False) -> int:
+        return len([
+            notifier
+            for notifier in self._notifiers.values()
+            if not enabled_only or (enabled_only and not notifier.disabled)
+        ])
 
     def get(self, name: str) -> AbstractNotifier:
         if not self.exists(name):

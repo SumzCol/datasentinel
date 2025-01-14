@@ -46,10 +46,15 @@ class AbstractNotifierManager(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
     @abstractmethod
-    def count(self) -> int:
-        """Returns the number of notifiers registered"""
+    def count(self, enabled_only: bool = False) -> int:
+        """Return the number of registered notifiers
+
+        Args:
+            enabled_only: Whether to only consider enabled notifiers.
+        Returns:
+            The number of registered notifiers
+        """
 
     @abstractmethod
     def get(self, name: str) -> AbstractNotifier:

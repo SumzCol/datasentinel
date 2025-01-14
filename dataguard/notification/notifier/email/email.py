@@ -15,4 +15,5 @@ class EmailNotifier(AbstractNotifier):
         return logging.getLogger(__name__)
 
     def notify(self, result: ValidationNodeResult):
+        self.logger.info(f"Credentials: {self._credentials}")
         self.logger.info(f"Sending email!")

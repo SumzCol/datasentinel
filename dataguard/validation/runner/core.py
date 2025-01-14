@@ -6,7 +6,7 @@ from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
-from dataguard.validation.datasource.core import AbstractDatasource
+from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.node.result import ValidationNodeResult
 from dataguard.validation.node.validation_node import ValidationNode
 from dataguard.validation.status import Status
@@ -29,6 +29,7 @@ class CriticalCheckFailedError(RunnerError):
 
 
 class AbstractRunner(ABC):
+    """Base class for all runner implementations."""
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -36,17 +37,17 @@ class AbstractRunner(ABC):
     def run(
         self,
         validation_node: ValidationNode,
-        datasource: AbstractDatasource | None,
+        data_asset: AbstractDataAsset | None,
         result_store_manager: ResultStoreManager,
         notifier_manager: NotifierManager
     ) -> None:
         """Run a validation node"""
-        if datasource is None and validation_node.datasource is None:
+        if data_asset is None and validation_node.data_asset is None:
             raise NoDatasetDefinedError(
                 f"No dataset to be validated was passed or defined inside the "
                 f"validation node '{validation_node.name}'"
             )
-        datasource = datasource or validation_node.datasource
+        data_asset = data_asset or validation_node.data_asset
 
         if not validation_node.has_checks:
             raise NoChecksDefinedError(
@@ -55,7 +56,7 @@ class AbstractRunner(ABC):
 
         validation_node_result = self._run(
             validation_node=validation_node,
-            datasource=datasource
+            data_asset=data_asset
         )
 
         self._log_status(result=validation_node_result)
@@ -75,7 +76,7 @@ class AbstractRunner(ABC):
     def _run(
         self,
         validation_node: ValidationNode,
-        datasource: AbstractDatasource
+        data_asset: AbstractDataAsset
     ) -> ValidationNodeResult:
         pass
 
@@ -83,9 +84,15 @@ class AbstractRunner(ABC):
         self,
         result: ValidationNodeResult
     ):
+        data_asset_info = (
+            f"Data asset '{result.data_asset}' in schema '{result.data_asset_schema}'"
+            if result.data_asset_schema is not None
+            else f"Data asset '{result.data_asset}'"
+        )
+
         if result.status == Status.PASS:
             self._logger.info(
-                f"Data asset '{result.data_asset}' passed all checks on "
+                f"{data_asset_info} passed all checks on "
                 f"validation node '{result.name}'"
             )
             return
@@ -102,11 +109,6 @@ class AbstractRunner(ABC):
                 continue
 
             summary = _failed_checks_summary(result.failed_checks_by_level(level))
-            data_asset_info = (
-                f"Data asset '{result.data_asset}' in schema '{result.data_asset_schema}'"
-                if result.data_asset_schema is not None
-                else f"Data asset '{result.data_asset}'"
-            )
             method(
                 f"{data_asset_info} failed checks: {summary} on validation node '{result.name}'"
             )
