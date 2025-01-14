@@ -13,7 +13,6 @@ class ValidationNode:
     data_asset: AbstractDataAsset | None = None
     result_stores: List[str] | None = None
     notifiers_by_events: Dict[NotifyOnEvent, List[str]] | None = None
-    metadata: Dict[str, Any] | None = None
 
     def __post_init__(self):
         self.result_stores = self.result_stores or []

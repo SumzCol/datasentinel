@@ -18,7 +18,6 @@ class ValidationNodeResult:
     start_time: datetime
     end_time: datetime
     check_results: List[CheckResult]
-    metadata: Dict[str, Any] | None = None
 
     @property
     def status(self) -> Status:
