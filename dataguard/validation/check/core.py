@@ -5,8 +5,20 @@ from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 
 
-class AbstractCheck(ABC):
+class CheckError(Exception):
+    pass
 
+
+class UnsupportedDataframeTypeError(CheckError):
+    pass
+
+
+class EmptyCheckError(CheckError):
+    pass
+
+
+class AbstractCheck(ABC):
+    """Base class for all check implementations."""
     def __init__(
         self,
         level: CheckLevel,
@@ -26,5 +38,12 @@ class AbstractCheck(ABC):
         return self._level
 
     @abstractmethod
-    def evaluate(self, df: Any) -> CheckResult:
-        """Evaluate the given dataframe against the check rules."""
+    def validate(self, df: Any) -> CheckResult:
+        """Validate the given dataframe.
+
+        Args:
+            df: The dataframe to validate.
+
+        Returns:
+            The result of the validation process.
+        """

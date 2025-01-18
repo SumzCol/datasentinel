@@ -9,7 +9,7 @@ from dataguard.validation.check.result import CheckResult
 from dataguard.validation.status import Status
 
 
-@dataclass
+@dataclass(frozen=True)
 class ValidationNodeResult:
     run_id: ULID
     name: str

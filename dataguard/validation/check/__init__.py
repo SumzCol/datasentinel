@@ -1,8 +1,8 @@
-from .cuallee.cuallee_check import CualleeCheck
-from .row_level_check.row_level_check import RowLevelCheck
+from .cuallee.check import CualleeCheck
+from .row_level_result.check import RowLevelResultCheck
 
 
 __all__ = [
     "CualleeCheck",
-    "RowLevelCheck"
+    "RowLevelResultCheck"
 ]

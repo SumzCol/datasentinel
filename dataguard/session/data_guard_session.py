@@ -76,14 +76,17 @@ class DataGuardSession:
 
     @property
     def notifier_manager(self) -> AbstractNotifierManager:
+        """Return the notifier manager"""
         return self._notifier_manager
 
     @property
     def result_store_manager(self) -> AbstractResultStoreManager:
+        """Return the result store manager"""
         return self._result_store_manager
 
     @property
     def audit_store_manager(self) -> AbstractAuditStoreManager:
+        """Return the audit store manager"""
         return self._audit_store_manager
 
     def run_validation_node(
@@ -92,6 +95,14 @@ class DataGuardSession:
         data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None
     ):
+        """Run a validation node.
+
+        Args:
+            validation_node: Validation node to run
+            data_asset: Data asset to validate or replace the one in the validation node
+                if one is defined.
+            runner: Runner to run the validation node
+        """
         runner = runner or SimpleRunner()
         runner.run(
             validation_node=validation_node,

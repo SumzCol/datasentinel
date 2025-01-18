@@ -5,6 +5,7 @@ T = TypeVar('T')
 
 
 class AbstractBadRecordsDataset(ABC, Generic[T]):
+    """Base class for all bad records dataset implementations"""
     def __init__(self, data: T):
         self._data = data
 

@@ -19,7 +19,7 @@ class SimpleRunner(AbstractRunner):
         start_time = datetime.now()
         data = data_asset.load()
         check_results = [
-            check.evaluate(data)
+            check.validate(data)
             for check in validation_node.check_list
         ]
         end_time = datetime.now()
@@ -32,5 +32,4 @@ class SimpleRunner(AbstractRunner):
             start_time=start_time,
             end_time=end_time,
             check_results=check_results,
-            metadata=validation_node.metadata,
         )

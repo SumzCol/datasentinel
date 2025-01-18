@@ -24,7 +24,8 @@ classifiers = [
 ]
 dependencies = [
   "cuallee~=0.15.2",
-  "python-ulid~=2.7.0"
+  "python-ulid~=2.7.0",
+  "pydantic~=2.10",
 ]
 
 [project.optional-dependencies]

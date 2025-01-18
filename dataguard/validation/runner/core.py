@@ -51,7 +51,7 @@ class AbstractRunner(ABC):
 
         if not validation_node.has_checks:
             raise NoChecksDefinedError(
-                f"No checks were defined in check list '{validation_node.name}'"
+                f"No checks were defined in validation node '{validation_node.name}'"
             )
 
         validation_node_result = self._run(

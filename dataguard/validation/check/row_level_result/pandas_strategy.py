@@ -4,9 +4,9 @@ from typing import Dict, Callable, List
 import pandas as pd
 
 from dataguard.validation.bad_records.pandas_bad_records_dataset import PandasBadRecordsDataset
-from dataguard.validation.check.row_level_check.rule import Rule
-from dataguard.validation.check.row_level_check.utils import evaluate_pass_rate
-from dataguard.validation.check.row_level_check.validation_strategy import ValidationStrategy
+from dataguard.validation.check.row_level_result.rule import Rule
+from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
+from dataguard.validation.check.row_level_result.validation_strategy import ValidationStrategy
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
 
@@ -59,13 +59,13 @@ class PandasValidationStrategy(ValidationStrategy):
             for k, compute_instruction in self._compute_instructions.items()
         }
 
-    def validate_data_types(self, dataframe: pd.DataFrame, rules: Dict[str, Rule]) -> bool:
+    def validate_data_types(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> bool:
         return True
 
-    def compute(self, dataframe: pd.DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
-        rows = dataframe.shape[0]
+    def compute(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
+        rows = df.shape[0]
         self._generate_compute_instructions(rules)
-        bad_records = self._compute_bad_records(dataframe)
+        bad_records = self._compute_bad_records(df)
 
         rule_metrics = []
         for index, (hash_key, rule) in enumerate(rules.items(), 1):

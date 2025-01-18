@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any, Set
+from typing import List, Dict
 
 from dataguard.notification.event import NotifyOnEvent
 from dataguard.validation.check.core import AbstractCheck

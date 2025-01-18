@@ -1,12 +1,14 @@
-from dataclasses import dataclass
 from typing import Dict, Any
+
+from pydantic.dataclasses import dataclass
 
 from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
 from dataguard.validation.status import Status
 
 
-@dataclass
+@dataclass(frozen=True)
 class RuleMetric:
+    """Represent a rule metric."""
     id: int
     rule: str
     column: str
@@ -20,9 +22,11 @@ class RuleMetric:
 
     @property
     def status(self):
+        """Return the status of the rule."""
         return Status.PASS if self.pass_rate >= self.pass_threshold else Status.FAIL
 
     def to_dict(self) -> Dict[str, Any]:
+        """Return the rule metric as a dictionary."""
         return {
             "id": self.id,
             "rule": self.rule,

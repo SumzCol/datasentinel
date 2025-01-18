@@ -1,4 +1,4 @@
-from .cuallee_check import CualleeCheck
+from .check import CualleeCheck
 
 
 __all__ = ["CualleeCheck"]

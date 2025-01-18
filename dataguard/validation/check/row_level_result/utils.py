@@ -1,6 +1,6 @@
 from typing import Callable, List
 
-from dataguard.validation.check.row_level_check.rule import Rule
+from dataguard.validation.check.row_level_result.rule import Rule
 
 
 def evaluate_pass_rate(total_rows: int, bad_records: int) -> float:

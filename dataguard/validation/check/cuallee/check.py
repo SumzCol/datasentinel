@@ -1,15 +1,13 @@
-import re
 from datetime import datetime
 from typing import Any, List, Tuple, Dict, Callable
 
-from toolz import first
-
 from cuallee import Check, CheckLevel as CualleeCheckLevel
 
-from dataguard.validation.check.core import AbstractCheck
+from dataguard.validation.check.core import AbstractCheck, UnsupportedDataframeTypeError
+from dataguard.validation.check.df_type import DataframeType
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
-from dataguard.validation.check.utils import _get_df_type
+from dataguard.validation.check.utils import to_df_if_delta_table
 from dataguard.validation.rule.metric import RuleMetric
 
 
@@ -18,7 +16,7 @@ def _cuallee_check_level(level: CheckLevel) -> CualleeCheckLevel:
 
 
 class CualleeCheck(AbstractCheck):
-
+    """Cuallee check implementation."""
     def __init__(self, level: CheckLevel, name: str):
         self._check = Check(
             level=CualleeCheckLevel(_cuallee_check_level(level=level)),
@@ -426,27 +424,26 @@ class CualleeCheck(AbstractCheck):
             start_time: datetime,
             end_time: datetime
     ) -> CheckResult:
-        dtype = _get_df_type(cuallee_result)
+        df_type = DataframeType.from_df(cuallee_result)
 
-        if "pyspark" in dtype:
+        if df_type == DataframeType.PYSPARK:
             rule_metrics = self._get_rule_metrics_pyspark(cuallee_result=cuallee_result)
-        elif "pandas" in dtype:
+        elif df_type == DataframeType.PANDAS:
             rule_metrics = self._get_rule_metrics_pandas(cuallee_result=cuallee_result)
         else:
-            raise ValueError(f"Unsupported dataframe type: {dtype}")
+            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
         return CheckResult(
             name=self.name,
             level=self.level,
-            type=self.__class__.__name__,
+            check_class=self.__class__.__name__,
             start_time=start_time,
             end_time=end_time,
             rule_metrics=rule_metrics,
         )
 
-    def evaluate(self, df: Any) -> CheckResult:
-        if "delta" in _get_df_type(df):
-            df = df.toDF()
+    def validate(self, df: Any) -> CheckResult:
+        df = to_df_if_delta_table(df=df)
 
         start_time = datetime.now()
         result = self._check.validate(df)

@@ -22,21 +22,24 @@ class ResultStoreNotFoundError(ResultStoreManagerError):
 
 
 class AbstractResultStore(ABC):
+    """Base class for all result store implementations."""
     def __init__(self, name: str, disabled: bool):
         self._name = name
         self._disabled = disabled
 
     @property
     def name(self):
+        """Returns the name of the result store."""
         return self._name
 
     @property
     def disabled(self):
+        """Returns whether the result store is disabled."""
         return self._disabled
 
     @abstractmethod
     def store(self, result: ValidationNodeResult):
-        """Store a checklist result"""
+        """Store a validation node result"""
 
 
 class AbstractResultStoreManager(ABC):
