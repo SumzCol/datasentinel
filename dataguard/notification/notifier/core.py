@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from dataguard.notification.event import NotifyOnEvent
+from dataguard.validation.node.core import NotifyOnEvent
 from dataguard.validation.node.result import ValidationNodeResult
 
 
@@ -35,6 +35,10 @@ class AbstractNotifier(ABC):
     @property
     def disabled(self) -> bool:
         return self._disabled
+
+    @property
+    def _logger(self) -> logging.Logger:
+        return logging.getLogger(__name__)
 
     @abstractmethod
     def notify(self, result: ValidationNodeResult):

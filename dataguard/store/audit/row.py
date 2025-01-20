@@ -1,6 +1,3 @@
-from typing import Any
-
-
 class AuditRow:
     """Represent a row of audit data."""
     def __init__(self, **kwargs):
@@ -8,7 +5,7 @@ class AuditRow:
 
     @property
     def columns(self):
-        """Returns the column names of the row."""
+        """Return the column names of the row."""
         return list(self.__dict__.keys())
 
     def to_dict(self):

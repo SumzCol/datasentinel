@@ -3,10 +3,10 @@ from typing import List, Dict, Any
 
 from pyspark.sql import DataFrame
 
-from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
+from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
 
 
-class SparkBadRecordsDataset(AbstractBadRecordsDataset[DataFrame]):
+class SparkFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
     def __init__(self, data: DataFrame):
         super().__init__(data)
 

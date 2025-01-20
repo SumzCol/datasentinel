@@ -3,7 +3,7 @@ from typing import Dict, Callable, List
 
 import pandas as pd
 
-from dataguard.validation.bad_records.pandas_bad_records_dataset import PandasBadRecordsDataset
+from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 from dataguard.validation.check.row_level_result.rule import Rule
 from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
 from dataguard.validation.check.row_level_result.validation_strategy import ValidationStrategy
@@ -82,7 +82,7 @@ class PandasValidationStrategy(ValidationStrategy):
                     pass_rate=pass_rate,
                     pass_threshold=rule.pass_threshold,
                     options=rule.options,
-                    bad_records=PandasBadRecordsDataset(bad_records[rule.key]),
+                    failed_rows_dataset=PandasFailedRowsDataset(bad_records[rule.key]),
                 )
             )
 

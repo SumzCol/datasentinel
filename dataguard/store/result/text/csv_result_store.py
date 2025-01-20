@@ -23,7 +23,7 @@ class CSVResultStore(AbstractResultStore):
             "status",
             "check_name",
             "check_level",
-            "check_type",
+            "check_class",
             "check_start_time",
             "check_end_time",
             "check_status",
@@ -36,7 +36,7 @@ class CSVResultStore(AbstractResultStore):
             "rule_pass_rate",
             "rule_pass_threshold",
             "rule_options",
-            "rule_bad_records",
+            "rule_failed_rows_dataset",
             "rule_status",
         ]
         validation_node_result_dict = result.to_dict()
@@ -58,7 +58,7 @@ class CSVResultStore(AbstractResultStore):
                             "status": validation_node_result_dict["status"],
                             "check_name": check_result["name"],
                             "check_level": check_result["level"],
-                            "check_type": check_result["type"],
+                            "check_class": check_result["check_class"],
                             "check_start_time": check_result["start_time"].isoformat(),
                             "check_end_time": check_result["end_time"].isoformat(),
                             "check_status": check_result["status"],
@@ -75,9 +75,11 @@ class CSVResultStore(AbstractResultStore):
                                 if rule_metric["options"] is not None
                                 else None
                             ),
-                            "rule_bad_records": (
-                                rule_metric["bad_records"].to_json(limit=self._bad_records_limit)
-                                if rule_metric["bad_records"] is not None
+                            "rule_failed_rows_dataset": (
+                                rule_metric["failed_rows_dataset"].to_json(
+                                    limit=self._bad_records_limit
+                                )
+                                if rule_metric["rule_failed_rows_dataset"] is not None
                                 else None
                             ),
                             "rule_status": rule_metric["status"],

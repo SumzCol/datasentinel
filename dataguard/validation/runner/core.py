@@ -62,7 +62,7 @@ class AbstractRunner(ABC):
         self._log_status(result=validation_node_result)
 
         notifier_manager.notify_all_by_event(
-            notifiers_by_events=validation_node.notifiers_by_events,
+            notifiers_by_event=validation_node.notifiers_by_event,
             result=validation_node_result
         )
         result_store_manager.store_all(
@@ -119,8 +119,15 @@ def _failed_checks_summary(
 ) -> str:
     failed_checks_str = []
     for failed_check in failed_checks:
-        failed_rules = ",".join([rule_metric.rule for rule_metric in failed_check.failed_rules])
-        failed_checks_str.append(f"{failed_check.name}({failed_rules})")
+        failed_rules_str = ", ".join(
+            [
+                f"{rule_metric.rule}[column: {rule_metric.column}]"
+                if rule_metric.column is not None
+                else rule_metric.rule
+                for rule_metric in failed_check.failed_rules
+            ]
+        )
+        failed_checks_str.append(f"{failed_check.name}({failed_rules_str})")
 
     return ", ".join(failed_checks_str)
 

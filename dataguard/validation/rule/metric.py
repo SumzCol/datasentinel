@@ -1,14 +1,29 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
+from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 
-from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
+from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
 from dataguard.validation.status import Status
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class RuleMetric:
-    """Represent a rule metric."""
+    """Represent the result metric of a data quality rule.
+
+    Attributes:
+        id: The id of the rule metric.
+        rule: The name of the rule that was evaluated.
+        column: The column or columns that the rule evaluated.
+        value: The value of the rule.
+        rows: The number of rows analyzed.
+        violations: The number of rows that didn't pass the rule.
+        pass_rate: The pass rate representing the percentage of rows that passed the rule.
+        pass_threshold: The pass threshold set for the rule.
+        options: The options set for the rule if any.
+        failed_rows_dataset: The failed rows dataset containing the rows that failed the rule
+            if there were any violations, and if they were computed.
+    """
     id: int
     rule: str
     column: str
@@ -17,8 +32,8 @@ class RuleMetric:
     violations: int
     pass_rate: float
     pass_threshold: float
-    options: Dict[str, Any] | None
-    bad_records: AbstractBadRecordsDataset | None
+    options: Optional[Dict[str, Any]] = None
+    failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
 
     @property
     def status(self):
@@ -37,6 +52,6 @@ class RuleMetric:
             "pass_rate": self.pass_rate,
             "pass_threshold": self.pass_threshold,
             "options": self.options,
-            "bad_records": self.bad_records,
+            "failed_rows_dataset": self.failed_rows_dataset,
             "status": self.status.value
         }

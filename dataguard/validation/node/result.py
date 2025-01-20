@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Dict, Any
 
+from pydantic import ConfigDict
+from pydantic.dataclasses import dataclass
 from ulid import ULID
 
 from dataguard.validation.check.level import CheckLevel
@@ -9,7 +10,7 @@ from dataguard.validation.check.result import CheckResult
 from dataguard.validation.status import Status
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class ValidationNodeResult:
     run_id: ULID
     name: str

@@ -89,7 +89,7 @@ class RowLevelResultCheck(AbstractCheck):
         return CheckResult(
             name=self.name,
             level=self.level,
-            check_class=self.__class__.__name__,
+            class_name=self.__class__.__name__,
             start_time=start_time,
             end_time=end_time,
             rule_metrics=rule_metrics,

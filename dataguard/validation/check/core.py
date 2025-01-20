@@ -18,7 +18,7 @@ class EmptyCheckError(CheckError):
 
 
 class AbstractCheck(ABC):
-    """Base class for all check implementations."""
+    """Base class for all data quality check implementations."""
     def __init__(
         self,
         level: CheckLevel,
@@ -45,5 +45,5 @@ class AbstractCheck(ABC):
             df: The dataframe to validate.
 
         Returns:
-            The result of the validation process.
+            The result of data quality check applied to the dataframe.
         """

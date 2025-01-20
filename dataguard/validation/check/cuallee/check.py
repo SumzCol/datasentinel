@@ -393,7 +393,7 @@ class CualleeCheck(AbstractCheck):
                 pass_rate=row.pass_rate,
                 pass_threshold=row.pass_threshold,
                 options=self._check.rules[i].options,
-                bad_records=None,
+                failed_rows_dataset=None,
             )
             for i, row in enumerate(cuallee_result.collect())
         ]
@@ -413,7 +413,7 @@ class CualleeCheck(AbstractCheck):
                 pass_rate=row["pass_rate"],
                 pass_threshold=row["pass_threshold"],
                 options=self._check.rules[i].options,
-                bad_records=None,
+                failed_rows_dataset=None,
             )
             for i, (index, row) in enumerate(cuallee_result.iterrows())
         ]
@@ -436,7 +436,7 @@ class CualleeCheck(AbstractCheck):
         return CheckResult(
             name=self.name,
             level=self.level,
-            check_class=self.__class__.__name__,
+            class_name=self.__class__.__name__,
             start_time=start_time,
             end_time=end_time,
             rule_metrics=rule_metrics,

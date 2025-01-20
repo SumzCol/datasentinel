@@ -1,8 +1,7 @@
-import logging
 import threading
 from typing import Dict, List
 
-from dataguard.notification.event import NotifyOnEvent
+from dataguard.validation.node.core import NotifyOnEvent
 from dataguard.notification.notifier.core import (
     AbstractNotifier,
     NotifierAlreadyExistsError,
@@ -56,11 +55,11 @@ class NotifierManager(AbstractNotifierManager):
         status = result.status
         notifiers = []
         if status == Status.PASS:
-            notifiers.extend(notifiers_by_events.get(NotifyOnEvent.PASS))
+            notifiers.extend(notifiers_by_events.get(NotifyOnEvent.PASS, []))
         else:
-            notifiers.extend(notifiers_by_events.get(NotifyOnEvent.FAIL))
+            notifiers.extend(notifiers_by_events.get(NotifyOnEvent.FAIL, []))
 
-        notifiers.extend(notifiers_by_events.get(NotifyOnEvent.ALL))
+        notifiers.extend(notifiers_by_events.get(NotifyOnEvent.ALL, []))
 
         for notifier in notifiers:
             self._notify(

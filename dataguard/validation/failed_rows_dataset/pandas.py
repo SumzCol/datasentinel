@@ -3,10 +3,10 @@ from typing import List, Dict, Any
 
 from pandas import DataFrame
 
-from dataguard.validation.bad_records.core import AbstractBadRecordsDataset
+from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
 
 
-class PandasBadRecordsDataset(AbstractBadRecordsDataset[DataFrame]):
+class PandasFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
     def __init__(self, data: DataFrame):
         super().__init__(data)
 

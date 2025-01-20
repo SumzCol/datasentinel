@@ -10,10 +10,20 @@ from dataguard.validation.status import Status
 
 @dataclass(frozen=True)
 class CheckResult:
-    """Represent the result of a check."""
+    """Represent the result of a data quality check.
+
+    Attributes:
+        name: The name of the check.
+        level: The severity level of the check.
+        class_name: The name of the python class of the check that was applied.
+        start_time: The start time of the check.
+        end_time: The end time of the check.
+        rule_metrics: A list with the metrics computed for each rule applied
+            in the check.
+    """
     name: str
     level: CheckLevel
-    check_class: str
+    class_name: str
     start_time: datetime
     end_time: datetime
     rule_metrics: List[RuleMetric]
@@ -29,19 +39,20 @@ class CheckResult:
 
     @property
     def failed_rules(self) -> List[RuleMetric]:
-        """Return the failed rules."""
+        """Return the metrics of the rules that failed."""
         return [metric for metric in self.rule_metrics if metric.status == Status.FAIL]
 
     @property
     def failed_rules_count(self) -> int:
+        """Return the number of rules that failed."""
         return len(self.failed_rules)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Return the result as a dictionary."""
+        """Return the result of the check as a dictionary."""
         return {
             "name": self.name,
             "level": self.level.name,
-            "check_class": self.check_class,
+            "check_class": self.class_name,
             "start_time": self.start_time,
             "end_time": self.end_time,
             "rule_metrics":  [

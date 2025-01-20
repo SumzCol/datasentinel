@@ -4,7 +4,7 @@ from typing import Callable, Dict, List, Any
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
 
-from dataguard.validation.bad_records.spark_bad_records_dataset import SparkBadRecordsDataset
+from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 from dataguard.validation.check.row_level_result.utils import value, evaluate_pass_rate
 from dataguard.validation.check.row_level_result.validation_strategy import ValidationStrategy
 from dataguard.validation.check.row_level_result.rule import Rule
@@ -136,7 +136,7 @@ class PysparkValidationStrategy(ValidationStrategy):
                     pass_rate=pass_rate,
                     pass_threshold=rule.pass_threshold,
                     options=rule.options,
-                    bad_records=SparkBadRecordsDataset(bad_records[rule.key]),
+                    failed_rows_dataset=SparkFailedRowsDataset(bad_records[rule.key]),
                 )
             )
 

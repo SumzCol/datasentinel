@@ -1,8 +1,7 @@
 import enum
-import re
 from typing import Any
 
-from toolz import first
+from pyspark.sql.functions import typeof
 
 from dataguard.validation.check.utils import get_type
 
@@ -20,4 +19,4 @@ class DataframeType(enum.Enum):
         elif "pandas" in _type:
             return DataframeType.PANDAS
         else:
-            raise ValueError(f"Unsupported dataframe type: {_type}")
+            raise ValueError(f"{type(df)} is not a valid dataframe type")
