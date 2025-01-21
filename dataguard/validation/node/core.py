@@ -1,7 +1,9 @@
 from enum import Enum
 
+from dataguard.core import DataGuardError
 
-class ValidationNodeError(Exception):
+
+class ValidationNodeError(DataGuardError):
     pass
 
 

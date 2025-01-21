@@ -5,9 +5,8 @@ from typing import Any, Dict, List, Callable
 from dataguard.validation.check.core import (
     AbstractCheck,
     UnsupportedDataframeTypeError,
-    EmptyCheckError,
+    EmptyCheckError, DataframeType,
 )
-from dataguard.validation.check.df_type import DataframeType
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.check.row_level_result.utils import are_id_columns_in_rule_columns

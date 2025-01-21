@@ -1,14 +1,15 @@
 import logging
 from abc import abstractmethod, ABC
 
-from dataguard.store.audit.row import AuditRow
+from dataguard.core import DataGuardError
+from dataguard.store.audit.row import BaseAuditRow
 
 
-class AuditStoreError(Exception):
+class AuditStoreError(DataGuardError):
     pass
 
 
-class AuditStoreManagerError(Exception):
+class AuditStoreManagerError(DataGuardError):
     pass
 
 
@@ -37,7 +38,7 @@ class AbstractAuditStore(ABC):
         return self._disabled
 
     @abstractmethod
-    def append(self, row: AuditRow):
+    def append(self, row: BaseAuditRow):
         """Append a row to the audit store.
 
         Args:
@@ -111,7 +112,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def append(self, audit_store: str, row: AuditRow):
+    def append(self, audit_store: str, row: BaseAuditRow):
         """Append a row to the audit store with the given name.
 
         Args:
@@ -120,7 +121,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def append_to_all_stores(self, row: AuditRow):
+    def append_to_all_stores(self, row: BaseAuditRow):
         """Append a row all the audit stores registered.
 
         Args:

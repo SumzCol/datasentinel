@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
+from dataguard.core import DataGuardError
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.check.level import CheckLevel
@@ -12,7 +13,7 @@ from dataguard.validation.node.validation_node import ValidationNode
 from dataguard.validation.status import Status
 
 
-class RunnerError(Exception):
+class RunnerError(DataGuardError):
     pass
 
 

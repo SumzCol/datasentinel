@@ -1,21 +1,13 @@
-class AuditRow:
-    """Represent a row of audit data."""
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+from typing import Any
 
-    @property
-    def columns(self):
-        """Return the column names of the row."""
-        return list(self.__dict__.keys())
+from pydantic import BaseModel
 
-    def to_dict(self):
-        return self.__dict__
 
-    def __getitem__(self, item):
-        return self.__dict__[item]
+class BaseAuditRow(BaseModel):
+    def to_dict(self) -> dict[str, Any]:
+        """Returns the row as a dictionary."""
+        return self.model_dump()
 
-    def __iter__(self):
-        return iter(self.__dict__.values())
-
-    def __repr__(self):
-        return f"AuditRow({', '.join(f'{k}={v}' for k, v in self.__dict__.items())})"
+    def columns(self) -> list[str]:
+        """Returns the columns of the row."""
+        return list(self.model_fields.keys())

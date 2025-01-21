@@ -2,14 +2,15 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
+from dataguard.core import DataGuardError
 from dataguard.validation.node.result import ValidationNodeResult
 
 
-class ResultStoreError(Exception):
+class ResultStoreError(DataGuardError):
     pass
 
 
-class ResultStoreManagerError(Exception):
+class ResultStoreManagerError(DataGuardError):
     pass
 
 

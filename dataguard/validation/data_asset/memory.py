@@ -1,6 +1,6 @@
 from typing import Any
 
-from dataguard.validation.data_asset.core import AbstractDataAsset
+from dataguard.validation.data_asset.core import AbstractDataAsset, DataAssetError
 
 
 class MemoryDataAsset(AbstractDataAsset[Any]):
@@ -10,5 +10,5 @@ class MemoryDataAsset(AbstractDataAsset[Any]):
 
     def load(self) -> Any:
         if self._data is None:
-            raise ValueError("Data for MemoryDataAsset has not been saved yet.")
+            raise DataAssetError("Data for MemoryDataAsset has not been saved yet.")
         return self._data

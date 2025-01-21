@@ -1,4 +1,7 @@
-class DataGuardSessionError(Exception):
+from dataguard.core import DataGuardError
+
+
+class DataGuardSessionError(DataGuardError):
     pass
 
 class SessionAlreadyExistsError(DataGuardSessionError):

@@ -7,7 +7,7 @@ from dataguard.store.audit.core import (
     AuditStoreNotFoundError,
     AuditStoreAlreadyExistsError, AuditStoreError, AbstractAuditStoreManager,
 )
-from dataguard.store.audit.row import AuditRow
+from dataguard.store.audit.row import BaseAuditRow
 
 
 class AuditStoreManager(AbstractAuditStoreManager):
@@ -48,17 +48,17 @@ class AuditStoreManager(AbstractAuditStoreManager):
     def exists(self, name: str) -> bool:
         return name in self._audit_stores
 
-    def append(self, audit_store: str, row: AuditRow):
+    def append(self, audit_store: str, row: BaseAuditRow):
         self._append(self.get(audit_store), row)
 
-    def append_to_all_stores(self, row: AuditRow):
+    def append_to_all_stores(self, row: BaseAuditRow):
         for audit_store in self._audit_stores.values():
             self._append(audit_store, row)
 
     def _append(
         self,
         audit_store: AbstractAuditStore,
-        row: AuditRow,
+        row: BaseAuditRow,
     ):
         if audit_store.disabled:
             self._logger.warning(

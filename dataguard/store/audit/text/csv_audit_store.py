@@ -3,7 +3,7 @@ import os
 from typing import List
 
 from dataguard.store.audit.core import AbstractAuditStore, AuditStoreError
-from dataguard.store.audit.row import AuditRow
+from dataguard.store.audit.row import BaseAuditRow
 
 
 class CSVAuditStore(AbstractAuditStore):
@@ -49,15 +49,15 @@ class CSVAuditStore(AbstractAuditStore):
                 f'columns of rows stored in the audit store ({store_headers}).'
             )
 
-    def _append_row(self, row: AuditRow, first_write: bool) -> None:
+    def _append_row(self, row: BaseAuditRow, first_write: bool) -> None:
         mode = 'w' if first_write else 'a'
         with open(self._filepath, mode) as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=row.columns)
+            writer = csv.DictWriter(csv_file, fieldnames=row.columns())
             if first_write:
                 writer.writeheader()
             writer.writerow(row.to_dict())
 
-    def append(self, row: AuditRow):
+    def append(self, row: BaseAuditRow):
         headers = self._get_headers()
-        self._validate_columns(row_headers=row.columns, store_headers=headers)
+        self._validate_columns(row_headers=row.columns(), store_headers=headers)
         self._append_row(row, first_write=not headers)

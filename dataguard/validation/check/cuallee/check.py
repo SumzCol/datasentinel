@@ -3,8 +3,11 @@ from typing import Any, List, Tuple, Dict, Callable
 
 from cuallee import Check, CheckLevel as CualleeCheckLevel
 
-from dataguard.validation.check.core import AbstractCheck, UnsupportedDataframeTypeError
-from dataguard.validation.check.df_type import DataframeType
+from dataguard.validation.check.core import (
+    AbstractCheck,
+    UnsupportedDataframeTypeError,
+    DataframeType,
+)
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.check.utils import to_df_if_delta_table

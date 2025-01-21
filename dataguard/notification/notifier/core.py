@@ -2,15 +2,16 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
+from dataguard.core import DataGuardError
 from dataguard.validation.node.core import NotifyOnEvent
 from dataguard.validation.node.result import ValidationNodeResult
 
 
-class NotifierError(Exception):
+class NotifierError(DataGuardError):
     pass
 
 
-class NotifierManagerError(Exception):
+class NotifierManagerError(DataGuardError):
     pass
 
 
