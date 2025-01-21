@@ -81,16 +81,19 @@ all-resultstores = [
 database-databaseauditstore = [
   "SQLAlchemy>=1.4, <3.0",
 ]
+spark-deltatableauditstore = [
+  "dataguard[pyspark-base,deltatable-base]",
+]
 all-auditstores = [
   "dataguard[database-databaseauditstore]"
 ]
 
 # Notifiers dependencies
 slack-slacknotifier = [
-  "dataguard[slack-notifier]"
+  "slack-sdk==3.22.0"
 ]
 email-smtpemailnotifier = [
-  "dataguard[email-notifier]"
+  "smtplib"
 ]
 all-notifiers = [
   "dataguard[slack-slacknotifier,email-smtpemailnotifier]"

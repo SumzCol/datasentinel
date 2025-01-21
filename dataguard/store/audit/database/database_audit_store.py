@@ -106,7 +106,6 @@ class DatabaseAuditStore(AbstractAuditStore):
             ) from e
 
     def append(self, row: AuditRow):
-        """Append a row to the audit store."""
         row_dict = {
             field: _serialize_field_value(value)
             for field, value in row.to_dict().items()
