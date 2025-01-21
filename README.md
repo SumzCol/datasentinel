@@ -5,9 +5,9 @@
 ## Features
 
 - **Data Quality Validations**: Execute checks to ensure data accuracy, completeness, consistency, integrity and many more rules.
-- **Audit Logging**: Log audit data to multiple sources including databases, text files, and more.
+- **Audit Logging**: Log audit data to multiple sources.
 - **Notifications**: Send notifications to different destinations when data quality issues are identified.
-- **Data Quality Metrics Logging**: Compute and log metrics for data quality checks in multiple destinations.
+- **Data Quality Metrics Logging**: Log metrics related to data quality validations for reporting and analysis.
 
 ## Installation
 
