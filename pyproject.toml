@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dataguard"
 version = "0.0.1"
-description = "Data Guard is a powerful tool to combat and monitor data quality issues."
+description = "Data Guard is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
-    { name = "Sumz" },
+    { name = "Sumz SAS" },
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -15,40 +15,106 @@ license = {text = "Apache Software License (Apache 2.0)"}
 keywords = [
     "data quality",
     "data engineering",
+    "monitoring"
 ]
 classifiers = [
     "Development Status :: 4 - Alpha",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["readme", "version"]
 dependencies = [
-  "cuallee~=0.14.0",
+  "cuallee~=0.15.2",
+  "python-ulid~=2.7.0",
+  "pydantic~=2.10",
 ]
 
 [project.optional-dependencies]
-dev = [
-  "black==24.8.0",
-  "ruff==0.6.4",
-  "pre-commit==3.8.0",
+# Base dependencies
+pyspark-base = [
+  "pyspark>=3.4.0"
 ]
-pandas = [
-  "cuallee[pandas]~=0.14.0"
+deltatable-base = [
+  "delta-spark>=3.1.0, <4.0"
 ]
-pyspark = [
-  "cuallee[pyspark]~=0.14.0"
+pandas-base = [
+  "pandas>=1.3, <3.0"
 ]
-snowpark = [
-  "cuallee[snowpark]~=0.14.0",
+
+# Checks dependencies
+pandas-cualleecheck = [
+  "cuallee[pandas]~=0.15.2"
 ]
+pyspark-cualleecheck = [
+  "cuallee[pyspark]~=0.15.2",
+]
+cualleecheck = [
+  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
+]
+pandas-rowlevelresultcheck = [
+  "dataguard[pandas-base]",
+]
+pyspark-rowlevelresultcheck = [
+  "dataguard[pyspark-base]",
+]
+rowlevelresultcheck = [
+  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck"
+]
+pandas-checks = [
+  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
+]
+pyspark-checks = [
+  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
+]
+all-checks = [
+  "dataguard[pandas-checks,pyspark-checks]"
+]
+
+# Result stores dependencies
+spark-deltatableresultstore = [
+  "dataguard[pyspark-base,deltatable-base]",
+]
+all-resultstores = [
+  "dataguard[spark-deltatableresultstore]"
+]
+
+# Audit stores dependencies
+database-databaseauditstore = [
+  "SQLAlchemy>=1.4, <3.0",
+]
+spark-deltatableauditstore = [
+  "dataguard[pyspark-base,deltatable-base]",
+]
+all-auditstores = [
+  "dataguard[database-databaseauditstore]"
+]
+
+# Notifiers dependencies
+slack-slacknotifier = [
+  "slack-sdk==3.22.0"
+]
+email-smtpemailnotifier = [
+  "smtplib"
+]
+all-notifiers = [
+  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
+]
+
+# Testing dependencies
 test = [
   "pytest",
   "pytest-cov",
   "pendulum >= 2.1.2",
-  "cuallee~=0.14.0",
 ]
+
+# Linting dependencies
+lint = [
+  "ruff==0.6.4",
+  "pre-commit==3.8.0",
+]
+
+# All
 all = [
-  "cuallee[dev,pyspark,snowpark,pandas,test]"
+  "dataguard[test, lint, all-checks, all-resultstores, all-auditstores, all-notifiers]"
 ]
 
 [project.urls]

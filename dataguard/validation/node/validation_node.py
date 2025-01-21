@@ -1,0 +1,44 @@
+from typing import List, Dict, Optional
+
+from pydantic import ConfigDict, Field
+from pydantic.dataclasses import dataclass
+
+from dataguard.validation.node.core import NotifyOnEvent
+from dataguard.validation.check.core import AbstractCheck
+from dataguard.validation.data_asset.core import AbstractDataAsset
+
+
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
+class ValidationNode:
+    """Represent the parametrization of a data quality validation process.
+
+    Attributes:
+        name: The name of the validation node.
+        check_list: A list with the data quality checks to be applied to
+            the data asset.
+        data_asset: The data asset to be validated.
+        result_stores: A list with the name of the result stores where the
+            results of the validation process will be saved.
+        notifiers_by_event: A dictionary where each key is an event, and the corresponding value
+            is a list of the notifiers name to trigger when that event occurs.
+    """
+    name: str
+    check_list: List[AbstractCheck]
+    data_asset: Optional[AbstractDataAsset] = None
+    result_stores: Optional[List[str]] = Field(default_factory=list)
+    notifiers_by_event: Optional[Dict[NotifyOnEvent, List[str]]] = Field(default_factory=dict)
+
+    @property
+    def checks_count(self):
+        return len(self.check_list)
+
+    @property
+    def has_checks(self) -> bool:
+        return self.checks_count > 0
+
+    def add_check(self, check: AbstractCheck):
+        self.check_list.append(check)
+        return self
+
+    def check_exists(self, check_name: str) -> bool:
+        return any(check.name == check_name for check in self.check_list)
