@@ -30,92 +30,92 @@ dependencies = [
 
 [project.optional-dependencies]
 # Base dependencies
-pyspark-base = [
-  "pyspark>=3.4.0"
-]
-deltatable-base = [
-  "delta-spark>=3.1.0, <4.0"
-]
-pandas-base = [
-  "pandas>=1.3, <3.0"
-]
+#pyspark-base = [
+#  "pyspark>=3.4.0"
+#]
+#deltatable-base = [
+#  "delta-spark>=3.1.0, <4.0"
+#]
+#pandas-base = [
+#  "pandas>=1.3, <3.0"
+#]
 
 # Checks dependencies
-pandas-cualleecheck = [
-  "cuallee[pandas]~=0.15.2"
-]
-pyspark-cualleecheck = [
-  "cuallee[pyspark]~=0.15.2",
-]
-cualleecheck = [
-  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
-]
-pandas-rowlevelresultcheck = [
-  "dataguard[pandas-base]",
-]
-pyspark-rowlevelresultcheck = [
-  "dataguard[pyspark-base]",
-]
-rowlevelresultcheck = [
-  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck"
-]
-pandas-checks = [
-  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
-]
-pyspark-checks = [
-  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
-]
-all-checks = [
-  "dataguard[pandas-checks,pyspark-checks]"
-]
+#pandas-cualleecheck = [
+#  "cuallee[pandas]~=0.15.2"
+#]
+#pyspark-cualleecheck = [
+#  "cuallee[pyspark]~=0.15.2",
+#]
+#cualleecheck = [
+#  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
+#]
+#pandas-rowlevelresultcheck = [
+#  "dataguard[pandas-base]",
+#]
+#pyspark-rowlevelresultcheck = [
+#  "dataguard[pyspark-base]",
+#]
+#rowlevelresultcheck = [
+#  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck"
+#]
+#pandas-checks = [
+#  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
+#]
+#pyspark-checks = [
+#  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
+#]
+#all-checks = [
+#  "dataguard[pandas-checks,pyspark-checks]"
+#]
 
 # Result stores dependencies
-spark-deltatableresultstore = [
-  "dataguard[pyspark-base,deltatable-base]",
-]
-all-resultstores = [
-  "dataguard[spark-deltatableresultstore]"
-]
+#spark-deltatableresultstore = [
+#  "dataguard[pyspark-base,deltatable-base]",
+#]
+#all-resultstores = [
+#  "dataguard[spark-deltatableresultstore]"
+#]
 
 # Audit stores dependencies
-database-databaseauditstore = [
-  "SQLAlchemy>=1.4, <3.0",
-]
-spark-deltatableauditstore = [
-  "dataguard[pyspark-base,deltatable-base]",
-]
-all-auditstores = [
-  "dataguard[database-databaseauditstore]"
-]
+#database-databaseauditstore = [
+#  "SQLAlchemy>=1.4, <3.0",
+#]
+#spark-deltatableauditstore = [
+#  "dataguard[pyspark-base,deltatable-base]",
+#]
+#all-auditstores = [
+#  "dataguard[database-databaseauditstore]"
+#]
 
 # Notifiers dependencies
-slack-slacknotifier = [
-  "slack-sdk==3.22.0"
-]
-email-smtpemailnotifier = [
-  "smtplib"
-]
-all-notifiers = [
-  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
-]
+#slack-slacknotifier = [
+#  "slack-sdk==3.22.0"
+#]
+#email-smtpemailnotifier = [
+#  "smtplib"
+#]
+#all-notifiers = [
+#  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
+#]
 
 # Testing dependencies
-test = [
-  "pytest",
-  "pytest-cov",
-  "pendulum >= 2.1.2",
-]
+#test = [
+#  "pytest",
+#  "pytest-cov",
+#  "pendulum >= 2.1.2",
+#]
 
 # Linting dependencies
-lint = [
-  "ruff==0.6.4",
-  "pre-commit==3.8.0",
-]
+#lint = [
+#  "ruff==0.6.4",
+#  "pre-commit==3.8.0",
+#]
 
 # All
-all = [
-  "dataguard[test, lint, all-checks, all-resultstores, all-auditstores, all-notifiers]"
-]
+#all = [
+#  "dataguard[test, lint, all-checks, all-resultstores, all-auditstores, all-notifiers]"
+#]
 
 [project.urls]
 "Homepage" = "https://github.com/SumzCol/dataguard"
