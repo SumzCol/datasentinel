@@ -26,7 +26,7 @@ from dataguard.store.audit.row import BaseAuditRow
 
 
 class DatabaseAuditStore(AbstractAuditStore):
-    """Audit store implementation that appends to a database using SQLAlchemy."""
+    """Audit store implementation that appends audit data to a database using SQLAlchemy."""
 
     def __init__(
         self,
@@ -74,8 +74,8 @@ class DatabaseAuditStore(AbstractAuditStore):
     def _create_table(self, row: BaseAuditRow) -> Table:
         try:
             columns = []
-            for name, info in row.model_fields.items():
-                column_type = self._infer_sql_type(info.annotation)
+            for name, info in row.row_fields.items():
+                column_type = self._infer_sql_type(info.type)
                 columns.append(Column(name, column_type))
 
             table = Table(
@@ -119,21 +119,13 @@ class DatabaseAuditStore(AbstractAuditStore):
             return value.isoformat()
         elif isinstance(value, date):
             return value.isoformat()
+        elif value is None:
+            return value
         else:
             return json.dumps(value)
 
     @staticmethod
-    def _is_optional_field(python_type: type) -> bool:
-        return (
-            (
-                get_origin(python_type) == UnionType or
-                get_origin(python_type) == Union
-            )
-            and len(get_args(python_type)) == 2
-            and get_args(python_type)[1] == NoneType
-        )
-
-    def _infer_sql_type(self, python_type: type) -> Any:
+    def _infer_sql_type(python_type: type) -> Any:
         """Infer the SQLAlchemy column type based on the Python data type."""
         if python_type == int:
             return Integer
@@ -147,7 +139,5 @@ class DatabaseAuditStore(AbstractAuditStore):
             return DateTime
         elif python_type == date:
             return Date
-        elif self._is_optional_field(python_type):
-            return self._infer_sql_type(get_args(python_type)[0])
         else:
             return String
