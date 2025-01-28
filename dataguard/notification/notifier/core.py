@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 
 from dataguard.core import DataGuardError
-from dataguard.validation.node.core import NotifyOnEvent
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.core import NotifyOnEvent
+from dataguard.validation.result import DataValidationResult
 
 
 class NotifierError(DataGuardError):
@@ -42,7 +42,7 @@ class AbstractNotifier(ABC):
         return logging.getLogger(__name__)
 
     @abstractmethod
-    def notify(self, result: ValidationNodeResult):
+    def notify(self, result: DataValidationResult):
         pass
 
 
@@ -110,7 +110,7 @@ class AbstractNotifierManager(ABC):
     def notify_all_by_event(
             self,
             notifiers_by_events: Dict[NotifyOnEvent, List[str]],
-            result: ValidationNodeResult
+            result: DataValidationResult
     ):
         """
         Notify a validation node result using the specified notifiers for each event.

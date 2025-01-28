@@ -8,8 +8,8 @@ from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.node.result import ValidationNodeResult
-from dataguard.validation.node.validation_node import ValidationNode
+from dataguard.validation.result import DataValidationResult
+from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.status import Status
 
 
@@ -37,37 +37,37 @@ class AbstractRunner(ABC):
 
     def run(
         self,
-        validation_node: ValidationNode,
+        data_validation: DataValidation,
         data_asset: AbstractDataAsset | None,
         result_store_manager: ResultStoreManager,
         notifier_manager: NotifierManager
     ) -> None:
         """Run a validation node"""
-        if data_asset is None and validation_node.data_asset is None:
+        if data_asset is None and data_validation.data_asset is None:
             raise NoDatasetDefinedError(
                 f"No dataset to be validated was passed or defined inside the "
-                f"validation node '{validation_node.name}'"
+                f"validation node '{data_validation.name}'"
             )
-        data_asset = data_asset or validation_node.data_asset
+        data_asset = data_asset or data_validation.data_asset
 
-        if not validation_node.has_checks:
+        if not data_validation.has_checks:
             raise NoChecksDefinedError(
-                f"No checks were defined in validation node '{validation_node.name}'"
+                f"No checks were defined in validation node '{data_validation.name}'"
             )
 
         validation_node_result = self._run(
-            validation_node=validation_node,
+            data_validation=data_validation,
             data_asset=data_asset
         )
 
         self._log_status(result=validation_node_result)
 
         notifier_manager.notify_all_by_event(
-            notifiers_by_event=validation_node.notifiers_by_event,
+            notifiers_by_events=data_validation.notifiers_by_event,
             result=validation_node_result
         )
         result_store_manager.store_all(
-            result_stores=validation_node.result_stores,
+            result_stores=data_validation.result_stores,
             result=validation_node_result
         )
 
@@ -76,14 +76,14 @@ class AbstractRunner(ABC):
     @abstractmethod
     def _run(
         self,
-        validation_node: ValidationNode,
+        data_validation: DataValidation,
         data_asset: AbstractDataAsset
-    ) -> ValidationNodeResult:
+    ) -> DataValidationResult:
         pass
 
     def _log_status(
         self,
-        result: ValidationNodeResult
+        result: DataValidationResult
     ):
         data_asset_info = (
             f"Data asset '{result.data_asset}' in schema '{result.data_asset_schema}'"
@@ -134,7 +134,7 @@ def _failed_checks_summary(
 
 
 def _raise_exc_on_failed_critical_checks(
-    result: ValidationNodeResult
+    result: DataValidationResult
 ):
     critical_failed_checks = result.failed_checks_by_level(CheckLevel.CRITICAL)
     if critical_failed_checks:

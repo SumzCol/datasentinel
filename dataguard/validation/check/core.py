@@ -21,7 +21,6 @@ class EmptyCheckError(CheckError):
 
 
 class DataframeType(enum.Enum):
-    """"""
     PYSPARK = "pyspark"
     PANDAS = "pandas"
 

@@ -3,17 +3,17 @@ from typing import List, Dict, Optional
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
-from dataguard.validation.node.core import NotifyOnEvent
+from dataguard.validation.core import NotifyOnEvent
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.data_asset.core import AbstractDataAsset
 
 
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
-class ValidationNode:
-    """Represent the parametrization of a data quality validation process.
+class DataValidation:
+    """Represent the parametrization of a data validation process.
 
     Attributes:
-        name: The name of the validation node.
+        name: The name of the data validation process.
         check_list: A list with the data quality checks to be applied to
             the data asset.
         data_asset: The data asset to be validated.

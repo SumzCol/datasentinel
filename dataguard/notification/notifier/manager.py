@@ -1,14 +1,14 @@
 import threading
 from typing import Dict, List
 
-from dataguard.validation.node.core import NotifyOnEvent
+from dataguard.validation.core import NotifyOnEvent
 from dataguard.notification.notifier.core import (
     AbstractNotifier,
     NotifierAlreadyExistsError,
     NotifierNotFoundError, AbstractNotifierManager,
 )
 from dataguard.store.result.core import ResultStoreError
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 from dataguard.validation.status import Status
 
 
@@ -50,7 +50,7 @@ class NotifierManager(AbstractNotifierManager):
     def notify_all_by_event(
         self,
         notifiers_by_events: Dict[NotifyOnEvent, List[str]],
-        result: ValidationNodeResult
+        result: DataValidationResult
     ):
         status = result.status
         notifiers = []
@@ -70,7 +70,7 @@ class NotifierManager(AbstractNotifierManager):
     def _notify(
         self,
         notifier: AbstractNotifier,
-        result: ValidationNodeResult
+        result: DataValidationResult
     ):
         if notifier.disabled:
             self._logger.warning(

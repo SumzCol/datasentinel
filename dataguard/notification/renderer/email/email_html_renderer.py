@@ -1,7 +1,7 @@
 from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 
 
 class EmailHTMLRenderer(AbstractRenderer[str]):
-    def render(self, result: ValidationNodeResult) -> str:
+    def render(self, result: DataValidationResult) -> str:
         pass

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from dataguard.core import DataGuardError
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 
 
 class ResultStoreError(DataGuardError):
@@ -39,8 +39,8 @@ class AbstractResultStore(ABC):
         return self._disabled
 
     @abstractmethod
-    def store(self, result: ValidationNodeResult):
-        """Store a validation node result"""
+    def store(self, result: DataValidationResult):
+        """Store a data validation result"""
 
 
 class AbstractResultStoreManager(ABC):
@@ -109,7 +109,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def store_all(self, result_stores: List[str], result: ValidationNodeResult):
+    def store_all(self, result_stores: List[str], result: DataValidationResult):
         """Store a result in all the given result stores
 
         Args:

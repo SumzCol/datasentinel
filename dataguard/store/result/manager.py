@@ -1,4 +1,3 @@
-import logging
 import threading
 from typing import Dict, List
 
@@ -9,7 +8,7 @@ from dataguard.store.result.core import (
     AbstractResultStoreManager,
     ResultStoreError,
 )
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 
 
 class ResultStoreManager(AbstractResultStoreManager):
@@ -46,7 +45,7 @@ class ResultStoreManager(AbstractResultStoreManager):
     def exists(self, name: str) -> bool:
         return name in self._result_stores
 
-    def store_all(self, result_stores: List[str], result: ValidationNodeResult):
+    def store_all(self, result_stores: List[str], result: DataValidationResult):
         for result_store in result_stores:
             self._store(
                 result_store=self.get(result_store),
@@ -56,7 +55,7 @@ class ResultStoreManager(AbstractResultStoreManager):
     def _store(
         self,
         result_store: AbstractResultStore,
-        result: ValidationNodeResult
+        result: DataValidationResult
     ):
         if result_store.disabled:
             self._logger.warning(

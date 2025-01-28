@@ -11,7 +11,18 @@ from dataguard.validation.status import Status
 
 
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
-class ValidationNodeResult:
+class DataValidationResult:
+    """Represent the result of a data validation process.
+
+    Attributes:
+        run_id: The unique identifier of the validation process.
+        name: The name of the validation process.
+        data_asset: The name of the data asset validated.
+        data_asset_schema: The schema of the data asset validated.
+        start_time: The start time of the validation process.
+        end_time: The end time of the validation process.
+        check_results: A list with the results of the data quality checks applied.
+    """
     run_id: ULID
     name: str
     data_asset: str

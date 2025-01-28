@@ -13,12 +13,11 @@ from dataguard.validation.status import Status
 
 class PandasValidationStrategy(ValidationStrategy):
     def __init__(self):
-        """Determine the computational options for Rules"""
         self._compute_instructions: Dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {}
 
     def is_complete(self, rule: Rule):
-        def _execute(dataframe: pd.DataFrame) -> pd.DataFrame:
-            df = dataframe[
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
                 [
                     *rule.id_columns,
                     rule.column
@@ -32,8 +31,8 @@ class PandasValidationStrategy(ValidationStrategy):
         self._compute_instructions[rule.key] = _execute
 
     def are_complete(self, rule: Rule):
-        def _execute(dataframe: pd.DataFrame) -> pd.DataFrame:
-            df = dataframe[[
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[[
                 *rule.id_columns,
                 *rule.column
             ]]

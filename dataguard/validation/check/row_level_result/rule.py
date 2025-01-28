@@ -13,12 +13,23 @@ class CheckDataType(enum.Enum):
     STRING = 2
     DATE = 3
     TIMESTAMP = 4
-    DUO = 5
 
 
 @dataclass
 class Rule:
-    """Predicate definition holder"""
+    """Predicate definition holder
+
+    Attributes:
+        method: Rule method name
+        column: Column to evaluate
+        id_columns: ID columns used to identify bad rows if the check generates them
+        value: Rule value argument
+        data_type: Rule data type
+        pass_threshold: Rule pass threshold
+        options: Rule options
+        status: Rule status
+        name: Rule name
+    """
 
     method: str
     column: Union[str, List[str], Tuple[str, ...], None]

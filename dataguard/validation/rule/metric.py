@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
@@ -26,13 +26,13 @@ class RuleMetric:
     """
     id: int
     rule: str
-    column: str
     value: str
     rows: int
     violations: int
     pass_rate: float
     pass_threshold: float
     options: Optional[Dict[str, Any]] = None
+    column: Optional[str] = None
     failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
 
     @property

@@ -14,7 +14,7 @@ from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.node.validation_node import ValidationNode
+from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.runner.core import AbstractRunner
 from dataguard.validation.runner.simple_runner import SimpleRunner
 
@@ -89,23 +89,23 @@ class DataGuardSession:
         """Return the audit store manager"""
         return self._audit_store_manager
 
-    def run_validation_node(
+    def run_data_validation(
         self,
-        validation_node: ValidationNode,
+        data_validation: DataValidation,
         data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None
     ):
-        """Run a validation node.
+        """Run a data validation.
 
         Args:
-            validation_node: Validation node to run
+            data_validation: Validation node to run
             data_asset: Data asset to validate or replace the one in the validation node
                 if one is defined.
             runner: Runner to run the validation node
         """
         runner = runner or SimpleRunner()
         runner.run(
-            validation_node=validation_node,
+            data_validation=data_validation,
             data_asset=data_asset,
             notifier_manager=self._notifier_manager,
             result_store_manager=self._result_store_manager

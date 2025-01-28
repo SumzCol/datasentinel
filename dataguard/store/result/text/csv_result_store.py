@@ -3,7 +3,7 @@ import json
 import os
 
 from dataguard.store.result.core import AbstractResultStore
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 
 
 class CSVResultStore(AbstractResultStore):
@@ -12,7 +12,7 @@ class CSVResultStore(AbstractResultStore):
         self._bad_records_limit = bad_records_limit
         super().__init__(name=name, disabled=disabled)
 
-    def store(self, result: ValidationNodeResult):
+    def store(self, result: DataValidationResult):
         fieldnames = [
             "run_id",
             "name",
@@ -79,7 +79,7 @@ class CSVResultStore(AbstractResultStore):
                                 rule_metric["failed_rows_dataset"].to_json(
                                     limit=self._bad_records_limit
                                 )
-                                if rule_metric["rule_failed_rows_dataset"] is not None
+                                if rule_metric["failed_rows_dataset"] is not None
                                 else None
                             ),
                             "rule_status": rule_metric["status"],
