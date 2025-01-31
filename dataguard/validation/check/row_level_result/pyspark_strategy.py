@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Any
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
+from pyspark.sql.types import NumericType, StringType, DateType, TimestampType
 
 from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 from dataguard.validation.check.row_level_result.utils import value, evaluate_pass_rate
@@ -78,6 +79,113 @@ class PysparkValidationStrategy(ValidationStrategy):
             )
         self._compute_instructions[rule.key] = _execute
 
+    def has_pattern(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(
+                    ~F.col(rule.column).rlike(rule.value)
+                )
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_greater_than(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(f"{rule.column} <= {rule.value}")
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_greater_or_equal_than(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(f"{rule.column} < {rule.value}")
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_less_than(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(f"{rule.column} >= {rule.value}")
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_less_or_equal_than(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(f"{rule.column} > {rule.value}")
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_equal_than(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(f"{rule.column} != {rule.value}")
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_between(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(
+                    f"{rule.column} < {rule.value[0]} or {rule.column} > {rule.value[1]}"
+                )
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_in(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(
+                    ~F.col(rule.column).isin(rule.value)
+                )
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def not_in(self, rule: Rule):
+        def _execute(dataframe: DataFrame) -> DataFrame:
+            return (
+                dataframe
+                .select(
+                    rule.column,
+                )
+                .filter(
+                    F.col(rule.column).isin(rule.value)
+                )
+            )
+        self._compute_instructions[rule.key] = _execute
+
     def is_custom(self, rule: Rule):
         def _execute(dataframe: DataFrame):
             computed_frame = rule.value(dataframe, rule.options)
@@ -113,7 +221,14 @@ class PysparkValidationStrategy(ValidationStrategy):
         """
         Validate the datatype of each column according to the CheckDataType of the rule's method
         """
-        return True
+        valid = True
+        for key, rule in rules.items():
+            dtype = rule.data_type.value
+            if  dtype == 1: valid = valid and isinstance(df.schema[rule.column].dataType, NumericType)
+            elif dtype == 2: valid = valid and isinstance(df.schema[rule.column].dataType, StringType)
+            elif dtype == 3: valid = valid and isinstance(df.schema[rule.column].dataType, DateType)
+            elif dtype == 4: valid = valid and isinstance(df.schema[rule.column].dataType, TimestampType)
+        return valid
 
     def compute(self, df: DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
         """Compute and returns calculated rule metrics"""

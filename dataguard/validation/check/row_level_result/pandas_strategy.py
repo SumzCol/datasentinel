@@ -3,6 +3,8 @@ from typing import Dict, Callable, List
 
 import pandas as pd
 
+import pandas.api.types as pdt
+
 from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 from dataguard.validation.check.row_level_result.rule import Rule
 from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
@@ -41,6 +43,150 @@ class PandasValidationStrategy(ValidationStrategy):
             )
         self._compute_instructions[rule.key] = _execute
 
+    def has_pattern(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  ~df[rule.column].astype(str).str.match(rule.value, na=False)
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_unique(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[[rule.column]]
+            return (
+                df[rule.column].value_counts().reset_index().query('count > 1')[[rule.column]]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def are_unique(self, rule: Rule): ## ojo
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[[
+                *rule.column
+            ]]
+            return (
+                df[df[list(rule.column)].isnull().any(axis=1)]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_greater_than(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column] <= rule.value
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_greater_or_equal_than(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column] < rule.value
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_less_than(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column] >= rule.value
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+    
+    def is_less_or_equal_than(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column] > rule.value
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_equal_than(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column] != rule.value
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_between(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  (df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1]) 
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def is_in(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  ~df[rule.column].isin(rule.value)
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
+    def not_in(self, rule: Rule):
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[
+                [
+                    rule.column
+                ]
+            ]
+            return (
+                df[
+                  df[rule.column].isin(rule.value)
+                ]
+            )
+        self._compute_instructions[rule.key] = _execute
+
     def _generate_compute_instructions(
             self,
             rules: Dict[str, Rule]
@@ -59,7 +205,13 @@ class PandasValidationStrategy(ValidationStrategy):
         }
 
     def validate_data_types(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> bool:
-        return True
+        valid = True
+        for key, rule in rules.items():
+            dtype = rule.data_type.value
+            if  dtype == 1: valid = valid and pdt.is_numeric_dtype(df[rule.column])
+            elif dtype == 2: valid = valid and pdt.is_string_dtype(df[rule.column])
+            elif dtype in [3,4]: valid = valid and pdt.is_datetime64_any_dtype(df[rule.column])
+        return valid
 
     def compute(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
         rows = df.shape[0]

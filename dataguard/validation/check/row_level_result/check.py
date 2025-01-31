@@ -91,7 +91,13 @@ class RowLevelResultCheck(AbstractCheck):
         ) >> self._rules
         return self
 
-    def is_greater_than(self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None):
+    def is_greater_than(
+            self,
+            column: str,
+            value: float,
+            pct: float = 1.0,
+            id_columns: List[str] = None
+    ):
         Rule(
             method="is_greater_than",
             column=column,
@@ -181,7 +187,7 @@ class RowLevelResultCheck(AbstractCheck):
             method="is_between",
             column=column,
             id_columns=[] if id_columns is None else id_columns,
-            value=value,
+            value= value[::-1] if value[0] > value[1] else value,
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
         ) >> self._rules

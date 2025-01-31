@@ -32,7 +32,7 @@ class RuleMetric:
     pass_rate: float
     pass_threshold: float
     options: Optional[Dict[str, Any]] = None
-    column: Optional[str] = None
+    column: Optional[str] | List[str] | tuple[str] = None
     failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
 
     @property
