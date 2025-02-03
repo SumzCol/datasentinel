@@ -1,11 +1,11 @@
 import importlib
-from datetime import datetime
-from typing import Any, Dict, List, Callable, Tuple
+from datetime import datetime, date
+from typing import Any, Dict, List, Callable, Tuple, Union
 
 from dataguard.validation.check.core import (
     AbstractCheck,
     UnsupportedDataframeTypeError,
-    EmptyCheckError, DataframeType,
+    EmptyCheckError, DataframeType, BadArgumentError,
 )
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
@@ -28,12 +28,13 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_complete(self, id_columns: List[str], column: str, pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
-            raise ValueError("ID columns cannot be evaluated in 'is_complete' rule")
+            raise BadArgumentError("ID columns cannot be evaluated in 'is_complete' rule")
+        if not id_columns:
+            raise BadArgumentError("ID columns cannot be empty in 'is_complete' rule")
         Rule(
             method="is_complete",
             column=column,
             id_columns=id_columns,
-            value="N/A",
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
         ) >> self._rules
@@ -46,31 +47,28 @@ class RowLevelResultCheck(AbstractCheck):
             method="are_complete",
             column=column,
             id_columns=id_columns,
-            value="N/A",
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
         ) >> self._rules
         return self
 
-    def is_unique(self, column: str, pct: float = 1.0):
+    def is_unique(self, column: str, pct: float = 1.0, ignore_nulls: bool = False):
         Rule(
             method="is_unique",
             column=column,
-            id_columns=None,
-            value="N/A",
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
+            options={"ignore_nulls": ignore_nulls},
         ) >> self._rules
         return self
 
-    def are_unique(self, column: List[str], pct: float = 1.0):
+    def are_unique(self, column: List[str], pct: float = 1.0, ignore_nulls: bool = False):
         Rule(
             method="are_unique",
             column=column,
-            id_columns=None,
-            value="N/A",
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
+            options={"ignore_nulls": ignore_nulls},
         ) >> self._rules
         return self
 
@@ -92,11 +90,11 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_greater_than(
-            self,
-            column: str,
-            value: float,
-            pct: float = 1.0,
-            id_columns: List[str] = None
+        self,
+        column: str,
+        value: float,
+        pct: float = 1.0,
+        id_columns: List[str] = None
     ):
         Rule(
             method="is_greater_than",
@@ -179,15 +177,22 @@ class RowLevelResultCheck(AbstractCheck):
     def is_between(
         self,
         column: str,
-        value: List[Any],
+        value: Union[
+            List[float],
+            List[int],
+            List[datetime],
+            List[date]
+        ],
         pct: float = 1.0,
         id_columns: List[str] = None
     ):
+        if len(value) != 2 or not isinstance(value, List):
+            raise BadArgumentError("Value must be a list containing min and max values")
         Rule(
             method="is_between",
             column=column,
             id_columns=[] if id_columns is None else id_columns,
-            value= value[::-1] if value[0] > value[1] else value,
+            value=value,
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
         ) >> self._rules
@@ -196,7 +201,7 @@ class RowLevelResultCheck(AbstractCheck):
     def is_in(
         self,
         column: str,
-        value: List | Tuple,
+        value: List,
         pct: float = 1.0,
         id_columns: List[str] = None
     ):
@@ -213,7 +218,7 @@ class RowLevelResultCheck(AbstractCheck):
     def not_in(
         self,
         column: str,
-        value: List | Tuple,
+        value: List,
         pct: float = 1.0,
         id_columns: List[str] = None
     ):
@@ -237,7 +242,13 @@ class RowLevelResultCheck(AbstractCheck):
             fn, Callable
         ), "Please provide a Callable/Function for validation"
 
-        Rule("is_custom", None, None, fn, CheckDataType.AGNOSTIC, pct, options) >> self._rules
+        Rule(
+            method="is_custom",
+            value=fn,
+            data_type=CheckDataType.AGNOSTIC,
+            pass_threshold=pct,
+            options=options
+        ) >> self._rules
         return self
 
     def validate(self, df: Any) -> CheckResult:
@@ -257,7 +268,9 @@ class RowLevelResultCheck(AbstractCheck):
         else:
             raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
-        validation_strategy.validate_data_types(df, self._rules)
+        assert validation_strategy.validate_data_types(df, self._rules), (
+            "One or more evaluated columns have a data type incompatible with the defined rules."
+        )
         start_time = datetime.now()
         rule_metrics = validation_strategy.compute(df, self._rules)
         end_time = datetime.now()

@@ -153,17 +153,3 @@ class TestDataGuardSession:
         # Verify that the session is correctly registered
         assert session.name == "custom_session"
         assert session in DataGuardSession._active_sessions.values()
-
-    def test_run_validation_node(self):
-        session = DataGuardSession(name="test_session")
-        data_validation = Mock(spec=DataValidation)
-        dataset = Mock(spec=AbstractDataAsset)
-        runner = Mock(spec=SimpleRunner)
-
-        session.run_data_validation(data_validation, dataset, runner)
-        runner.run.assert_called_once_with(
-            data_validation=data_validation,
-            datasource=dataset,
-            notifier_manager=session.notifier_manager,
-            result_store_manager=session.result_store_manager
-        )

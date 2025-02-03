@@ -95,7 +95,7 @@ class DataGuardSession:
         data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None
     ):
-        """Run a data validation.
+        """Runs a data validation.
 
         Args:
             data_validation: Validation node to run

@@ -389,8 +389,8 @@ class CualleeCheck(AbstractCheck):
             RuleMetric(
                 id=row.id,
                 rule=row.rule,
-                column=row.column,
-                value=row.value,
+                column=self._check.rules[i].column,
+                value=self._check.rules[i].value,
                 rows=row.rows,
                 violations=row.violations,
                 pass_rate=row.pass_rate,
@@ -409,8 +409,8 @@ class CualleeCheck(AbstractCheck):
             RuleMetric(
                 id=row["id"],
                 rule=row["rule"],
-                column=row["column"],
-                value=row["value"],
+                column=self._check.rules[i].column,
+                value=self._check.rules[i].value,
                 rows=row["rows"],
                 violations=row["violations"],
                 pass_rate=row["pass_rate"],

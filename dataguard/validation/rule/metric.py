@@ -1,7 +1,9 @@
-from typing import Dict, Any, Optional, List
+from datetime import datetime, date
+from typing import Dict, Any, Optional, List, Tuple, Callable
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field, model_validator, field_validator
 from pydantic.dataclasses import dataclass
+from typing_extensions import Self
 
 from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
 from dataguard.validation.status import Status
@@ -15,6 +17,7 @@ class RuleMetric:
         id: The id of the rule metric.
         rule: The name of the rule that was evaluated.
         column: The column or columns that the rule evaluated.
+        id_columns: The ID columns used to identify failed rows if they were specified.
         value: The value of the rule.
         rows: The number of rows analyzed.
         violations: The number of rows that didn't pass the rule.
@@ -22,18 +25,34 @@ class RuleMetric:
         pass_threshold: The pass threshold set for the rule.
         options: The options set for the rule if any.
         failed_rows_dataset: The failed rows dataset containing the rows that failed the rule
-            if there were any violations, and if they were computed.
+            if there were any violations and if they were computed.
     """
     id: int
     rule: str
-    value: str
     rows: int
     violations: int
     pass_rate: float
     pass_threshold: float
+    value: Optional[int | float | str | datetime | date | List | Callable] = None
     options: Optional[Dict[str, Any]] = None
-    column: Optional[str] | List[str] | tuple[str] = None
+    column: Optional[List[str]] = None
+    id_columns: Optional[List[str]] = None
     failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
+
+    @model_validator(mode="after")
+    def validate_model(self) -> Self:
+        if self.violations > self.rows:
+            raise ValueError("Violations cannot be greater than rows")
+
+        return self
+
+    @field_validator("column", mode="before")
+    def validate_columns(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return [value]
+        if isinstance(value, tuple) or isinstance(value, set):
+            return list(value)
+        return value
 
     @property
     def status(self):
@@ -45,7 +64,8 @@ class RuleMetric:
         return {
             "id": self.id,
             "rule": self.rule,
-            "column": self.column,
+            "columns": self.column,
+            "id_columns": self.id_columns,
             "value": self.value,
             "rows": self.rows,
             "violations": self.violations,

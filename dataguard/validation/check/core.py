@@ -12,6 +12,10 @@ class CheckError(DataGuardError):
     pass
 
 
+class BadArgumentError(CheckError):
+    pass
+
+
 class UnsupportedDataframeTypeError(CheckError):
     pass
 

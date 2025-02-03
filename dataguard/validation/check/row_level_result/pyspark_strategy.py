@@ -1,5 +1,5 @@
 import operator
-from typing import Callable, Dict, List, Any
+from typing import Callable, Dict, List
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
@@ -193,7 +193,7 @@ class PysparkValidationStrategy(ValidationStrategy):
                 type(computed_frame)
             ), "Custom function does not return a PySpark DataFrame"
             assert (
-                len(computed_frame.columns) >= 1
+                    len(computed_frame.column) >= 1
             ), "Custom function should retun at least one column"
             return computed_frame
 
@@ -204,7 +204,7 @@ class PysparkValidationStrategy(ValidationStrategy):
             rules: Dict[str, Rule]
     ) -> None:
         for k, v in rules.items():
-            operator.methodcaller(v.name, v)(self)
+            operator.methodcaller(v.method, v)(self)
 
     def _compute_bad_records(
             self,
@@ -243,8 +243,9 @@ class PysparkValidationStrategy(ValidationStrategy):
             rule_metrics.append(
                 RuleMetric(
                     id=index,
-                    rule=rule.name,
+                    rule=rule.method,
                     column=rule.column,
+                    id_columns=rule.id_columns,
                     value=value(rule),
                     rows=rows,
                     violations=bad_records_count,

@@ -7,10 +7,9 @@ import pandas.api.types as pdt
 
 from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 from dataguard.validation.check.row_level_result.rule import Rule
-from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
+from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate, value
 from dataguard.validation.check.row_level_result.validation_strategy import ValidationStrategy
 from dataguard.validation.rule.metric import RuleMetric
-from dataguard.validation.status import Status
 
 
 class PandasValidationStrategy(ValidationStrategy):
@@ -84,8 +83,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  df[rule.column] <= rule.value
-                ]
+                    df[rule.column] <= rule.value
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
 
@@ -98,8 +97,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  df[rule.column] < rule.value
-                ]
+                    df[rule.column] < rule.value
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
 
@@ -112,8 +111,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  df[rule.column] >= rule.value
-                ]
+                    df[rule.column] >= rule.value
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
     
@@ -126,8 +125,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  df[rule.column] > rule.value
-                ]
+                    df[rule.column] > rule.value
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
 
@@ -140,8 +139,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  df[rule.column] != rule.value
-                ]
+                    df[rule.column] != rule.value
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
 
@@ -154,8 +153,8 @@ class PandasValidationStrategy(ValidationStrategy):
             ]
             return (
                 df[
-                  (df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1]) 
-                ]
+                    (df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1])
+                    ]
             )
         self._compute_instructions[rule.key] = _execute
 
@@ -192,7 +191,7 @@ class PandasValidationStrategy(ValidationStrategy):
             rules: Dict[str, Rule]
     ) -> None:
         for v in rules.values():
-            operator.methodcaller(v.name, v)(self)
+            operator.methodcaller(v.method, v)(self)
 
     def _compute_bad_records(
             self,
@@ -225,9 +224,10 @@ class PandasValidationStrategy(ValidationStrategy):
             rule_metrics.append(
                 RuleMetric(
                     id=index,
-                    rule=rule.name,
+                    rule=rule.method,
                     column=rule.column,
-                    value=rule.value,
+                    id_columns=rule.id_columns,
+                    value=value(rule),
                     rows=rows,
                     violations=bad_records_count,
                     pass_rate=pass_rate,
