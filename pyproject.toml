@@ -4,13 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dataguard"
-version = "0.0.1"
 description = "Data Guard is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
     { name = "Sumz SAS" },
 ]
 requires-python = ">=3.10"
-readme = "README.md"
 license = {text = "Apache Software License (Apache 2.0)"}
 keywords = [
     "data quality",
@@ -27,6 +25,7 @@ dependencies = [
   "python-ulid~=2.7.0",
   "pydantic~=2.10",
 ]
+dynamic = ["version", "readme"]
 
 [project.optional-dependencies]
 # Base dependencies
@@ -89,9 +88,9 @@ pandas-base = [
 #]
 
 # Notifiers dependencies
-#slack-slacknotifier = [
-#  "slack-sdk==3.22.0"
-#]
+slack-slacknotifier = [
+  "slack-sdk~=3.34.0"
+]
 #email-smtpemailnotifier = [
 #  "smtplib"
 #]
@@ -111,6 +110,7 @@ test = [
   "jupyterlab_server>=2.11.1",
   "jupyterlab>=3,<5",
   "jupyter~=1.0",
+  "slack-sdk~=3.34.0",
 ]
 
 # Linting dependencies
@@ -127,3 +127,7 @@ test = [
 [project.urls]
 "Homepage" = "https://github.com/SumzCol/dataguard"
 "Bug Tracker" = "https://github.com/SumzCol/dataguard"
+
+[tool.setuptools.dynamic]
+version = {attr = "dataguard.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
