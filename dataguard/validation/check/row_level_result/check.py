@@ -42,7 +42,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def are_complete(self, id_columns: List[str], column: List[str], pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
-            raise ValueError("ID columns cannot be evaluated in 'are_complete' rule")
+            raise BadArgumentError("ID columns cannot be evaluated in 'are_complete' rule")
         Rule(
             method="are_complete",
             column=column,
@@ -238,13 +238,9 @@ class RowLevelResultCheck(AbstractCheck):
             pct: float = 1.0,
             options: Dict[str, Any] = None
     ):
-        assert isinstance(
-            fn, Callable
-        ), "Please provide a Callable/Function for validation"
-
         Rule(
             method="is_custom",
-            value=fn,
+            function=fn,
             data_type=CheckDataType.AGNOSTIC,
             pass_threshold=pct,
             options=options

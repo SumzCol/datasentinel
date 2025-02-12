@@ -390,7 +390,16 @@ class CualleeCheck(AbstractCheck):
                 id=row.id,
                 rule=row.rule,
                 column=self._check.rules[i].column,
-                value=self._check.rules[i].value,
+                value=(
+                    self._check.rules[i].value
+                    if not row.rule == "is_custom" and not self._check.rules[i].value == "N/A"
+                    else None
+                ),
+                function=(
+                    self._check.rules[i].value
+                    if row.rule == "is_custom"
+                    else None
+                ),
                 rows=row.rows,
                 violations=row.violations,
                 pass_rate=row.pass_rate,
@@ -410,7 +419,16 @@ class CualleeCheck(AbstractCheck):
                 id=row["id"],
                 rule=row["rule"],
                 column=self._check.rules[i].column,
-                value=self._check.rules[i].value,
+                value=(
+                    self._check.rules[i].value
+                    if not row["rule"] == "is_custom"
+                    else None
+                ),
+                function=(
+                    self._check.rules[i].value
+                    if row["rule"] == "is_custom"
+                    else None
+                ),
                 rows=row["rows"],
                 violations=row["violations"],
                 pass_rate=row["pass_rate"],

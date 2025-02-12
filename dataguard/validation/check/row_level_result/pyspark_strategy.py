@@ -188,13 +188,13 @@ class PysparkValidationStrategy(ValidationStrategy):
 
     def is_custom(self, rule: Rule):
         def _execute(dataframe: DataFrame):
-            computed_frame = rule.value(dataframe, rule.options)
+            computed_frame = rule.function(dataframe, rule.options)
             assert "pyspark" in str(
                 type(computed_frame)
             ), "Custom function does not return a PySpark DataFrame"
             assert (
-                    len(computed_frame.column) >= 1
-            ), "Custom function should retun at least one column"
+                    len(computed_frame.columns) >= 1
+            ), "Custom function should return at least one column"
             return computed_frame
 
         self._compute_instructions[rule.key] = _execute
@@ -210,7 +210,7 @@ class PysparkValidationStrategy(ValidationStrategy):
             self,
             dataframe: DataFrame,
     ) -> Dict[str, DataFrame]:
-        """Compute rules throught spark transform"""
+        """Compute rules through spark transform"""
 
         return {
             k: compute_instruction(dataframe)  # type: ignore
@@ -246,7 +246,8 @@ class PysparkValidationStrategy(ValidationStrategy):
                     rule=rule.method,
                     column=rule.column,
                     id_columns=rule.id_columns,
-                    value=value(rule),
+                    value=rule.value,
+                    function=rule.function,
                     rows=rows,
                     violations=bad_records_count,
                     pass_rate=pass_rate,

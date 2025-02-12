@@ -11,7 +11,7 @@ from dataguard.validation.status import Status
 
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class RuleMetric:
-    """Represent the result metric of a data quality rule.
+    """Represent the result metrics of the evaluation of a data quality rule.
 
     Attributes:
         id: The id of the rule metric.
@@ -19,6 +19,7 @@ class RuleMetric:
         column: The column or columns that the rule evaluated.
         id_columns: The ID columns used to identify failed rows if they were specified.
         value: The value of the rule.
+        function: The function used to evaluate the rule if one was supplied.
         rows: The number of rows analyzed.
         violations: The number of rows that didn't pass the rule.
         pass_rate: The pass rate representing the percentage of rows that passed the rule.
@@ -33,10 +34,11 @@ class RuleMetric:
     violations: int
     pass_rate: float
     pass_threshold: float
-    value: Optional[int | float | str | datetime | date | List | Callable] = None
+    value: Optional[int | float | str | datetime | date | List] = None
+    function: Optional[Callable] = None
     options: Optional[Dict[str, Any]] = None
-    column: Optional[List[str]] = Field(default_factory=list)
-    id_columns: Optional[List[str]] = Field(default_factory=list)
+    column: Optional[List[str]] = None
+    id_columns: Optional[List[str]] = None
     failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
 
     @model_validator(mode="after")
@@ -47,7 +49,15 @@ class RuleMetric:
         return self
 
     @field_validator("column", mode="before")
-    def validate_columns(cls, value: Any) -> Any:
+    def validate_column(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return [value]
+        if isinstance(value, tuple) or isinstance(value, set):
+            return list(value)
+        return value
+
+    @field_validator("id_columns", mode="before")
+    def validate_id_columns(cls, value: Any) -> Any:
         if isinstance(value, str):
             return [value]
         if isinstance(value, tuple) or isinstance(value, set):
@@ -59,6 +69,10 @@ class RuleMetric:
         """Return the status of the rule."""
         return Status.PASS if self.pass_rate >= self.pass_threshold else Status.FAIL
 
+    @staticmethod
+    def function_to_string(function: Callable) -> str:
+        return f"{function.__module__}.{function.__name__}"
+
     def to_dict(self) -> Dict[str, Any]:
         """Return the rule metric as a dictionary."""
         return {
@@ -67,6 +81,7 @@ class RuleMetric:
             "columns": self.column,
             "id_columns": self.id_columns,
             "value": self.value,
+            "function": self.function,
             "rows": self.rows,
             "violations": self.violations,
             "pass_rate": self.pass_rate,

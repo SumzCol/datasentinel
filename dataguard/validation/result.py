@@ -60,7 +60,7 @@ class DataValidationResult:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "run_id": str(self.run_id),
+            "run_id": self.run_id,
             "name": self.name,
             "data_asset": self.data_asset,
             "data_asset_schema": self.data_asset_schema,
@@ -70,5 +70,5 @@ class DataValidationResult:
                 check_result.to_dict()
                 for check_result in self.check_results
             ],
-            "status": self.status.value
+            "status": self.status
         }

@@ -111,6 +111,7 @@ test = [
   "jupyterlab>=3,<5",
   "jupyter~=1.0",
   "slack-sdk~=3.34.0",
+  "SQLAlchemy>=1.4, <3.0",
 ]
 
 # Linting dependencies

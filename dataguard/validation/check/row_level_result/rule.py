@@ -2,9 +2,9 @@ import enum
 import hashlib
 from collections import Counter
 from datetime import datetime, date
-from typing import Tuple, Optional, Any, Dict, List, Set, Callable
+from typing import Optional, Any, Dict, List, Callable
 
-from pydantic import Field, model_validator, field_validator
+from pydantic import model_validator, field_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
@@ -28,6 +28,7 @@ class Rule:
         column: Column or columns to evaluate
         id_columns: ID columns used to identify failed rows if the check generates them
         value: Rule value argument
+        function: Rule function if a custom function is used
         data_type: Rule data type
         pass_threshold: Rule pass threshold
         options: Rule options
@@ -36,7 +37,8 @@ class Rule:
     method: str
     data_type: CheckDataType
     pass_threshold: float = 1.0
-    value: Optional[int|float|str|datetime|date|List|Callable] = None
+    value: Optional[int|float|str|datetime|date|List] = None
+    function: Optional[Callable] = None
     column: Optional[str | List[str]] = None
     id_columns: Optional[List[str]] = None
     options: Optional[Dict[str, Any]] = None
@@ -56,6 +58,8 @@ class Rule:
             # All values can only be of one data type in a rule
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
+        if self.method == "is_custom" and self.function is None:
+            raise ValueError("When 'is_custom' method is used, a function must be provided")
         return self
 
     @property
