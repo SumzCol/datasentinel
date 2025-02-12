@@ -47,6 +47,10 @@ class DataValidationResult:
             if check_result.status == Status.FAIL
         ]
 
+    @property
+    def failed_checks_count(self) -> int:
+        return len(self.failed_checks)
+
     def failed_checks_by_level(self, level: CheckLevel) -> List[CheckResult]:
         return [
             check_result
