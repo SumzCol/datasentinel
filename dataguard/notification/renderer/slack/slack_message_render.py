@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 
 from pydantic.dataclasses import dataclass
 
-from dataguard.notification.renderer.core import AbstractRenderer
+from dataguard.notification.renderer.core import AbstractRenderer, RendererError
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
@@ -14,21 +14,52 @@ class SlackMessage:
     blocks: List[Dict[str, Any]]
 
 
-class SlackMessageRender(AbstractRenderer[SlackMessage]):
+class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
+    def __init__(self, checks_display_limit: int = 5, rules_display_limit: int = 5):
+        if not 0 < checks_display_limit <= 5:
+            raise RendererError("Checks display limit must be greater than 0 and less than 5.")
+        if not 0 < rules_display_limit <= 5:
+            raise RendererError("Rules display limit must be greater than 0 and less than 5.")
+        self._checks_display_limit = checks_display_limit
+        self._rules_display_limit = rules_display_limit
 
-    @staticmethod
-    def _render_text_message(result: DataValidationResult) -> str:
-        status_str = "passed" if result.status == Status.PASS else "failed"
-        return (
+    def _render_text_rules_metric(self, rules_metric: List[RuleMetric]) -> str:
+        return ", ".join(
+            [
+                f"{rule_metric.rule}: {', '.join(rule_metric.column)}"
+                if not rule_metric.rule == "is_custom"
+                else f"{rule_metric.rule}: {rule_metric.value}"
+                for rule_metric in rules_metric[:self._rules_display_limit]
+            ]
+        )
+
+    def _render_text_message(self, result: DataValidationResult) -> str:
+        status = result.status
+        status_str = "passed" if status == Status.PASS else "failed"
+        message = (
             f"{result.name} data validation {status_str}!, run id: {result.run_id}, "
             f"data asset: {result.data_asset}, "
             f"data asset schema: {result.data_asset_schema}, "
             f"start time: {result.start_time.isoformat()}, "
-            f"end time: {result.end_time.isoformat()}"
+            f"end time: {result.end_time.isoformat()}."
         )
 
-    @staticmethod
-    def _render_rules_metric(rules_metric: List[RuleMetric]) -> List[Dict[str, Any]]:
+        if status == Status.PASS:
+            return message
+
+        failed_checks_str = ", ".join(
+            [
+                (
+                    f"{failed_check.name} "
+                    f"({self._render_text_rules_metric(failed_check.failed_rules)})"
+                )
+                for failed_check in result.failed_checks[:self._checks_display_limit]
+            ]
+        )
+
+        return f"{message} Failed checks: {failed_checks_str}"
+
+    def _render_block_rules_metric(self, rules_metric: List[RuleMetric]) -> List[Dict[str, Any]]:
         return [
             {
                 "type": "rich_text_section",
@@ -47,11 +78,10 @@ class SlackMessageRender(AbstractRenderer[SlackMessage]):
                     }
                 ]
             }
-            for rule_metric in rules_metric
+            for rule_metric in rules_metric[:self._rules_display_limit]
         ]
 
-    @staticmethod
-    def _render_blocks_message(result: DataValidationResult) -> List[Dict[str, Any]]:
+    def _render_blocks_message(self, result: DataValidationResult) -> List[Dict[str, Any]]:
         blocks = [
             {
                 "type": "header",
@@ -100,7 +130,7 @@ class SlackMessageRender(AbstractRenderer[SlackMessage]):
                                 },
                                 {
                                     "type": "text",
-                                    "text": check_result.name,
+                                    "text": failed_check.name,
                                 }
                             ]
                         },
@@ -116,7 +146,7 @@ class SlackMessageRender(AbstractRenderer[SlackMessage]):
                                 },
                                 {
                                     "type": "text",
-                                    "text": check_result.class_name
+                                    "text": failed_check.class_name
                                 }
                             ]
                         },
@@ -132,7 +162,7 @@ class SlackMessageRender(AbstractRenderer[SlackMessage]):
                                 },
                                 {
                                     "type": "text",
-                                    "text": check_result.level.value
+                                    "text": failed_check.level.value
                                 }
                             ]
                         },
@@ -153,25 +183,12 @@ class SlackMessageRender(AbstractRenderer[SlackMessage]):
                             "style": "bullet",
                             "indent": 0,
                             "elements": [
-                                {
-                                    "type": "rich_text_section",
-                                    "elements": [
-                                        {
-                                            "type": "text",
-                                            "text": f"{rule.rule}: "
-                                        },
-                                        {
-                                            "type": "text",
-                                            "text": ",".join(rule.column)
-                                        }
-                                    ]
-                                }
-                                for rule in check_result.failed_rules
+                                *self._render_block_rules_metric(failed_check.failed_rules)
                             ]
                         }
                     ]
                 }
-                for check_result in result.failed_checks
+                for failed_check in result.failed_checks[:self._checks_display_limit]
             ]
         )
 

@@ -35,8 +35,8 @@ class RuleMetric:
     pass_threshold: float
     value: Optional[int | float | str | datetime | date | List | Callable] = None
     options: Optional[Dict[str, Any]] = None
-    column: Optional[List[str]] = None
-    id_columns: Optional[List[str]] = None
+    column: Optional[List[str]] = Field(default_factory=list)
+    id_columns: Optional[List[str]] = Field(default_factory=list)
     failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
 
     @model_validator(mode="after")
