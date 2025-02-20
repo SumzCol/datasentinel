@@ -16,7 +16,8 @@ from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
-class TestDataGuardSession:
+@pytest.mark.unit
+class TestDataGuardSessionUnit:
     def teardown_method(self):
         # Code to run after each test method
         DataGuardSession._active_sessions.clear()

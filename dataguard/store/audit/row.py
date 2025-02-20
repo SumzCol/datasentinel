@@ -7,8 +7,9 @@ from typing import Any, Tuple, Dict, get_args, get_origin, Union
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-
-_VALID_TYPES = [str, int, float, bool, datetime, date, dict, list, tuple, set]
+_VALID_SCALAR_TYPES = [str, int, float, bool, datetime, date]
+_VALID_COLLECTION_TYPES = [list, tuple, set]
+_VALID_TYPES = [*_VALID_SCALAR_TYPES, *_VALID_COLLECTION_TYPES, dict]
 
 
 @dataclass
@@ -49,26 +50,65 @@ class BaseAuditRow(BaseModel):
     def _validate_fields(self) -> None:
         for name, pydantic_field_info in self.model_fields.items():
             if self._is_multi_type(pydantic_field_info.annotation):
-                raise ValueError(f"Multi-type fields are not supported: {name}")
+                raise ValueError(f"Multi-type fields are not supported '{name}'.")
 
-            _field_type = self._field_type(pydantic_field_info.annotation)
-            if _field_type not in _VALID_TYPES:
-                _str_types = ", ".join([t.__name__ for t in _VALID_TYPES])
-                raise ValueError(
-                    f"Field '{name}' has an invalid type '{_field_type}'. "
-                    f"Valid types are: {_str_types}"
-                )
+            # _field_type = self._field_type(pydantic_field_info.annotation)
+            # if _field_type not in _VALID_TYPES:
+            #     _str_types = ", ".join([t.__name__ for t in _VALID_TYPES])
+            #     raise ValueError(
+            #         f"Field '{name}' has an invalid type '{_field_type}'. "
+            #         f"Valid types are: {_str_types}"
+            #     )
 
-    @staticmethod
-    def _is_multi_type(annotation: type) -> bool:
-        origin = get_origin(annotation)
-
-        if not origin or (origin != Union and origin != UnionType):
-            return False
-
+    def _is_multi_type(self, annotation: type) -> bool:
+        field_type = get_origin(annotation) or annotation
         args = get_args(annotation)
 
-        if len(args) == 1 or (len(args) == 2 and args[1] == NoneType):
+        if field_type in _VALID_SCALAR_TYPES:
+            return False
+
+        if field_type == Any:
+            return True
+
+        if field_type == dict:
+            return False
+
+        if not (
+            self._is_multi_typed_collection(field_type=field_type, args=args) or
+            self._is_multi_typed_optional(field_type=field_type, args=args)
+        ):
+            return False
+
+        return True
+
+    def _is_multi_typed_optional(self, field_type: type, args: tuple | None) -> bool:
+        if not field_type == Union and not field_type == UnionType:
+            return False
+
+        if (
+            len(args) == 2 and args[1] == NoneType and not self._is_multi_type(args[0])
+        ):
+            return False
+
+        return True
+
+    @staticmethod
+    def _is_multi_typed_collection(field_type: type, args: tuple | None) -> bool:
+        if not field_type in _VALID_COLLECTION_TYPES:
+            return False
+        if not args:
+            return True
+
+        if field_type == list and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
+            return False
+
+        if field_type == tuple and (
+            (len(args) == 1 and args[0] in _VALID_SCALAR_TYPES) or
+            (len(args) == 2 and args[0] in _VALID_SCALAR_TYPES and args[1] == Ellipsis)
+        ):
+            return False
+
+        if field_type == set and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
             return False
 
         return True
@@ -76,16 +116,14 @@ class BaseAuditRow(BaseModel):
     @staticmethod
     def _is_complex(annotation: type) -> bool:
         origin = get_origin(annotation)
-
-        if not origin:
-            return False
-
-        if origin != Union and origin != UnionType:
-            return True
-
         args = get_args(annotation)
 
-        if len(args) == 1 or (len(args) == 2 and args[1] == NoneType):
+        if annotation in _VALID_SCALAR_TYPES or not origin:
+            return False
+
+        if (origin == Union or origin == UnionType) and (
+           args and len(args) == 2 and args[1] == NoneType
+        ):
             return False
 
         return True

@@ -132,3 +132,10 @@ test = [
 [tool.setuptools.dynamic]
 version = {attr = "dataguard.__version__"}
 readme = {file = "README.md", content-type = "text/markdown"}
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: mark a test as a unit test",
+    "functional: mark a test as a functional test",
+    "e2e: mark a test as an end-to-end test"
+]
