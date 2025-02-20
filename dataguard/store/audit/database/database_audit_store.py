@@ -1,7 +1,6 @@
 import json
 from datetime import datetime, date
-from types import NoneType, UnionType
-from typing import Any, Literal, Dict, Union, get_args, get_origin
+from typing import Any, Literal, Dict
 
 from sqlalchemy import (
     create_engine,
@@ -13,7 +12,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Date,
-    MetaData
+    MetaData,
 )
 from sqlalchemy.exc import (
     NoSuchTableError,
@@ -55,7 +54,7 @@ class DatabaseAuditStore(AbstractAuditStore):
                 self._table,
                 self._metadata,
                 schema=self._schema,
-                autoload_with=self._engine
+                autoload_with=self._engine,
             )
         except NoSuchTableError as e:
             if not self._if_table_not_exists == "create":
@@ -78,12 +77,7 @@ class DatabaseAuditStore(AbstractAuditStore):
                 column_type = self._infer_sql_type(info.type)
                 columns.append(Column(name, column_type))
 
-            table = Table(
-                self._table,
-                self._metadata,
-                schema=self._schema,
-                *columns
-            )
+            table = Table(self._table, self._metadata, schema=self._schema, *columns)
             self._metadata.create_all(self._engine)
 
             return table
@@ -127,13 +121,13 @@ class DatabaseAuditStore(AbstractAuditStore):
     @staticmethod
     def _infer_sql_type(python_type: type) -> Any:
         """Infer the SQLAlchemy column type based on the Python data type."""
-        if python_type == int:
+        if python_type is int:
             return Integer
-        elif python_type == str:
+        elif python_type is str:
             return String
-        elif python_type == bool:
+        elif python_type is bool:
             return Boolean
-        elif python_type == float:
+        elif python_type is float:
             return Float
         elif python_type == datetime:
             return DateTime

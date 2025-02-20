@@ -15,7 +15,7 @@ class SlackNotifier(AbstractNotifier):
         channel: str,
         credentials: Dict[str, Any],
         renderer: AbstractRenderer[SlackMessage],
-        disabled: bool = False
+        disabled: bool = False,
     ):
         super().__init__(name, disabled)
         if "SLACK_TOKEN" not in credentials:
@@ -32,7 +32,5 @@ class SlackNotifier(AbstractNotifier):
         message = self._renderer.render(result)
         client = WebClient(token=self._slack_token)
         client.chat_postMessage(
-            channel=self._channel,
-            text=message.text,
-            blocks=message.blocks
+            channel=self._channel, text=message.text, blocks=message.blocks
         )

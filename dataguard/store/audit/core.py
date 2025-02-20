@@ -23,6 +23,7 @@ class AuditStoreNotFoundError(AuditStoreManagerError):
 
 class AbstractAuditStore(ABC):
     """Base class for all audit store implementations."""
+
     def __init__(self, name: str, disabled: bool):
         self._disabled = disabled
         self._name = name
@@ -48,6 +49,7 @@ class AbstractAuditStore(ABC):
 
 class AbstractAuditStoreManager(ABC):
     """Base class for all audit store manager implementations."""
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)

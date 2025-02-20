@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, date
-from enum import Enum
 from types import UnionType, NoneType
-from typing import Any, Tuple, Dict, get_args, get_origin, Union
+from typing import Any, Dict, get_args, get_origin, Union
 
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
@@ -67,15 +66,15 @@ class BaseAuditRow(BaseModel):
         if field_type in _VALID_SCALAR_TYPES:
             return False
 
-        if field_type == Any:
+        if field_type is Any:
             return True
 
-        if field_type == dict:
+        if field_type is dict:
             return False
 
         if not (
-            self._is_multi_typed_collection(field_type=field_type, args=args) or
-            self._is_multi_typed_optional(field_type=field_type, args=args)
+            self._is_multi_typed_collection(field_type=field_type, args=args)
+            or self._is_multi_typed_optional(field_type=field_type, args=args)
         ):
             return False
 
@@ -85,30 +84,32 @@ class BaseAuditRow(BaseModel):
         if not field_type == Union and not field_type == UnionType:
             return False
 
-        if (
-            len(args) == 2 and args[1] == NoneType and not self._is_multi_type(args[0])
-        ):
+        if len(args) == 2 and args[1] == NoneType and not self._is_multi_type(args[0]):
             return False
 
         return True
 
     @staticmethod
     def _is_multi_typed_collection(field_type: type, args: tuple | None) -> bool:
-        if not field_type in _VALID_COLLECTION_TYPES:
+        if field_type not in _VALID_COLLECTION_TYPES:
             return False
         if not args:
             return True
 
-        if field_type == list and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
+        if field_type is list and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
             return False
 
-        if field_type == tuple and (
-            (len(args) == 1 and args[0] in _VALID_SCALAR_TYPES) or
-            (len(args) == 2 and args[0] in _VALID_SCALAR_TYPES and args[1] == Ellipsis)
+        if field_type is tuple and (
+            (len(args) == 1 and args[0] in _VALID_SCALAR_TYPES)
+            or (
+                len(args) == 2
+                and args[0] in _VALID_SCALAR_TYPES
+                and args[1] == Ellipsis
+            )
         ):
             return False
 
-        if field_type == set and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
+        if field_type is set and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
             return False
 
         return True
@@ -122,7 +123,7 @@ class BaseAuditRow(BaseModel):
             return False
 
         if (origin == Union or origin == UnionType) and (
-           args and len(args) == 2 and args[1] == NoneType
+            args and len(args) == 2 and args[1] == NoneType
         ):
             return False
 

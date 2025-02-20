@@ -13,19 +13,33 @@ license = {text = "Apache Software License (Apache 2.0)"}
 keywords = [
     "data quality",
     "data engineering",
-    "monitoring"
+    "monitoring",
+    "data validation",
+    "data pipelines",
+    "pipelines",
+    "audit logging",
 ]
 classifiers = [
     "Development Status :: 4 - Alpha",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "cuallee~=0.15.2",
   "python-ulid~=2.7.0",
   "pydantic~=2.10",
 ]
+
 dynamic = ["version", "readme"]
+
+[project.urls]
+"Homepage" = "https://github.com/SumzCol/dataguard"
+"Bug Tracker" = "https://github.com/SumzCol/dataguard"
+
+[tool.setuptools.dynamic]
+version = {attr = "dataguard.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
 
 [project.optional-dependencies]
 # Base dependencies
@@ -40,52 +54,52 @@ pandas-base = [
 ]
 
 # Checks dependencies
-#pandas-cualleecheck = [
-#  "cuallee[pandas]~=0.15.2"
-#]
-#pyspark-cualleecheck = [
-#  "cuallee[pyspark]~=0.15.2",
-#]
-#cualleecheck = [
-#  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
-#]
-#pandas-rowlevelresultcheck = [
-#  "dataguard[pandas-base]",
-#]
-#pyspark-rowlevelresultcheck = [
-#  "dataguard[pyspark-base]",
-#]
-#rowlevelresultcheck = [
-#  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck"
-#]
-#pandas-checks = [
-#  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
-#]
-#pyspark-checks = [
-#  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
-#]
-#all-checks = [
-#  "dataguard[pandas-checks,pyspark-checks]"
-#]
+pandas-cualleecheck = [
+  "cuallee[pandas]~=0.15.2"
+]
+pyspark-cualleecheck = [
+  "cuallee[pyspark]~=0.15.2",
+]
+cualleecheck = [
+  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
+]
+pandas-rowlevelresultcheck = [
+  "dataguard[pandas-base]",
+]
+pyspark-rowlevelresultcheck = [
+  "dataguard[pyspark-base]",
+]
+rowlevelresultcheck = [
+  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck]"
+]
+pandas-checks = [
+  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
+]
+pyspark-checks = [
+  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
+]
+all-checks = [
+  "dataguard[pandas-checks,pyspark-checks]"
+]
 
 # Result stores dependencies
-#spark-deltatableresultstore = [
-#  "dataguard[pyspark-base,deltatable-base]",
-#]
-#all-resultstores = [
-#  "dataguard[spark-deltatableresultstore]"
-#]
+spark-deltatableresultstore = [
+  "dataguard[pyspark-base,deltatable-base]",
+]
+all-resultstores = [
+  "dataguard[spark-deltatableresultstore]"
+]
 
 # Audit stores dependencies
-#database-databaseauditstore = [
-#  "SQLAlchemy>=1.4, <3.0",
-#]
-#spark-deltatableauditstore = [
-#  "dataguard[pyspark-base,deltatable-base]",
-#]
-#all-auditstores = [
-#  "dataguard[database-databaseauditstore]"
-#]
+database-databaseauditstore = [
+  "SQLAlchemy>=1.4, <3.0",
+]
+spark-deltatableauditstore = [
+  "dataguard[pyspark-base,deltatable-base]",
+]
+all-auditstores = [
+  "dataguard[database-databaseauditstore,spark-deltatableauditstore]"
+]
 
 # Notifiers dependencies
 slack-slacknotifier = [
@@ -94,48 +108,31 @@ slack-slacknotifier = [
 #email-smtpemailnotifier = [
 #  "smtplib"
 #]
-#all-notifiers = [
-#  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
-#]
+all-notifiers = [
+  "dataguard[slack-slacknotifier]"
+]
+
+all = [
+  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]"
+]
 
 # Testing dependencies
 test = [
-  "pytest",
-  "pytest-cov",
+  "pytest>=7.2,<9.0",
+  "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
-  "pandas>=1.3, <3.0",
-  "pyspark>=3.4.0",
-  "delta-spark>=3.1.0, <4.0",
-  "ipython~=8.10",
-  "jupyterlab_server>=2.11.1",
-  "jupyterlab>=3,<5",
-  "jupyter~=1.0",
-  "slack-sdk~=3.34.0",
-  "SQLAlchemy>=1.4, <3.0",
+  "dataguard[all]",
 ]
 
-# Linting dependencies
-#lint = [
-#  "ruff==0.6.4",
-#  "pre-commit==3.8.0",
-#]
-
-# All
-#all = [
-#  "dataguard[test, lint, all-checks, all-resultstores, all-auditstores, all-notifiers]"
-#]
-
-[project.urls]
-"Homepage" = "https://github.com/SumzCol/dataguard"
-"Bug Tracker" = "https://github.com/SumzCol/dataguard"
-
-[tool.setuptools.dynamic]
-version = {attr = "dataguard.__version__"}
-readme = {file = "README.md", content-type = "text/markdown"}
+# Lint dependencies
+lint = [
+  "ruff==0.9.7",
+  "pre-commit>=2.9.2, <5.0",
+  "mypy~=1.15.0",
+]
 
 [tool.pytest.ini_options]
 markers = [
     "unit: mark a test as a unit test",
     "functional: mark a test as a functional test",
-    "e2e: mark a test as an end-to-end test"
 ]

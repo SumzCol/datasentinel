@@ -20,10 +20,10 @@ def _cuallee_check_level(level: CheckLevel) -> CualleeCheckLevel:
 
 class CualleeCheck(AbstractCheck):
     """Cuallee check implementation."""
+
     def __init__(self, level: CheckLevel, name: str):
         self._check = Check(
-            level=CualleeCheckLevel(_cuallee_check_level(level=level)),
-            name=name
+            level=CualleeCheckLevel(_cuallee_check_level(level=level)), name=name
         )
         super().__init__(level, name)
 
@@ -40,17 +40,14 @@ class CualleeCheck(AbstractCheck):
         return self
 
     def is_unique(
-            self,
-            column: str,
-            pct: float = 1.0,
-            approximate: bool = False,
-            ignore_nulls: bool = False
+        self,
+        column: str,
+        pct: float = 1.0,
+        approximate: bool = False,
+        ignore_nulls: bool = False,
     ):
         self._check.is_unique(
-            column=column,
-            pct=pct,
-            approximate=approximate,
-            ignore_nulls=ignore_nulls
+            column=column, pct=pct, approximate=approximate, ignore_nulls=ignore_nulls
         )
         return self
 
@@ -59,9 +56,9 @@ class CualleeCheck(AbstractCheck):
         return self
 
     def are_unique(
-            self,
-            column: List[str],
-            pct: float = 1.0,
+        self,
+        column: List[str],
+        pct: float = 1.0,
     ):
         self._check.are_unique(column=column, pct=pct)
         return self
@@ -155,151 +152,131 @@ class CualleeCheck(AbstractCheck):
         return self
 
     def is_t_minus_n(
-            self,
-            column: str,
-            value: int,
-            pct: float = 1.0,
-            options: Dict[str, str] | None=None
+        self,
+        column: str,
+        value: int,
+        pct: float = 1.0,
+        options: Dict[str, str] | None = None,
     ):
         options = options or {}
         self._check.is_t_minus_n(column=column, value=value, pct=pct, options=options)
         return self
 
     def is_t_minus_1(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.is_t_minus_1(column=column, pct=pct)
         return self
 
     def is_t_minus_2(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.is_t_minus_2(column=column, pct=pct)
         return self
 
     def is_t_minus_3(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.is_t_minus_3(column=column, pct=pct)
         return self
 
     def is_yesterday(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.is_yesterday(column=column, pct=pct)
         return self
 
     def is_today(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.is_today(column=column, pct=pct)
         return self
 
     def has_percentile(
-            self,
-            column: str,
-            value: float,
-            percentile: float,
-            precision: int = 10000,
+        self,
+        column: str,
+        value: float,
+        percentile: float,
+        precision: int = 10000,
     ):
         self._check.has_percentile(
-            column=column,
-            value=value,
-            percentile=percentile,
-            precision=precision
+            column=column, value=value, percentile=percentile, precision=precision
         )
         return self
 
     def is_inside_interquartile_range(
-            self,
-            column: str,
-            value: List[float] | None = None,
-            pct: float = 1.0
+        self, column: str, value: List[float] | None = None, pct: float = 1.0
     ):
         self._check.is_inside_interquartile_range(column=column, value=value, pct=pct)
         return self
 
-    def has_max_by(
-            self,
-            column_source: str,
-            column_target: str,
-            values: float | str
-    ):
+    def has_max_by(self, column_source: str, column_target: str, values: float | str):
         self._check.has_max_by(
-            column_source=column_source,
-            column_target=column_target,
-            value=values
+            column_source=column_source, column_target=column_target, value=values
         )
         return self
 
-    def has_min_by(
-            self,
-            column_source: str,
-            column_target: str,
-            values: float | str
-    ):
+    def has_min_by(self, column_source: str, column_target: str, values: float | str):
         self._check.has_min_by(
-            column_source=column_source,
-            column_target=column_target,
-            value=values
+            column_source=column_source, column_target=column_target, value=values
         )
         return self
 
     def has_correlation(
-            self,
-            column_left: str,
-            column_right: str,
-            values: float,
+        self,
+        column_left: str,
+        column_right: str,
+        values: float,
     ):
         self._check.has_correlation(
-            column_left=column_left,
-            column_right=column_right,
-            value=values
+            column_left=column_left, column_right=column_right, value=values
         )
         return self
 
     def satisfies(
-            self,
-            column: str,
-            predicate: str,
-            pct: float = 1.0,
-            options: Dict[str, str] | None = None,
+        self,
+        column: str,
+        predicate: str,
+        pct: float = 1.0,
+        options: Dict[str, str] | None = None,
     ):
         options = options or {}
-        self._check.satisfies(column=column, predicate=predicate, pct=pct, options=options)
+        self._check.satisfies(
+            column=column, predicate=predicate, pct=pct, options=options
+        )
         return self
 
     def has_cardinality(
-            self,
-            column: str,
-            value: int,
+        self,
+        column: str,
+        value: int,
     ):
         self._check.has_cardinality(column=column, value=value)
         return self
 
     def has_infogain(
-            self,
-            column: str,
-            pct: float = 1.0,
+        self,
+        column: str,
+        pct: float = 1.0,
     ):
         self._check.has_infogain(column=column, pct=pct)
         return self
 
     def has_entropy(
-            self,
-            column: str,
-            value: float,
-            tolerance: float = 0.01,
+        self,
+        column: str,
+        value: float,
+        tolerance: float = 0.01,
     ):
         self._check.has_entropy(column=column, value=value, tolerance=tolerance)
         return self
@@ -345,37 +322,37 @@ class CualleeCheck(AbstractCheck):
         return self
 
     def is_daily(
-            self,
-            column: str,
-            value: List[int] | None = None,
-            pct: float = 1.0,
+        self,
+        column: str,
+        value: List[int] | None = None,
+        pct: float = 1.0,
     ):
         self._check.is_daily(column=column, value=value, pct=pct)
         return self
 
     def has_workflow(
-            self,
-            column_group: str,
-            column_event: str,
-            column_order: str,
-            edges: List[Tuple[str]],
-            pct: float = 1.0
+        self,
+        column_group: str,
+        column_event: str,
+        column_order: str,
+        edges: List[Tuple[str]],
+        pct: float = 1.0,
     ):
         self._check.has_workflow(
             column_group=column_group,
             column_event=column_event,
             column_order=column_order,
             edges=edges,
-            pct=pct
+            pct=pct,
         )
         return self
 
     def is_custom(
-            self,
-            column: str | List[str],
-            fn: Callable = None,
-            pct: float = 1.0,
-            options: Dict[str, str] | None = None
+        self,
+        column: str | List[str],
+        fn: Callable = None,
+        pct: float = 1.0,
+        options: Dict[str, str] | None = None,
     ):
         options = options or {}
         self._check.is_custom(column=column, fn=fn, pct=pct, options=options)
@@ -392,13 +369,12 @@ class CualleeCheck(AbstractCheck):
                 column=self._check.rules[i].column,
                 value=(
                     self._check.rules[i].value
-                    if not row.rule == "is_custom" and not self._check.rules[i].value == "N/A"
+                    if not row.rule == "is_custom"
+                    and not self._check.rules[i].value == "N/A"
                     else None
                 ),
                 function=(
-                    self._check.rules[i].value
-                    if row.rule == "is_custom"
-                    else None
+                    self._check.rules[i].value if row.rule == "is_custom" else None
                 ),
                 rows=row.rows,
                 violations=row.violations,
@@ -425,9 +401,7 @@ class CualleeCheck(AbstractCheck):
                     else None
                 ),
                 function=(
-                    self._check.rules[i].value
-                    if row["rule"] == "is_custom"
-                    else None
+                    self._check.rules[i].value if row["rule"] == "is_custom" else None
                 ),
                 rows=row["rows"],
                 violations=row["violations"],
@@ -440,10 +414,7 @@ class CualleeCheck(AbstractCheck):
         ]
 
     def _to_check_result(
-            self,
-            cuallee_result: Any,
-            start_time: datetime,
-            end_time: datetime
+        self, cuallee_result: Any, start_time: datetime, end_time: datetime
     ) -> CheckResult:
         df_type = DataframeType.from_df(cuallee_result)
 
@@ -452,7 +423,9 @@ class CualleeCheck(AbstractCheck):
         elif df_type == DataframeType.PANDAS:
             rule_metrics = self._get_rule_metrics_pandas(cuallee_result=cuallee_result)
         else:
-            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
+            raise UnsupportedDataframeTypeError(
+                f"Unsupported dataframe type: {df_type.value}"
+            )
 
         return CheckResult(
             name=self.name,
@@ -471,7 +444,5 @@ class CualleeCheck(AbstractCheck):
         end_time = datetime.now()
 
         return self._to_check_result(
-            cuallee_result=result,
-            start_time=start_time,
-            end_time=end_time
+            cuallee_result=result, start_time=start_time, end_time=end_time
         )

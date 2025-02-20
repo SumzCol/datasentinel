@@ -34,17 +34,18 @@ class Rule:
         options: Rule options
         status: Rule status
     """
+
     method: str
     data_type: CheckDataType
     pass_threshold: float = 1.0
-    value: Optional[int|float|str|datetime|date|List] = None
+    value: Optional[int | float | str | datetime | date | List] = None
     function: Optional[Callable] = None
     column: Optional[str | List[str]] = None
     id_columns: Optional[List[str]] = None
     options: Optional[Dict[str, Any]] = None
     status: Optional[str] = None
 
-    @field_validator('pass_threshold', mode='after')
+    @field_validator("pass_threshold", mode="after")
     def validate_pass_threshold(cls, pass_threshold: float) -> float:
         if not 0 <= pass_threshold <= 1:
             raise ValueError("The pass threshold should be between 0 and 1")
@@ -59,7 +60,9 @@ class Rule:
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
         if self.method == "is_custom" and self.function is None:
-            raise ValueError("When 'is_custom' method is used, a function must be provided")
+            raise ValueError(
+                "When 'is_custom' method is used, a function must be provided"
+            )
         return self
 
     @property
@@ -77,9 +80,11 @@ class Rule:
         )
 
     def __repr__(self):
-        return (f"Rule(method:{self.method}, column:{self.column}, id_columns:{self.id_columns}, "
-                f"value:{self.value}, data_type:{self.data_type}, "
-                f"pass_threshold:{self.pass_threshold})")
+        return (
+            f"Rule(method:{self.method}, column:{self.column}, id_columns:{self.id_columns}, "
+            f"value:{self.value}, data_type:{self.data_type}, "
+            f"pass_threshold:{self.pass_threshold})"
+        )
 
     def __rshift__(self, rule_dict: Dict[str, Any]) -> Dict[str, Any]:
         rule_dict[self.key] = self

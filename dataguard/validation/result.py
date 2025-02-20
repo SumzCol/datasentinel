@@ -23,6 +23,7 @@ class DataValidationResult:
         end_time: The end time of the validation process.
         check_results: A list with the results of the data quality checks applied.
     """
+
     run_id: ULID
     name: str
     data_asset: str
@@ -35,7 +36,12 @@ class DataValidationResult:
     def status(self) -> Status:
         return (
             Status.PASS
-            if all([check_result.status == Status.PASS for check_result in self.check_results])
+            if all(
+                [
+                    check_result.status == Status.PASS
+                    for check_result in self.check_results
+                ]
+            )
             else Status.FAIL
         )
 
@@ -67,8 +73,7 @@ class DataValidationResult:
             "start_time": self.start_time,
             "end_time": self.end_time,
             "check_results": [
-                check_result.to_dict()
-                for check_result in self.check_results
+                check_result.to_dict() for check_result in self.check_results
             ],
-            "status": self.status
+            "status": self.status,
         }

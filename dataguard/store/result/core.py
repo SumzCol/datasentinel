@@ -24,6 +24,7 @@ class ResultStoreNotFoundError(ResultStoreManagerError):
 
 class AbstractResultStore(ABC):
     """Base class for all result store implementations."""
+
     def __init__(self, name: str, disabled: bool):
         self._name = name
         self._disabled = disabled
@@ -45,6 +46,7 @@ class AbstractResultStore(ABC):
 
 class AbstractResultStoreManager(ABC):
     """Base class for all result store manager implementations"""
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)

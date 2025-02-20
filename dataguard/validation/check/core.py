@@ -42,6 +42,7 @@ class DataframeType(enum.Enum):
 
 class AbstractCheck(ABC):
     """Base class for all data quality check implementations."""
+
     def __init__(
         self,
         level: CheckLevel,

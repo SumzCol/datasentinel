@@ -5,7 +5,8 @@ from dataguard.validation.core import NotifyOnEvent
 from dataguard.notification.notifier.core import (
     AbstractNotifier,
     NotifierAlreadyExistsError,
-    NotifierNotFoundError, AbstractNotifierManager,
+    NotifierNotFoundError,
+    AbstractNotifierManager,
 )
 from dataguard.store.result.core import ResultStoreError
 from dataguard.validation.result import DataValidationResult
@@ -19,11 +20,13 @@ class NotifierManager(AbstractNotifierManager):
         self._notifiers: Dict[str, AbstractNotifier] = {}
 
     def count(self, enabled_only: bool = False) -> int:
-        return len([
-            notifier
-            for notifier in self._notifiers.values()
-            if not enabled_only or (enabled_only and not notifier.disabled)
-        ])
+        return len(
+            [
+                notifier
+                for notifier in self._notifiers.values()
+                if not enabled_only or (enabled_only and not notifier.disabled)
+            ]
+        )
 
     def get(self, name: str) -> AbstractNotifier:
         if not self.exists(name):
@@ -50,7 +53,7 @@ class NotifierManager(AbstractNotifierManager):
     def notify_all_by_event(
         self,
         notifiers_by_events: Dict[NotifyOnEvent, List[str]],
-        result: DataValidationResult
+        result: DataValidationResult,
     ):
         status = result.status
         notifiers = []
@@ -62,16 +65,9 @@ class NotifierManager(AbstractNotifierManager):
         notifiers.extend(notifiers_by_events.get(NotifyOnEvent.ALL, []))
 
         for notifier in notifiers:
-            self._notify(
-                notifier=self.get(notifier),
-                result=result
-            )
+            self._notify(notifier=self.get(notifier), result=result)
 
-    def _notify(
-        self,
-        notifier: AbstractNotifier,
-        result: DataValidationResult
-    ):
+    def _notify(self, notifier: AbstractNotifier, result: DataValidationResult):
         if notifier.disabled:
             self._logger.warning(
                 f"Notifier '{notifier.name}' is disabled, skipping sending notification."

@@ -17,9 +17,13 @@ class SlackMessage:
 class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
     def __init__(self, checks_display_limit: int = 3, rules_display_limit: int = 5):
         if not 0 < checks_display_limit <= 5:
-            raise RendererError("Checks display limit must be greater than 0 and less than 5.")
+            raise RendererError(
+                "Checks display limit must be greater than 0 and less than 5."
+            )
         if not 0 < rules_display_limit <= 5:
-            raise RendererError("Rules display limit must be greater than 0 and less than 5.")
+            raise RendererError(
+                "Rules display limit must be greater than 0 and less than 5."
+            )
         self._checks_display_limit = checks_display_limit
         self._rules_display_limit = rules_display_limit
 
@@ -27,7 +31,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
         return ", ".join(
             [
                 f"[{self._render_rule_metric_info(rule_metric)}]"
-                for rule_metric in rules_metric[:self._rules_display_limit]
+                for rule_metric in rules_metric[: self._rules_display_limit]
             ]
         )
 
@@ -51,7 +55,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                     f"{failed_check.name} "
                     f"({self._render_text_rules_metric(failed_check.failed_rules)})"
                 )
-                for failed_check in result.failed_checks[:self._checks_display_limit]
+                for failed_check in result.failed_checks[: self._checks_display_limit]
             ]
         )
 
@@ -70,21 +74,22 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
             f"rows={rule_metric.rows}"
         )
 
-    def _render_block_rules_metric(self, rules_metric: List[RuleMetric]) -> List[Dict[str, Any]]:
+    def _render_block_rules_metric(
+        self, rules_metric: List[RuleMetric]
+    ) -> List[Dict[str, Any]]:
         return [
             {
                 "type": "rich_text_section",
                 "elements": [
-                    {
-                        "type": "text",
-                        "text": self._render_rule_metric_info(rule_metric)
-                    }
-                ]
+                    {"type": "text", "text": self._render_rule_metric_info(rule_metric)}
+                ],
             }
-            for rule_metric in rules_metric[:self._rules_display_limit]
+            for rule_metric in rules_metric[: self._rules_display_limit]
         ]
 
-    def _render_blocks_message(self, result: DataValidationResult) -> List[Dict[str, Any]]:
+    def _render_blocks_message(
+        self, result: DataValidationResult
+    ) -> List[Dict[str, Any]]:
         blocks = [
             {
                 "type": "header",
@@ -95,21 +100,23 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                         if result.status == Status.PASS
                         else "A data validation has failed! :alerta:"
                     ),
-                }
+                },
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "\n".join([
-                        f"*Validation Name:* {result.name}",
-                        f"*Run ID*: {result.run_id}",
-                        f"*Data Asset*: {result.data_asset}",
-                        f"*Data Asset Schema*: {result.data_asset_schema}",
-                        f"*Start Time*: {result.start_time.isoformat()}",
-                        f"*End Time*: {result.end_time.isoformat()}"
-                    ])
-                }
+                    "text": "\n".join(
+                        [
+                            f"*Validation Name:* {result.name}",
+                            f"*Run ID*: {result.run_id}",
+                            f"*Data Asset*: {result.data_asset}",
+                            f"*Data Asset Schema*: {result.data_asset_schema}",
+                            f"*Start Time*: {result.start_time.isoformat()}",
+                            f"*End Time*: {result.end_time.isoformat()}",
+                        ]
+                    ),
+                },
             },
         ]
 
@@ -127,8 +134,8 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                         f"of {result.failed_checks_count})*:"
                         if result.failed_checks_count > self._checks_display_limit
                         else "*Failed Checks*:"
-                    )
-                }
+                    ),
+                },
             }
         )
 
@@ -143,15 +150,13 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                                 {
                                     "type": "text",
                                     "text": "Check name: ",
-                                    "style": {
-                                        "bold": True
-                                    }
+                                    "style": {"bold": True},
                                 },
                                 {
                                     "type": "text",
                                     "text": failed_check.name,
-                                }
-                            ]
+                                },
+                            ],
                         },
                         {
                             "type": "rich_text_section",
@@ -159,15 +164,10 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                                 {
                                     "type": "text",
                                     "text": "Check Class: ",
-                                    "style": {
-                                        "bold": True
-                                    }
+                                    "style": {"bold": True},
                                 },
-                                {
-                                    "type": "text",
-                                    "text": failed_check.class_name
-                                }
-                            ]
+                                {"type": "text", "text": failed_check.class_name},
+                            ],
                         },
                         {
                             "type": "rich_text_section",
@@ -175,15 +175,10 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                                 {
                                     "type": "text",
                                     "text": "Check level: ",
-                                    "style": {
-                                        "bold": True
-                                    }
+                                    "style": {"bold": True},
                                 },
-                                {
-                                    "type": "text",
-                                    "text": failed_check.level.name
-                                }
-                            ]
+                                {"type": "text", "text": failed_check.level.name},
+                            ],
                         },
                         {
                             "type": "rich_text_section",
@@ -200,23 +195,23 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                                         )
                                         else "Failed rules: "
                                     ),
-                                    "style": {
-                                        "bold": True
-                                    }
+                                    "style": {"bold": True},
                                 }
-                            ]
+                            ],
                         },
                         {
                             "type": "rich_text_list",
                             "style": "bullet",
                             "indent": 0,
                             "elements": [
-                                *self._render_block_rules_metric(failed_check.failed_rules)
-                            ]
-                        }
-                    ]
+                                *self._render_block_rules_metric(
+                                    failed_check.failed_rules
+                                )
+                            ],
+                        },
+                    ],
                 }
-                for failed_check in result.failed_checks[:self._checks_display_limit]
+                for failed_check in result.failed_checks[: self._checks_display_limit]
             ]
         )
 
@@ -225,5 +220,5 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
     def render(self, result: DataValidationResult) -> SlackMessage:
         return SlackMessage(
             text=self._render_text_message(result),
-            blocks=self._render_blocks_message(result)
+            blocks=self._render_blocks_message(result),
         )

@@ -22,11 +22,14 @@ class DataValidation:
         notifiers_by_event: A dictionary where each key is an event, and the corresponding value
             is a list of the notifiers name to trigger when that event occurs.
     """
+
     name: str
     check_list: List[AbstractCheck]
     data_asset: Optional[AbstractDataAsset] = None
     result_stores: Optional[List[str]] = Field(default_factory=list)
-    notifiers_by_event: Optional[Dict[NotifyOnEvent, List[str]]] = Field(default_factory=dict)
+    notifiers_by_event: Optional[Dict[NotifyOnEvent, List[str]]] = Field(
+        default_factory=dict
+    )
 
     @property
     def checks_count(self):

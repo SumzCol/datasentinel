@@ -12,16 +12,11 @@ from dataguard.validation.runner.core import (
 
 class SimpleRunner(AbstractRunner):
     def _run(
-        self,
-        data_validation: DataValidation,
-        data_asset: AbstractDataAsset
+        self, data_validation: DataValidation, data_asset: AbstractDataAsset
     ) -> DataValidationResult:
         start_time = datetime.now()
         data = data_asset.load()
-        check_results = [
-            check.validate(data)
-            for check in data_validation.check_list
-        ]
+        check_results = [check.validate(data) for check in data_validation.check_list]
         end_time = datetime.now()
 
         return DataValidationResult(

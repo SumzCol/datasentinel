@@ -8,7 +8,9 @@ from pyspark.sql.types import (
     StringType,
     TimestampType,
     IntegerType,
-    ArrayType, LongType, DoubleType,
+    ArrayType,
+    LongType,
+    DoubleType,
 )
 
 from dataguard.store.result.core import AbstractResultStore, ResultStoreError
@@ -28,20 +30,18 @@ class DeltaTableResultStore(AbstractResultStore):
         external_path: str = None,
         save_args: Dict[str, Any] = None,
         failed_rows_limit: int = 100,
-        disabled: bool = False
+        disabled: bool = False,
     ):
         super().__init__(name, disabled)
         if not 0 <= failed_rows_limit <= 1000:
-            raise ResultStoreError(
-                "Failed rows limit must be between 0 and 1000"
-            )
+            raise ResultStoreError("Failed rows limit must be between 0 and 1000")
         self._failed_rows_limit = failed_rows_limit
         self._delta_table_appender = DeltaTableAppender(
             table=table,
             schema=schema,
             dataset_type=dataset_type,
             external_path=external_path,
-            save_args=save_args
+            save_args=save_args,
         )
 
     def _result_to_df(self, result: DataValidationResult) -> DataFrame:
@@ -67,10 +67,13 @@ class DeltaTableResultStore(AbstractResultStore):
                         rule_name=rule_metric.rule,
                         rule_column=rule_metric.column,
                         rule_id_columns=rule_metric.id_columns,
-                        rule_value=str(rule_metric.value) if rule_metric.value else None,
+                        rule_value=str(rule_metric.value)
+                        if rule_metric.value
+                        else None,
                         rule_function=(
                             RuleMetric.function_to_string(rule_metric.function)
-                            if rule_metric.function else None
+                            if rule_metric.function
+                            else None
                         ),
                         rule_rows=rule_metric.rows,
                         rule_violations=rule_metric.violations,
@@ -78,48 +81,54 @@ class DeltaTableResultStore(AbstractResultStore):
                         rule_pass_threshold=rule_metric.pass_threshold,
                         rule_options=(
                             json.dumps(rule_metric.options)
-                            if rule_metric.options else None
+                            if rule_metric.options
+                            else None
                         ),
                         rule_failed_rows_dataset=(
                             rule_metric.failed_rows_dataset.to_json(
                                 limit=self._failed_rows_limit
                             )
-                            if rule_metric.failed_rows_dataset else None
+                            if rule_metric.failed_rows_dataset
+                            else None
                         ),
-                        rule_status=rule_metric.status.value
+                        rule_status=rule_metric.status.value,
                     )
                 )
 
         return get_spark().createDataFrame(
             data=rows,
-            schema=StructType([
-                StructField(name="run_id", dataType=StringType()),
-                StructField(name="name", dataType=StringType()),
-                StructField(name="data_asset", dataType=StringType()),
-                StructField(name="data_asset_schema", dataType=StringType()),
-                StructField(name="start_time", dataType=TimestampType()),
-                StructField(name="end_time", dataType=TimestampType()),
-                StructField(name="status", dataType=StringType()),
-                StructField(name="check_name", dataType=StringType()),
-                StructField(name="check_level", dataType=StringType()),
-                StructField(name="check_class_name", dataType=StringType()),
-                StructField(name="check_start_time", dataType=TimestampType()),
-                StructField(name="check_end_time", dataType=TimestampType()),
-                StructField(name="check_status", dataType=StringType()),
-                StructField(name="rule_index", dataType=IntegerType()),
-                StructField(name="rule_name", dataType=StringType()),
-                StructField(name="rule_column", dataType=ArrayType(StringType())),
-                StructField(name="rule_id_columns", dataType=ArrayType(StringType())),
-                StructField(name="rule_value", dataType=StringType()),
-                StructField(name="rule_function", dataType=StringType()),
-                StructField(name="rule_rows", dataType=LongType()),
-                StructField(name="rule_violations", dataType=LongType()),
-                StructField(name="rule_pass_rate", dataType=DoubleType()),
-                StructField(name="rule_pass_threshold", dataType=DoubleType()),
-                StructField(name="rule_options", dataType=StringType()),
-                StructField(name="rule_failed_rows_dataset", dataType=StringType()),
-                StructField(name="rule_status", dataType=StringType()),
-            ])
+            schema=StructType(
+                [
+                    StructField(name="run_id", dataType=StringType()),
+                    StructField(name="name", dataType=StringType()),
+                    StructField(name="data_asset", dataType=StringType()),
+                    StructField(name="data_asset_schema", dataType=StringType()),
+                    StructField(name="start_time", dataType=TimestampType()),
+                    StructField(name="end_time", dataType=TimestampType()),
+                    StructField(name="status", dataType=StringType()),
+                    StructField(name="check_name", dataType=StringType()),
+                    StructField(name="check_level", dataType=StringType()),
+                    StructField(name="check_class_name", dataType=StringType()),
+                    StructField(name="check_start_time", dataType=TimestampType()),
+                    StructField(name="check_end_time", dataType=TimestampType()),
+                    StructField(name="check_status", dataType=StringType()),
+                    StructField(name="rule_index", dataType=IntegerType()),
+                    StructField(name="rule_name", dataType=StringType()),
+                    StructField(name="rule_column", dataType=ArrayType(StringType())),
+                    StructField(
+                        name="rule_id_columns", dataType=ArrayType(StringType())
+                    ),
+                    StructField(name="rule_value", dataType=StringType()),
+                    StructField(name="rule_function", dataType=StringType()),
+                    StructField(name="rule_rows", dataType=LongType()),
+                    StructField(name="rule_violations", dataType=LongType()),
+                    StructField(name="rule_pass_rate", dataType=DoubleType()),
+                    StructField(name="rule_pass_threshold", dataType=DoubleType()),
+                    StructField(name="rule_options", dataType=StringType()),
+                    StructField(name="rule_failed_rows_dataset", dataType=StringType()),
+                    StructField(name="rule_status", dataType=StringType()),
+                ]
+            ),
         )
 
     def store(self, result: DataValidationResult):

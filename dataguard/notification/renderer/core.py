@@ -5,7 +5,7 @@ from dataguard.core import DataGuardError
 from dataguard.validation.result import DataValidationResult
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class RendererError(DataGuardError):

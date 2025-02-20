@@ -18,10 +18,7 @@ class SparkFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
             raise ValueError("Limit must be greater than 0")
 
         data = self._data.limit(limit) if limit is not None else self._data
-        return [
-            row.asDict()
-            for row in data.collect()
-        ]
+        return [row.asDict() for row in data.collect()]
 
     def to_json(self, limit: int = None) -> str:
         return json.dumps(self.to_dict(limit))

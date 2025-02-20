@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 
 from dataguard.core import DataGuardError
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DataAssetError(DataGuardError):
@@ -12,6 +12,7 @@ class DataAssetError(DataGuardError):
 
 class AbstractDataAsset(ABC, Generic[T]):
     """Base class for all data asset implementations."""
+
     def __init__(self, name: str, schema: str | None = None):
         self._name = name
         self._schema = schema

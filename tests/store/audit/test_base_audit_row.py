@@ -8,7 +8,6 @@ from dataguard.store.audit.row import BaseAuditRow
 
 @pytest.mark.unit
 class TestBaseAuditRowUnit:
-
     @pytest.mark.parametrize(
         "field_type",
         [
@@ -20,37 +19,59 @@ class TestBaseAuditRowUnit:
             Tuple[Any],
             tuple[Any],
             Optional[Any],
-        ]
+        ],
     )
     def test_error_on_field_with_any_as_type(self, field_type):
-        class MultiTypeFieldAuditRow(BaseAuditRow):
+        class AnyFieldAuditRow(BaseAuditRow):
             field: Any
 
-        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
+        with pytest.raises(
+            ValidationError, match="Multi-type fields are not supported"
+        ):
+            AnyFieldAuditRow(field="test")
+
+    @pytest.mark.parametrize(
+        "field_type",
+        [
+            int | float | str,
+            Union[int, float, str],
+            Optional[int | float | str],
+        ],
+    )
+    def test_error_on_field_with_multi_type_scalars(self, field_type):
+        class MultiTypeFieldAuditRow(BaseAuditRow):
+            field: field_type
+
+        with pytest.raises(
+            ValidationError, match="Multi-type fields are not supported"
+        ):
             MultiTypeFieldAuditRow(field="test")
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            List[int|float|str],
+            List[int | float | str],
             List[Union[int, float, str]],
             List[int] | List[float],
             Union[List[int], List[float]],
             List,
             list,
+            Optional[List[int | float | str]],
         ],
     )
     def test_error_on_list_with_multi_type_values(self, field_type):
         class MultiTypeListAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
+        with pytest.raises(
+            ValidationError, match="Multi-type fields are not supported"
+        ):
             MultiTypeListAuditRow(field=[1, 2])
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            Set[int|float|str],
+            Set[int | float | str],
             Set[Union[int, float, str]],
             Set[int] | Set[float],
             Union[Set[int], Set[float]],
@@ -62,23 +83,30 @@ class TestBaseAuditRowUnit:
         class MultiTypeSetAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
+        with pytest.raises(
+            ValidationError, match="Multi-type fields are not supported"
+        ):
             MultiTypeSetAuditRow(field={1, 2})
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            Tuple[int|float|str, ...],
+            Tuple[int | float | str, ...],
+            Tuple[int | float | str],
             Tuple[Union[int, float, str]],
             Tuple[int] | Tuple[float],
             Union[Tuple[int], Tuple[float]],
             tuple,
             Tuple,
+            Optional[Tuple[int | float | str]],
+            Optional[Tuple[int | float | str, ...]],
         ],
     )
     def test_error_on_tuple_with_multi_type_values(self, field_type):
         class MultiTypeTupleAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
+        with pytest.raises(
+            ValidationError, match="Multi-type fields are not supported"
+        ):
             MultiTypeTupleAuditRow(field=(1,))

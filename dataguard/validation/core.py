@@ -9,6 +9,7 @@ class NotifyOnEvent(Enum):
         PASS: Send notification when a data validation process passes.
         ALL: Always send notification regardless of the data validation process result status.
     """
+
     FAIL = "FAIL"
     PASS = "PASS"
     ALL = "ALL"

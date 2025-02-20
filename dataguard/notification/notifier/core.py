@@ -24,7 +24,6 @@ class NotifierNotFoundError(NotifierManagerError):
 
 
 class AbstractNotifier(ABC):
-
     def __init__(self, name: str, disabled: bool = False):
         self._name = name
         self._disabled = disabled
@@ -108,9 +107,9 @@ class AbstractNotifierManager(ABC):
 
     @abstractmethod
     def notify_all_by_event(
-            self,
-            notifiers_by_events: Dict[NotifyOnEvent, List[str]],
-            result: DataValidationResult
+        self,
+        notifiers_by_events: Dict[NotifyOnEvent, List[str]],
+        result: DataValidationResult,
     ):
         """
         Notify a validation node result using the specified notifiers for each event.

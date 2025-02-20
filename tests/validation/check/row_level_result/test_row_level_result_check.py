@@ -27,8 +27,7 @@ class TestRowLevelResultCheck:
                 RowLevelResultCheck(
                     level=CheckLevel.ERROR,
                     name="test",
-                )
-                .is_complete(id_columns=id_columns, column="id")
+                ).is_complete(id_columns=id_columns, column="id")
             )
 
     @pytest.mark.parametrize(
@@ -42,6 +41,5 @@ class TestRowLevelResultCheck:
                 RowLevelResultCheck(
                     level=CheckLevel.ERROR,
                     name="test",
-                )
-                .is_between(column="id", value=value)
+                ).is_between(column="id", value=value)
             )

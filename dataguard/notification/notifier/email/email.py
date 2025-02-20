@@ -16,4 +16,4 @@ class EmailNotifier(AbstractNotifier):
 
     def notify(self, result: DataValidationResult):
         self.logger.info(f"Credentials: {self._credentials}")
-        self.logger.info(f"Sending email!")
+        self.logger.info("Sending email!")

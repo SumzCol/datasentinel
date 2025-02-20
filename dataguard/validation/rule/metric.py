@@ -1,7 +1,7 @@
 from datetime import datetime, date
-from typing import Dict, Any, Optional, List, Tuple, Callable
+from typing import Dict, Any, Optional, List, Callable
 
-from pydantic import ConfigDict, Field, model_validator, field_validator
+from pydantic import ConfigDict, model_validator, field_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
@@ -28,6 +28,7 @@ class RuleMetric:
         failed_rows_dataset: The failed rows dataset containing the rows that failed the rule
             if there were any violations and if they were computed.
     """
+
     id: int
     rule: str
     rows: int
@@ -88,5 +89,5 @@ class RuleMetric:
             "pass_threshold": self.pass_threshold,
             "options": self.options,
             "failed_rows_dataset": self.failed_rows_dataset,
-            "status": self.status.value
+            "status": self.status.value,
         }

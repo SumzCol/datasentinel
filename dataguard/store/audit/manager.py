@@ -1,17 +1,20 @@
 import logging
 import threading
-from typing import Dict, List
+from typing import Dict
 
 from dataguard.store.audit.core import (
     AbstractAuditStore,
     AuditStoreNotFoundError,
-    AuditStoreAlreadyExistsError, AuditStoreError, AbstractAuditStoreManager,
+    AuditStoreAlreadyExistsError,
+    AuditStoreError,
+    AbstractAuditStoreManager,
 )
 from dataguard.store.audit.row import BaseAuditRow
 
 
 class AuditStoreManager(AbstractAuditStoreManager):
     _lock = threading.Lock()
+
     def __init__(self):
         self._audit_stores: Dict[str, AbstractAuditStore] = {}
 
@@ -20,15 +23,19 @@ class AuditStoreManager(AbstractAuditStoreManager):
         return logging.getLogger(__name__)
 
     def count(self, enabled_only: bool = False) -> int:
-        return len([
-            store
-            for store in self._audit_stores.values()
-            if not enabled_only or (enabled_only and not store.disabled)
-        ])
+        return len(
+            [
+                store
+                for store in self._audit_stores.values()
+                if not enabled_only or (enabled_only and not store.disabled)
+            ]
+        )
 
     def get(self, name: str) -> AbstractAuditStore:
         if not self.exists(name):
-            raise AuditStoreNotFoundError(f"An audit store with '{name}' does not exist.")
+            raise AuditStoreNotFoundError(
+                f"An audit store with '{name}' does not exist."
+            )
         return self._audit_stores[name]
 
     def register(self, audit_store: AbstractAuditStore, replace: bool = False):
@@ -41,7 +48,9 @@ class AuditStoreManager(AbstractAuditStoreManager):
 
     def remove(self, name: str):
         if not self.exists(name):
-            raise AuditStoreNotFoundError(f"An audit store with name '{name}' does not exist.")
+            raise AuditStoreNotFoundError(
+                f"An audit store with name '{name}' does not exist."
+            )
         with self._lock:
             del self._audit_stores[name]
 

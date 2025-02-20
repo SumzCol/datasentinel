@@ -34,9 +34,12 @@ def data_validation_result_mock():
         result.end_time = time if time else datetime.now()
         result.failed_checks = failed_checks_mocks
 
-        result.failed_checks_count = len(failed_checks_mocks) if failed_checks_mocks else 0
+        result.failed_checks_count = (
+            len(failed_checks_mocks) if failed_checks_mocks else 0
+        )
 
         return result
+
     return _create
 
 
@@ -57,6 +60,7 @@ def check_result_mock():
 
         result.failed_rules_count = len(failed_rules_mocks) if failed_rules_mocks else 0
         return result
+
     return _create
 
 
@@ -68,7 +72,7 @@ def rule_metric_mock():
         column: List[str] = None,
         violations: int = 0,
         rows: int = 0,
-        value: Any = None
+        value: Any = None,
     ) -> Mock:
         result = Mock(spec=RuleMetric)
         result.status = status
@@ -79,6 +83,7 @@ def rule_metric_mock():
         result.rows = rows
 
         return result
+
     return _create
 
 
@@ -178,24 +183,24 @@ class TestSlackMessageRendererUnit:
         # Test blocks structure
         assert len(message.blocks) == 4
         assert message.blocks[0]["type"] == "header"
-        assert message.blocks[0]["text"]["text"] == "A data validation has failed! :alerta:"
+        assert (
+            message.blocks[0]["text"]["text"]
+            == "A data validation has failed! :alerta:"
+        )
         assert message.blocks[1]["type"] == "section"
         assert message.blocks[2]["text"]["text"] == "*Failed Checks*:"
         assert message.blocks[3]["type"] == "rich_text"
         assert len(message.blocks[3]["elements"]) == 5
         assert len(message.blocks[3]["elements"][4]["elements"]) == 3
-        assert message.blocks[3]["elements"][4]["elements"][2]["elements"][0]["text"] == (
-            "rule=is_custom, value=package.module.function, violations=1, rows=2"
-        )
-        assert message.blocks[3]["elements"][4]["elements"][0]["elements"][0]["text"] == (
-            "rule=test_rule, column=[test_column], violations=1, rows=2"
-        )
+        assert message.blocks[3]["elements"][4]["elements"][2]["elements"][0][
+            "text"
+        ] == ("rule=is_custom, value=package.module.function, violations=1, rows=2")
+        assert message.blocks[3]["elements"][4]["elements"][0]["elements"][0][
+            "text"
+        ] == ("rule=test_rule, column=[test_column], violations=1, rows=2")
 
     def test_when_checks_display_limit_is_lower_than_failed_checks_count(
-        self,
-        data_validation_result_mock,
-        check_result_mock,
-        rule_metric_mock
+        self, data_validation_result_mock, check_result_mock, rule_metric_mock
     ):
         result = data_validation_result_mock(
             status=Status.FAIL,
@@ -204,36 +209,30 @@ class TestSlackMessageRendererUnit:
                     status=Status.FAIL,
                     check_level=CheckLevel.CRITICAL,
                     class_name="test_check",
-                    failed_rules_mocks=[
-                        rule_metric_mock()
-                    ],
+                    failed_rules_mocks=[rule_metric_mock()],
                 ),
                 check_result_mock(
                     status=Status.FAIL,
                     check_level=CheckLevel.CRITICAL,
                     class_name="test_check2",
-                    failed_rules_mocks=[
-                        rule_metric_mock()
-                    ],
+                    failed_rules_mocks=[rule_metric_mock()],
                 ),
             ],
         )
 
-        slack_message_render = SlackMessageRenderer(
-            checks_display_limit=1
-        )
+        slack_message_render = SlackMessageRenderer(checks_display_limit=1)
 
         message = slack_message_render.render(result)
 
         assert len(message.blocks) == 4
         assert message.blocks[2]["type"] == "section"
-        assert message.blocks[2]["text"]["text"] == "*Failed Checks (Showing only 1 of 2)*:"
+        assert (
+            message.blocks[2]["text"]["text"]
+            == "*Failed Checks (Showing only 1 of 2)*:"
+        )
 
     def test_when_rules_display_limit_is_lower_than_failed_rules_count(
-        self,
-        data_validation_result_mock,
-        check_result_mock,
-        rule_metric_mock
+        self, data_validation_result_mock, check_result_mock, rule_metric_mock
     ):
         result = data_validation_result_mock(
             status=Status.FAIL,
@@ -242,17 +241,12 @@ class TestSlackMessageRendererUnit:
                     status=Status.FAIL,
                     check_level=CheckLevel.CRITICAL,
                     class_name="test_check",
-                    failed_rules_mocks=[
-                        rule_metric_mock(),
-                        rule_metric_mock()
-                    ],
+                    failed_rules_mocks=[rule_metric_mock(), rule_metric_mock()],
                 ),
             ],
         )
 
-        slack_message_render = SlackMessageRenderer(
-            rules_display_limit=1
-        )
+        slack_message_render = SlackMessageRenderer(rules_display_limit=1)
 
         message = slack_message_render.render(result)
 
@@ -263,6 +257,3 @@ class TestSlackMessageRendererUnit:
         assert message.blocks[3]["elements"][3]["elements"][0]["text"] == (
             "Failed rules (Showing only 1 of 2): "
         )
-
-
-

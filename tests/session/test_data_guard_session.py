@@ -11,9 +11,6 @@ from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from unittest.mock import Mock
-from dataguard.validation.data_validation import DataValidation
-from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
 @pytest.mark.unit
@@ -43,7 +40,9 @@ class TestDataGuardSessionUnit:
 
         threads = []
         for i in range(10):
-            thread = threading.Thread(target=get_or_create_session, args=(f"session_{i}",))
+            thread = threading.Thread(
+                target=get_or_create_session, args=(f"session_{i}",)
+            )
             threads.append(thread)
             thread.start()
 
@@ -120,7 +119,7 @@ class TestDataGuardSessionUnit:
             name="custom_session",
             notifier_manager=custom_notifier_manager,
             audit_store_manager=custom_audit_store_manager,
-            result_store_manager=custom_result_store_manager
+            result_store_manager=custom_result_store_manager,
         )
 
         # Verify that the session uses the provided instances
@@ -143,7 +142,7 @@ class TestDataGuardSessionUnit:
             name="custom_session",
             notifier_manager=custom_notifier_manager,
             audit_store_manager=custom_audit_store_manager,
-            result_store_manager=custom_result_store_manager
+            result_store_manager=custom_result_store_manager,
         )
 
         # Verify that the session uses the provided instances

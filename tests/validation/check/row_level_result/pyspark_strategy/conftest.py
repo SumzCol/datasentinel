@@ -3,11 +3,7 @@ from pyspark.sql import SparkSession
 
 
 def _setup_spark_session():
-    return (
-        SparkSession.builder.appName("test")
-        .master("local[*]")
-        .getOrCreate()
-    )
+    return SparkSession.builder.appName("test").master("local[*]").getOrCreate()
 
 
 @pytest.fixture(scope="module", autouse=True)

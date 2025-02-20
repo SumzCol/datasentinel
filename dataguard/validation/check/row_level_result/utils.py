@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List
 
 from dataguard.validation.check.row_level_result.rule import Rule
 
@@ -25,11 +25,9 @@ def value(rule: Rule) -> str:
 
 
 def are_id_columns_in_rule_columns(
-    id_columns: List[str],
-    rule_columns: str | List[str]
+    id_columns: List[str], rule_columns: str | List[str]
 ) -> bool:
     rule_columns = [rule_columns] if isinstance(rule_columns, str) else rule_columns
     return bool(
-        {item.lower() for item in id_columns} &
-        {item.lower() for item in rule_columns}
+        {item.lower() for item in id_columns} & {item.lower() for item in rule_columns}
     )
