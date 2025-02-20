@@ -1,0 +1,47 @@
+name: Build and Publish Reusable Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: "Operating system to build on"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      version:
+        description: "Version to publish in the form 'major.minor.patch'"
+        required: true
+        type: string
+      python-version:
+        description: "Python version to use in the build process"
+        required: true
+        type: string
+
+jobs:
+  build-and-publish:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
+        shell: bash
+      - name: Install base dependencies
+        run: |
+          make install-base-reqs
+        shell: bash
+      - name: Build project
+        run: |
+          make build-package
+        shell: bash
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{inputs.version}}
+          name: ${{inputs.version}}
+          body: "This is a release for version ${{inputs.version}}"
+          draft: false
+          prerelease: false

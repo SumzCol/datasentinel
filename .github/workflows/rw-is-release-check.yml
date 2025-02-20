@@ -1,0 +1,52 @@
+name: Is Release Check Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      file-with-version:
+        required: true
+        type: string
+    outputs:
+      is_release:
+        description: "Whether this is a new release or not"
+        value: ${{ jobs.is-release-check.outputs.is_release }}
+      version:
+        description: "The version of the new release"
+        value: ${{ jobs.is-release-check.outputs.version }}
+
+jobs:
+  is-release-check:
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.set-is-release.outputs.is_release }}
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        env:
+          FILE_WITH_VERSION: ${{ inputs.file-with-version }}
+        id: get-version
+        run: |
+          VERSION=$(cat "$FILE_WITH_VERSION" | grep -Po  '\d+\.\d+\.\d+')
+          if [ -z "$VERSION" ]; then
+            echo "Error: Version not found"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - uses: mukunku/tag-exists-action@v1.6.0
+        id: tag-exists
+        with:
+          tag: ${{ steps.get-version.outputs.version }}
+
+      - name: Set is_release output
+        id: set-is-release
+        run: |
+          if [ "${{ steps.tag-exists.outputs.exists }}" == 'true' ]; then
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          fi
