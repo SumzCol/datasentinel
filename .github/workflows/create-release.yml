@@ -11,6 +11,7 @@ jobs:
     with:
       file-with-version: "dataguard/__init__.py"
   all-checks:
+    needs: [is-release-check]
     if: ${{ needs.is-release-check.outputs.is_release == 'true' }}
     uses: ./.github/workflows/all-checks.yml
   build-and-publish:
