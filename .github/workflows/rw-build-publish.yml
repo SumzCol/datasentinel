@@ -1,6 +1,6 @@
 name: Build and Publish Reusable Workflow
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       os:
         description: "Operating system to build on"
