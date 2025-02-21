@@ -39,8 +39,8 @@ jobs:
         run: |
           make lint
         shell: bash
-#      - name: Run type checking
-#        if: ${{ !cancelled() && steps.install-lint-reqs.outcome == 'success' }}
-#        run: |
-#          make typecheck
-#        shell: bash
+      - name: Run type checking
+        if: ${{ !cancelled() && steps.install-lint-reqs.outcome == 'success' }}
+        run: |
+          make typecheck
+        shell: bash

@@ -140,22 +140,22 @@ testpaths = [
   "tests"
 ]
 
-#[tool.ruff]
-#line-length = 98
-#show-fixes = true
-#lint.select = [
-#    "F",    # Pyflakes
-#    "W",    # pycodestyle
-#    "E",    # pycodestyle
-#    "I",    # isort
-#    "UP",   # pyupgrade
-#    "PL",   # Pylint
-#    "T201", # Print Statement
-#    "S",    # flake8-bandit
-#    "TCH",  # flake8-type-checking
-#    "RUF",  # Ruff-specific rules
-#]
-#lint.ignore = ["E501"]
+[tool.ruff]
+line-length = 98
+show-fixes = true
+lint.select = [
+    "F",    # Pyflakes
+    "W",    # pycodestyle
+    "E",    # pycodestyle
+    "I",    # isort
+    "UP",   # pyupgrade
+    "PL",   # Pylint
+    "T201", # Print Statement
+    "S",    # flake8-bandit
+    "TCH",  # flake8-type-checking
+    "RUF",  # Ruff-specific rules
+]
+lint.ignore = ["E501"]
 
 [tool.mypy]
 strict = true
