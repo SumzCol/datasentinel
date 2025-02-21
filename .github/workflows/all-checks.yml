@@ -1,4 +1,4 @@
-name: All Checks Reusable Workflow
+name: All Checks Workflow
 
 on:
   workflow_call:

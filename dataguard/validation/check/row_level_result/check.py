@@ -1,23 +1,26 @@
 import importlib
-from datetime import datetime, date
-from typing import Any, Dict, List, Callable, Union
+from collections.abc import Callable
+from datetime import date, datetime
+from typing import Any
+
+from typing_extensions import Self
 
 from dataguard.validation.check.core import (
     AbstractCheck,
-    UnsupportedDataframeTypeError,
-    EmptyCheckError,
-    DataframeType,
     BadArgumentError,
+    DataframeType,
+    EmptyCheckError,
+    UnsupportedDataframeTypeError,
 )
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
+from dataguard.validation.check.row_level_result.rule import CheckDataType, Rule
 from dataguard.validation.check.row_level_result.utils import (
     are_id_columns_in_rule_columns,
 )
 from dataguard.validation.check.row_level_result.validation_strategy import (
     ValidationStrategy,
 )
-from dataguard.validation.check.row_level_result.rule import Rule, CheckDataType
 from dataguard.validation.check.utils import to_df_if_delta_table
 
 
@@ -25,7 +28,7 @@ class RowLevelResultCheck(AbstractCheck):
     """Check implementation that returns failed rows."""
 
     def __init__(self, level: CheckLevel, name: str):
-        self._rules: Dict[str, Rule] = {}
+        self._rules: dict[str, Rule] = {}
         super().__init__(level, name)
 
     @property
@@ -33,7 +36,7 @@ class RowLevelResultCheck(AbstractCheck):
         """Returns all rules defined in check"""
         return list(self._rules.values())
 
-    def is_complete(self, id_columns: List[str], column: str, pct: float = 1.0):
+    def is_complete(self, id_columns: list[str], column: str, pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
             raise BadArgumentError(
                 "ID columns cannot be evaluated in 'is_complete' rule"
@@ -52,7 +55,7 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def are_complete(self, id_columns: List[str], column: List[str], pct: float = 1.0):
+    def are_complete(self, id_columns: list[str], column: list[str], pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
             raise BadArgumentError(
                 "ID columns cannot be evaluated in 'are_complete' rule"
@@ -83,7 +86,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def are_unique(
-        self, column: List[str], pct: float = 1.0, ignore_nulls: bool = False
+        self, column: list[str], pct: float = 1.0, ignore_nulls: bool = False
     ):
         (
             Rule(
@@ -98,7 +101,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def has_pattern(
-        self, column: str, value: str, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: str, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -114,7 +117,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_greater_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -130,7 +133,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_greater_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -146,7 +149,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_less_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -162,7 +165,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_less_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -178,7 +181,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -196,11 +199,11 @@ class RowLevelResultCheck(AbstractCheck):
     def is_between(
         self,
         column: str,
-        value: Union[List[float], List[int], List[datetime], List[date]],
+        value: list[float] | list[int] | list[datetime] | list[date],
         pct: float = 1.0,
-        id_columns: List[str] = None,
+        id_columns: list[str] = None,
     ):
-        if len(value) != 2 or not isinstance(value, List):
+        if len(value) != 2 or not isinstance(value, list):
             raise BadArgumentError("Value must be a list containing min and max values")
         (
             Rule(
@@ -216,7 +219,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_in(
-        self, column: str, value: List, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -232,7 +235,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def not_in(
-        self, column: str, value: List, pct: float = 1.0, id_columns: List[str] = None
+        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] = None
     ):
         (
             Rule(
@@ -247,7 +250,9 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def is_custom(self, fn: Callable, pct: float = 1.0, options: Dict[str, Any] = None):
+    def is_custom(
+        self, fn: Callable, pct: float = 1.0, options: dict[str, Any] = None
+    ) -> Self:
         (
             Rule(
                 method="is_custom",

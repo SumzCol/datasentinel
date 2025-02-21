@@ -136,3 +136,30 @@ markers = [
     "unit: mark a test as a unit test",
     "functional: mark a test as a functional test",
 ]
+testpaths = [
+  "tests"
+]
+
+#[tool.ruff]
+#line-length = 98
+#show-fixes = true
+#lint.select = [
+#    "F",    # Pyflakes
+#    "W",    # pycodestyle
+#    "E",    # pycodestyle
+#    "I",    # isort
+#    "UP",   # pyupgrade
+#    "PL",   # Pylint
+#    "T201", # Print Statement
+#    "S",    # flake8-bandit
+#    "TCH",  # flake8-type-checking
+#    "RUF",  # Ruff-specific rules
+#]
+#lint.ignore = ["E501"]
+
+[tool.mypy]
+strict = true
+allow_any_generics = true
+no_warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = ['^docs/']
