@@ -1,0 +1,23 @@
+default_stages: [pre-commit, manual]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-case-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.7
+    hooks:
+      - id: ruff
+        name: "ruff on dataguard/ and tests/"
+        args: [ "--fix", "--exit-non-zero-on-fix" ]
+        files: "^dataguard/|^tests/"
+      - id: ruff-format
+        name: "ruff format on dataguard/ and tests/"
+        files: "^dataguard/|^tests/"

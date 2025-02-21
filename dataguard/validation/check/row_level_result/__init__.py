@@ -1,6 +1,4 @@
 from .check import RowLevelResultCheck
 
 
-__all__ = [
-    "RowLevelResultCheck"
-]
+__all__ = ["RowLevelResultCheck"]

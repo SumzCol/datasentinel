@@ -14,13 +14,14 @@ from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.node.validation_node import ValidationNode
+from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.runner.core import AbstractRunner
 from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
 class DataGuardSession:
     """Entry point to access all the functionalities of DataGuard."""
+
     _active_sessions = {}
     _lock = threading.Lock()
 
@@ -32,7 +33,9 @@ class DataGuardSession:
         audit_store_manager: AbstractAuditStoreManager | None = None,
     ):
         if name in DataGuardSession._active_sessions:
-            raise SessionAlreadyExistsError(f"A session with name '{name}' already exists")
+            raise SessionAlreadyExistsError(
+                f"A session with name '{name}' already exists"
+            )
         self.name = name
         self._notifier_manager = notifier_manager or NotifierManager()
         self._result_store_manager = result_store_manager or ResultStoreManager()
@@ -89,26 +92,26 @@ class DataGuardSession:
         """Return the audit store manager"""
         return self._audit_store_manager
 
-    def run_validation_node(
+    def run_data_validation(
         self,
-        validation_node: ValidationNode,
+        data_validation: DataValidation,
         data_asset: AbstractDataAsset | None = None,
-        runner: AbstractRunner | None = None
+        runner: AbstractRunner | None = None,
     ):
-        """Run a validation node.
+        """Runs a data validation.
 
         Args:
-            validation_node: Validation node to run
+            data_validation: Validation node to run
             data_asset: Data asset to validate or replace the one in the validation node
                 if one is defined.
             runner: Runner to run the validation node
         """
         runner = runner or SimpleRunner()
         runner.run(
-            validation_node=validation_node,
+            data_validation=data_validation,
             data_asset=data_asset,
             notifier_manager=self._notifier_manager,
-            result_store_manager=self._result_store_manager
+            result_store_manager=self._result_store_manager,
         )
 
     def __repr__(self):

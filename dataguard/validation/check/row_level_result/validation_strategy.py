@@ -7,6 +7,7 @@ from dataguard.validation.rule.metric import RuleMetric
 
 class ValidationStrategy(ABC):
     """An interface for validation strategies to adhere to"""
+
     @abstractmethod
     def validate_data_types(self, df: Any, rules: Dict[str, Rule]) -> bool:
         """Validate that each rule evaluated columns have correct data types

@@ -1,4 +1,3 @@
-import logging
 import threading
 from typing import Dict, List
 
@@ -9,24 +8,29 @@ from dataguard.store.result.core import (
     AbstractResultStoreManager,
     ResultStoreError,
 )
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.validation.result import DataValidationResult
 
 
 class ResultStoreManager(AbstractResultStoreManager):
     _lock = threading.Lock()
+
     def __init__(self):
         self._result_stores: Dict[str, AbstractResultStore] = {}
 
     def count(self, enabled_only: bool = False) -> int:
-        return len([
-            store
-            for store in self._result_stores.values()
-            if not enabled_only or (enabled_only and not store.disabled)
-        ])
+        return len(
+            [
+                store
+                for store in self._result_stores.values()
+                if not enabled_only or (enabled_only and not store.disabled)
+            ]
+        )
 
     def get(self, name: str) -> AbstractResultStore:
         if not self.exists(name):
-            raise ResultStoreNotFoundError(f"A result store with name '{name}' does not exist.")
+            raise ResultStoreNotFoundError(
+                f"A result store with name '{name}' does not exist."
+            )
         return self._result_stores[name]
 
     def register(self, result_store: AbstractResultStore, replace: bool = False):
@@ -39,25 +43,20 @@ class ResultStoreManager(AbstractResultStoreManager):
 
     def remove(self, name: str):
         if not self.exists(name):
-            raise ResultStoreNotFoundError(f"A result store with name '{name}' does not exist.")
+            raise ResultStoreNotFoundError(
+                f"A result store with name '{name}' does not exist."
+            )
         with self._lock:
             del self._result_stores[name]
 
     def exists(self, name: str) -> bool:
         return name in self._result_stores
 
-    def store_all(self, result_stores: List[str], result: ValidationNodeResult):
+    def store_all(self, result_stores: List[str], result: DataValidationResult):
         for result_store in result_stores:
-            self._store(
-                result_store=self.get(result_store),
-                result=result
-            )
+            self._store(result_store=self.get(result_store), result=result)
 
-    def _store(
-        self,
-        result_store: AbstractResultStore,
-        result: ValidationNodeResult
-    ):
+    def _store(self, result_store: AbstractResultStore, result: DataValidationResult):
         if result_store.disabled:
             self._logger.warning(
                 f"Result store '{result_store.name}' is disabled, skipping saving results."

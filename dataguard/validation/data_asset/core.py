@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-T = TypeVar('T')
+from dataguard.core import DataGuardError
+
+T = TypeVar("T")
+
+
+class DataAssetError(DataGuardError):
+    pass
+
 
 class AbstractDataAsset(ABC, Generic[T]):
     """Base class for all data asset implementations."""
+
     def __init__(self, name: str, schema: str | None = None):
         self._name = name
         self._schema = schema

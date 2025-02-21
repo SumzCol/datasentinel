@@ -1,11 +1,18 @@
+import enum
 from abc import ABC, abstractmethod
 from typing import Any
 
+from dataguard.core import DataGuardError
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
+from dataguard.validation.check.utils import get_type
 
 
-class CheckError(Exception):
+class CheckError(DataGuardError):
+    pass
+
+
+class BadArgumentError(CheckError):
     pass
 
 
@@ -17,8 +24,25 @@ class EmptyCheckError(CheckError):
     pass
 
 
+class DataframeType(enum.Enum):
+    PYSPARK = "pyspark"
+    PANDAS = "pandas"
+
+    @classmethod
+    def from_df(cls, df: Any) -> "DataframeType":
+        _type = get_type(df)
+
+        if "pyspark" in _type:
+            return DataframeType.PYSPARK
+        elif "pandas" in _type:
+            return DataframeType.PANDAS
+        else:
+            raise ValueError(f"{type(df)} is not a valid dataframe type.")
+
+
 class AbstractCheck(ABC):
     """Base class for all data quality check implementations."""
+
     def __init__(
         self,
         level: CheckLevel,

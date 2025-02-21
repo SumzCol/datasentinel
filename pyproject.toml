@@ -4,29 +4,42 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dataguard"
-version = "0.0.1"
 description = "Data Guard is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
     { name = "Sumz SAS" },
 ]
 requires-python = ">=3.10"
-readme = "README.md"
 license = {text = "Apache Software License (Apache 2.0)"}
 keywords = [
     "data quality",
     "data engineering",
-    "monitoring"
+    "monitoring",
+    "data validation",
+    "data pipelines",
+    "pipelines",
+    "audit logging",
 ]
 classifiers = [
     "Development Status :: 4 - Alpha",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "cuallee~=0.15.2",
   "python-ulid~=2.7.0",
   "pydantic~=2.10",
 ]
+
+dynamic = ["version", "readme"]
+
+[project.urls]
+"Homepage" = "https://github.com/SumzCol/dataguard"
+"Bug Tracker" = "https://github.com/SumzCol/dataguard"
+
+[tool.setuptools.dynamic]
+version = {attr = "dataguard.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
 
 [project.optional-dependencies]
 # Base dependencies
@@ -57,7 +70,7 @@ pyspark-rowlevelresultcheck = [
   "dataguard[pyspark-base]",
 ]
 rowlevelresultcheck = [
-  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck"
+  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck]"
 ]
 pandas-checks = [
   "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
@@ -85,38 +98,68 @@ spark-deltatableauditstore = [
   "dataguard[pyspark-base,deltatable-base]",
 ]
 all-auditstores = [
-  "dataguard[database-databaseauditstore]"
+  "dataguard[database-databaseauditstore,spark-deltatableauditstore]"
 ]
 
 # Notifiers dependencies
 slack-slacknotifier = [
-  "slack-sdk==3.22.0"
+  "slack-sdk~=3.34.0"
 ]
-email-smtpemailnotifier = [
-  "smtplib"
-]
+#email-smtpemailnotifier = [
+#  "smtplib"
+#]
 all-notifiers = [
-  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
+  "dataguard[slack-slacknotifier]"
+]
+
+all = [
+  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]"
 ]
 
 # Testing dependencies
 test = [
-  "pytest",
-  "pytest-cov",
+  "pytest>=7.2,<9.0",
+  "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
+  "dataguard[all]",
 ]
 
-# Linting dependencies
+# Lint dependencies
 lint = [
-  "ruff==0.6.4",
-  "pre-commit==3.8.0",
+  "ruff==0.9.7",
+  "pre-commit>=2.9.2, <5.0",
+  "mypy~=1.15.0",
 ]
 
-# All
-all = [
-  "dataguard[test, lint, all-checks, all-resultstores, all-auditstores, all-notifiers]"
+[tool.pytest.ini_options]
+markers = [
+    "unit: mark a test as a unit test",
+    "functional: mark a test as a functional test",
+]
+testpaths = [
+  "tests"
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/SumzCol/dataguard"
-"Bug Tracker" = "https://github.com/SumzCol/dataguard"
+#[tool.ruff]
+#line-length = 98
+#show-fixes = true
+#lint.select = [
+#    "F",    # Pyflakes
+#    "W",    # pycodestyle
+#    "E",    # pycodestyle
+#    "I",    # isort
+#    "UP",   # pyupgrade
+#    "PL",   # Pylint
+#    "T201", # Print Statement
+#    "S",    # flake8-bandit
+#    "TCH",  # flake8-type-checking
+#    "RUF",  # Ruff-specific rules
+#]
+#lint.ignore = ["E501"]
+
+[tool.mypy]
+strict = true
+allow_any_generics = true
+no_warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = ['^docs/']

@@ -21,6 +21,7 @@ class CheckResult:
         rule_metrics: A list with the metrics computed for each rule applied
             in the check.
     """
+
     name: str
     level: CheckLevel
     class_name: str
@@ -55,9 +56,8 @@ class CheckResult:
             "check_class": self.class_name,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "rule_metrics":  [
-                rule_metric.to_dict()
-                for rule_metric in self.rule_metrics
+            "rule_metrics": [
+                rule_metric.to_dict() for rule_metric in self.rule_metrics
             ],
-            "status": self.status.value
+            "status": self.status.value,
         }

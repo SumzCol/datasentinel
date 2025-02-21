@@ -11,12 +11,10 @@ from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from unittest.mock import Mock
-from dataguard.validation.node.validation_node import ValidationNode
-from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
-class TestDataGuardSession:
+@pytest.mark.unit
+class TestDataGuardSessionUnit:
     def teardown_method(self):
         # Code to run after each test method
         DataGuardSession._active_sessions.clear()
@@ -42,7 +40,9 @@ class TestDataGuardSession:
 
         threads = []
         for i in range(10):
-            thread = threading.Thread(target=get_or_create_session, args=(f"session_{i}",))
+            thread = threading.Thread(
+                target=get_or_create_session, args=(f"session_{i}",)
+            )
             threads.append(thread)
             thread.start()
 
@@ -119,7 +119,7 @@ class TestDataGuardSession:
             name="custom_session",
             notifier_manager=custom_notifier_manager,
             audit_store_manager=custom_audit_store_manager,
-            result_store_manager=custom_result_store_manager
+            result_store_manager=custom_result_store_manager,
         )
 
         # Verify that the session uses the provided instances
@@ -142,7 +142,7 @@ class TestDataGuardSession:
             name="custom_session",
             notifier_manager=custom_notifier_manager,
             audit_store_manager=custom_audit_store_manager,
-            result_store_manager=custom_result_store_manager
+            result_store_manager=custom_result_store_manager,
         )
 
         # Verify that the session uses the provided instances
@@ -153,17 +153,3 @@ class TestDataGuardSession:
         # Verify that the session is correctly registered
         assert session.name == "custom_session"
         assert session in DataGuardSession._active_sessions.values()
-
-    def test_run_validation_node(self):
-        session = DataGuardSession(name="test_session")
-        validation_node = Mock(spec=ValidationNode)
-        dataset = Mock(spec=AbstractDataAsset)
-        runner = Mock(spec=SimpleRunner)
-
-        session.run_validation_node(validation_node, dataset, runner)
-        runner.run.assert_called_once_with(
-            validation_node=validation_node,
-            datasource=dataset,
-            notifier_manager=session.notifier_manager,
-            result_store_manager=session.result_store_manager
-        )

@@ -1,6 +1,4 @@
 from .email import EmailNotifier
 
 
-__all__ = [
-    "EmailNotifier"
-]
+__all__ = ["EmailNotifier"]

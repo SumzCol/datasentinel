@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, TypeVar, Generic
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class AbstractFailedRowsDataset(ABC, Generic[T]):
     """Base class for all bad records dataset implementations"""
+
     def __init__(self, data: T):
         self._data = data
 

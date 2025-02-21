@@ -25,14 +25,9 @@ def value(rule: Rule) -> str:
 
 
 def are_id_columns_in_rule_columns(
-    id_columns: str | List[str],
-    rule_columns: str | List[str]
+    id_columns: List[str], rule_columns: str | List[str]
 ) -> bool:
-    if isinstance(rule_columns, str):
-        rule_columns = [rule_columns]
-
-    if isinstance(id_columns, str):
-        id_columns = [id_columns]
-
-    rule_columns = [col.lower() for col in rule_columns]
-    return any([col.lower() in rule_columns for col in id_columns])
+    rule_columns = [rule_columns] if isinstance(rule_columns, str) else rule_columns
+    return bool(
+        {item.lower() for item in id_columns} & {item.lower() for item in rule_columns}
+    )

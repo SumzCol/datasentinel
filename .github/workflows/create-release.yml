@@ -1,0 +1,27 @@
+name: Create Release Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  is-release-check:
+    uses: ./.github/workflows/rw-is-release-check.yml
+    with:
+      file-with-version: "dataguard/__init__.py"
+  all-checks:
+    if: ${{ needs.is-release-check.outputs.is_release == 'true' }}
+    uses: ./.github/workflows/all-checks.yml
+  build-and-publish:
+    needs: [is-release-check, all-checks]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.is-release-check.outputs.is_release == 'true'
+    uses: ./.github/workflows/rw-build-publish.yml
+    with:
+      os: "ubuntu-latest"
+      version: ${{ needs.is-release-check.outputs.version }}
+      python-version: "3.10"

@@ -2,14 +2,15 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
-from dataguard.validation.node.result import ValidationNodeResult
+from dataguard.core import DataGuardError
+from dataguard.validation.result import DataValidationResult
 
 
-class ResultStoreError(Exception):
+class ResultStoreError(DataGuardError):
     pass
 
 
-class ResultStoreManagerError(Exception):
+class ResultStoreManagerError(DataGuardError):
     pass
 
 
@@ -23,6 +24,7 @@ class ResultStoreNotFoundError(ResultStoreManagerError):
 
 class AbstractResultStore(ABC):
     """Base class for all result store implementations."""
+
     def __init__(self, name: str, disabled: bool):
         self._name = name
         self._disabled = disabled
@@ -38,12 +40,13 @@ class AbstractResultStore(ABC):
         return self._disabled
 
     @abstractmethod
-    def store(self, result: ValidationNodeResult):
-        """Store a validation node result"""
+    def store(self, result: DataValidationResult):
+        """Store a data validation result"""
 
 
 class AbstractResultStoreManager(ABC):
     """Base class for all result store manager implementations"""
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -108,7 +111,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def store_all(self, result_stores: List[str], result: ValidationNodeResult):
+    def store_all(self, result_stores: List[str], result: DataValidationResult):
         """Store a result in all the given result stores
 
         Args:
