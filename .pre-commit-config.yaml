@@ -15,9 +15,9 @@ repos:
     rev: v0.9.7
     hooks:
       - id: ruff
-        name: "ruff on dataguard/ and tests/"
+        name: "ruff on dataguard/, scripts/ and tests/"
         args: [ "--fix", "--exit-non-zero-on-fix" ]
-        files: "^dataguard/|^tests/"
+        files: "^dataguard/|^tests/|^scripts/"
       - id: ruff-format
-        name: "ruff format on dataguard/ and tests/"
-        files: "^dataguard/|^tests/"
+        name: "ruff format on dataguard/, scripts/ and tests/"
+        files: "^dataguard/|^tests/|^scripts/"
