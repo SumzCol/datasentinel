@@ -25,9 +25,7 @@ class CualleeCheck(AbstractCheck):
     """Cuallee check implementation."""
 
     def __init__(self, level: CheckLevel, name: str):
-        self._check = Check(
-            level=CualleeCheckLevel(_cuallee_check_level(level=level)), name=name
-        )
+        self._check = Check(level=CualleeCheckLevel(_cuallee_check_level(level=level)), name=name)
         super().__init__(level, name)
 
     def is_complete(self, column: str, pct: float = 1.0) -> Self:
@@ -78,9 +76,7 @@ class CualleeCheck(AbstractCheck):
         self._check.is_positive(column=column, pct=pct)
         return self
 
-    def is_greater_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0
-    ) -> Self:
+    def is_greater_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
         self._check.is_greater_or_equal_than(column=column, value=value, pct=pct)
         return self
 
@@ -100,9 +96,7 @@ class CualleeCheck(AbstractCheck):
         self._check.is_negative(column=column, pct=pct)
         return self
 
-    def is_less_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0
-    ) -> Self:
+    def is_less_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
         self._check.is_less_or_equal_than(column=column, value=value, pct=pct)
         return self
 
@@ -150,9 +144,7 @@ class CualleeCheck(AbstractCheck):
         self._check.not_in(column=column, value=tuple(value), pct=pct)
         return self
 
-    def is_contained_in(
-        self, column: str, value: tuple | list, pct: float = 1.0
-    ) -> Self:
+    def is_contained_in(self, column: str, value: tuple | list, pct: float = 1.0) -> Self:
         self._check.is_contained_in(column=column, value=value, pct=pct)
         return self
 
@@ -229,17 +221,13 @@ class CualleeCheck(AbstractCheck):
         self._check.is_inside_interquartile_range(column=column, value=value, pct=pct)
         return self
 
-    def has_max_by(
-        self, column_source: str, column_target: str, values: float | str
-    ) -> Self:
+    def has_max_by(self, column_source: str, column_target: str, values: float | str) -> Self:
         self._check.has_max_by(
             column_source=column_source, column_target=column_target, value=values
         )
         return self
 
-    def has_min_by(
-        self, column_source: str, column_target: str, values: float | str
-    ) -> Self:
+    def has_min_by(self, column_source: str, column_target: str, values: float | str) -> Self:
         self._check.has_min_by(
             column_source=column_source, column_target=column_target, value=values
         )
@@ -264,9 +252,7 @@ class CualleeCheck(AbstractCheck):
         options: dict[str, str] | None = None,
     ) -> Self:
         options = options or {}
-        self._check.satisfies(
-            column=column, predicate=predicate, pct=pct, options=options
-        )
+        self._check.satisfies(column=column, predicate=predicate, pct=pct, options=options)
         return self
 
     def has_cardinality(
@@ -363,7 +349,7 @@ class CualleeCheck(AbstractCheck):
     def is_custom(
         self,
         column: str | list[str],
-        fn: Callable = None,
+        fn: Callable,
         pct: float = 1.0,
         options: dict[str, str] | None = None,
     ) -> Self:
@@ -382,13 +368,10 @@ class CualleeCheck(AbstractCheck):
                 column=self._check.rules[i].column,
                 value=(
                     self._check.rules[i].value
-                    if not row.rule == "is_custom"
-                    and not self._check.rules[i].value == "N/A"
+                    if not row.rule == "is_custom" and not self._check.rules[i].value == "N/A"
                     else None
                 ),
-                function=(
-                    self._check.rules[i].value if row.rule == "is_custom" else None
-                ),
+                function=(self._check.rules[i].value if row.rule == "is_custom" else None),
                 rows=row.rows,
                 violations=row.violations,
                 pass_rate=row.pass_rate,
@@ -408,14 +391,8 @@ class CualleeCheck(AbstractCheck):
                 id=row["id"],
                 rule=row["rule"],
                 column=self._check.rules[i].column,
-                value=(
-                    self._check.rules[i].value
-                    if not row["rule"] == "is_custom"
-                    else None
-                ),
-                function=(
-                    self._check.rules[i].value if row["rule"] == "is_custom" else None
-                ),
+                value=(self._check.rules[i].value if not row["rule"] == "is_custom" else None),
+                function=(self._check.rules[i].value if row["rule"] == "is_custom" else None),
                 rows=row["rows"],
                 violations=row["violations"],
                 pass_rate=row["pass_rate"],
@@ -436,9 +413,7 @@ class CualleeCheck(AbstractCheck):
         elif df_type == DataframeType.PANDAS:
             rule_metrics = self._get_rule_metrics_pandas(cuallee_result=cuallee_result)
         else:
-            raise UnsupportedDataframeTypeError(
-                f"Unsupported dataframe type: {df_type.value}"
-            )
+            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
         return CheckResult(
             name=self.name,

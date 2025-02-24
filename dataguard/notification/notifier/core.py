@@ -1,6 +1,5 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 from dataguard.core import DataGuardError
 from dataguard.validation.core import NotifyOnEvent
@@ -108,7 +107,7 @@ class AbstractNotifierManager(ABC):
     @abstractmethod
     def notify_all_by_event(
         self,
-        notifiers_by_events: Dict[NotifyOnEvent, List[str]],
+        notifiers_by_events: dict[NotifyOnEvent, list[str]],
         result: DataValidationResult,
     ):
         """

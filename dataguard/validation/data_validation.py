@@ -1,10 +1,8 @@
-from typing import List, Dict, Optional
-
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
-from dataguard.validation.core import NotifyOnEvent
 from dataguard.validation.check.core import AbstractCheck
+from dataguard.validation.core import NotifyOnEvent
 from dataguard.validation.data_asset.core import AbstractDataAsset
 
 
@@ -24,12 +22,10 @@ class DataValidation:
     """
 
     name: str
-    check_list: List[AbstractCheck]
-    data_asset: Optional[AbstractDataAsset] = None
-    result_stores: Optional[List[str]] = Field(default_factory=list)
-    notifiers_by_event: Optional[Dict[NotifyOnEvent, List[str]]] = Field(
-        default_factory=dict
-    )
+    check_list: list[AbstractCheck]
+    data_asset: AbstractDataAsset | None = None
+    result_stores: list[str] | None = Field(default_factory=list)
+    notifiers_by_event: dict[NotifyOnEvent, list[str]] | None = Field(default_factory=dict)
 
     @property
     def checks_count(self):

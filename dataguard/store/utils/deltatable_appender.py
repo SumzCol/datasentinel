@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Literal, Dict, Any
+from typing import Any, Literal
 
 from pyspark.sql import DataFrame
 
@@ -16,8 +16,8 @@ class DeltaTableAppender:
         table: str,
         schema: str,
         dataset_type: Literal["file", "table"],
-        external_path: str = None,
-        save_args: Dict[str, Any] = None,
+        external_path: str | None = None,
+        save_args: dict[str, Any] | None = None,
     ):
         if dataset_type not in ["file", "table"]:
             raise DeltaTableAppenderError(
@@ -28,10 +28,9 @@ class DeltaTableAppender:
         self._schema = schema.rstrip("/")
 
         if dataset_type == "table":
-            if not len(schema.split(".")) == 2:
+            if not len(schema.split(".")) == 2:  # noqa PLR2004
                 raise DeltaTableAppenderError(
-                    f"Invalid table schema: {schema}. "
-                    "It must be in the format 'catalog.schema'"
+                    f"Invalid table schema: {schema}. It must be in the format 'catalog.schema'"
                 )
             self._full_table_path = f"{schema}.{table}"
 

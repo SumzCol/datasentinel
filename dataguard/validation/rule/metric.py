@@ -1,7 +1,8 @@
-from datetime import datetime, date
-from typing import Dict, Any, Optional, List, Callable
+from collections.abc import Callable
+from datetime import date, datetime
+from typing import Any
 
-from pydantic import ConfigDict, model_validator, field_validator
+from pydantic import ConfigDict, field_validator, model_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
@@ -35,12 +36,12 @@ class RuleMetric:
     violations: int
     pass_rate: float
     pass_threshold: float
-    value: Optional[int | float | str | datetime | date | List] = None
-    function: Optional[Callable] = None
-    options: Optional[Dict[str, Any]] = None
-    column: Optional[List[str]] = None
-    id_columns: Optional[List[str]] = None
-    failed_rows_dataset: Optional[AbstractFailedRowsDataset] = None
+    value: int | float | str | datetime | date | list | None = None
+    function: Callable | None = None
+    options: dict[str, Any] | None = None
+    column: list[str] | None = None
+    id_columns: list[str] | None = None
+    failed_rows_dataset: AbstractFailedRowsDataset | None = None
 
     @model_validator(mode="after")
     def validate_model(self) -> Self:
@@ -74,7 +75,7 @@ class RuleMetric:
     def function_to_string(function: Callable) -> str:
         return f"{function.__module__}.{function.__name__}"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the rule metric as a dictionary."""
         return {
             "id": self.id,

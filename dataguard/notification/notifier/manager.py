@@ -1,14 +1,13 @@
 import threading
-from typing import Dict, List
 
-from dataguard.validation.core import NotifyOnEvent
 from dataguard.notification.notifier.core import (
     AbstractNotifier,
+    AbstractNotifierManager,
     NotifierAlreadyExistsError,
     NotifierNotFoundError,
-    AbstractNotifierManager,
 )
 from dataguard.store.result.core import ResultStoreError
+from dataguard.validation.core import NotifyOnEvent
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.status import Status
 
@@ -17,7 +16,7 @@ class NotifierManager(AbstractNotifierManager):
     _lock = threading.Lock()
 
     def __init__(self):
-        self._notifiers: Dict[str, AbstractNotifier] = {}
+        self._notifiers: dict[str, AbstractNotifier] = {}
 
     def count(self, enabled_only: bool = False) -> int:
         return len(
@@ -52,7 +51,7 @@ class NotifierManager(AbstractNotifierManager):
 
     def notify_all_by_event(
         self,
-        notifiers_by_events: Dict[NotifyOnEvent, List[str]],
+        notifiers_by_events: dict[NotifyOnEvent, list[str]],
         result: DataValidationResult,
     ):
         status = result.status
@@ -78,5 +77,5 @@ class NotifierManager(AbstractNotifierManager):
         except ResultStoreError as e:
             self._logger.error(
                 f"There was an error while trying to send notification "
-                f"using notifier '{notifier.name}'. Error: {str(e)}"
+                f"using notifier '{notifier.name}'. Error: {e!s}"
             )

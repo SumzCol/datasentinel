@@ -1,4 +1,4 @@
-from typing import List, Any, Union, Optional, Set, Tuple
+from typing import Any, Optional, Union
 
 import pytest
 from pydantic import ValidationError
@@ -12,11 +12,11 @@ class TestBaseAuditRowUnit:
         "field_type",
         [
             Any,
-            List[Any],
             list[Any],
-            Set[Any],
+            list[Any],
             set[Any],
-            Tuple[Any],
+            set[Any],
+            tuple[Any],
             tuple[Any],
             Optional[Any],
         ],
@@ -25,9 +25,7 @@ class TestBaseAuditRowUnit:
         class AnyFieldAuditRow(BaseAuditRow):
             field: Any
 
-        with pytest.raises(
-            ValidationError, match="Multi-type fields are not supported"
-        ):
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
             AnyFieldAuditRow(field="test")
 
     @pytest.mark.parametrize(
@@ -42,40 +40,36 @@ class TestBaseAuditRowUnit:
         class MultiTypeFieldAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(
-            ValidationError, match="Multi-type fields are not supported"
-        ):
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
             MultiTypeFieldAuditRow(field="test")
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            List[int | float | str],
-            List[Union[int, float, str]],
-            List[int] | List[float],
-            Union[List[int], List[float]],
-            List,
+            list[int | float | str],
+            list[int | float | str],
+            list[int] | list[float],
+            Union[list[int], list[float]],
             list,
-            Optional[List[int | float | str]],
+            list,
+            Optional[list[int | float | str]],
         ],
     )
     def test_error_on_list_with_multi_type_values(self, field_type):
         class MultiTypeListAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(
-            ValidationError, match="Multi-type fields are not supported"
-        ):
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
             MultiTypeListAuditRow(field=[1, 2])
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            Set[int | float | str],
-            Set[Union[int, float, str]],
-            Set[int] | Set[float],
-            Union[Set[int], Set[float]],
-            Set,
+            set[int | float | str],
+            set[int | float | str],
+            set[int] | set[float],
+            Union[set[int], set[float]],
+            set,
             set,
         ],
     )
@@ -83,30 +77,26 @@ class TestBaseAuditRowUnit:
         class MultiTypeSetAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(
-            ValidationError, match="Multi-type fields are not supported"
-        ):
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
             MultiTypeSetAuditRow(field={1, 2})
 
     @pytest.mark.parametrize(
         "field_type",
         [
-            Tuple[int | float | str, ...],
-            Tuple[int | float | str],
-            Tuple[Union[int, float, str]],
-            Tuple[int] | Tuple[float],
-            Union[Tuple[int], Tuple[float]],
+            tuple[int | float | str, ...],
+            tuple[int | float | str],
+            tuple[int | float | str],
+            tuple[int] | tuple[float],
+            Union[tuple[int], tuple[float]],
             tuple,
-            Tuple,
-            Optional[Tuple[int | float | str]],
-            Optional[Tuple[int | float | str, ...]],
+            tuple,
+            Optional[tuple[int | float | str]],
+            Optional[tuple[int | float | str, ...]],
         ],
     )
     def test_error_on_tuple_with_multi_type_values(self, field_type):
         class MultiTypeTupleAuditRow(BaseAuditRow):
             field: field_type
 
-        with pytest.raises(
-            ValidationError, match="Multi-type fields are not supported"
-        ):
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
             MultiTypeTupleAuditRow(field=(1,))

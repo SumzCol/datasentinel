@@ -1,18 +1,19 @@
 import logging
 import threading
+from typing import ClassVar
 
 from ulid import ULID
 
 from dataguard.notification.notifier.core import AbstractNotifierManager
+from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.session.core import (
-    SessionNotSpecifiedError,
     SessionAlreadyExistsError,
+    SessionNotSpecifiedError,
 )
 from dataguard.store.audit.core import AbstractAuditStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
-from dataguard.notification.notifier.manager import NotifierManager
 from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.runner.core import AbstractRunner
@@ -22,7 +23,7 @@ from dataguard.validation.runner.simple_runner import SimpleRunner
 class DataGuardSession:
     """Entry point to access all the functionalities of DataGuard."""
 
-    _active_sessions = {}
+    _active_sessions: ClassVar[dict[str, "DataGuardSession"]] = {}
     _lock = threading.Lock()
 
     def __init__(
@@ -33,9 +34,7 @@ class DataGuardSession:
         audit_store_manager: AbstractAuditStoreManager | None = None,
     ):
         if name in DataGuardSession._active_sessions:
-            raise SessionAlreadyExistsError(
-                f"A session with name '{name}' already exists"
-            )
+            raise SessionAlreadyExistsError(f"A session with name '{name}' already exists")
         self.name = name
         self._notifier_manager = notifier_manager or NotifierManager()
         self._result_store_manager = result_store_manager or ResultStoreManager()
@@ -67,8 +66,7 @@ class DataGuardSession:
 
         if name is None and len(cls._active_sessions) > 1:
             raise SessionNotSpecifiedError(
-                "No name specified and there are multiple active sessions. "
-                "Specify a name."
+                "No name specified and there are multiple active sessions. Specify a name."
             )
 
         if name in cls._active_sessions:

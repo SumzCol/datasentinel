@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -21,8 +21,8 @@ from dataguard.validation.status import Status
 def data_validation_result_mock():
     def _create(
         status: Status,
-        time: datetime = None,
-        failed_checks_mocks: List[Mock] = None,
+        time: datetime | None = None,
+        failed_checks_mocks: list[Mock] | None = None,
     ) -> Mock:
         result = Mock(spec=DataValidationResult)
         result.run_id = ULID()
@@ -34,9 +34,7 @@ def data_validation_result_mock():
         result.end_time = time if time else datetime.now()
         result.failed_checks = failed_checks_mocks
 
-        result.failed_checks_count = (
-            len(failed_checks_mocks) if failed_checks_mocks else 0
-        )
+        result.failed_checks_count = len(failed_checks_mocks) if failed_checks_mocks else 0
 
         return result
 
@@ -49,7 +47,7 @@ def check_result_mock():
         status: Status,
         check_level: CheckLevel,
         class_name: str,
-        failed_rules_mocks: List[Mock] = None,
+        failed_rules_mocks: list[Mock] | None = None,
     ) -> Mock:
         result = Mock(spec=CheckResult)
         result.name = "test_check"
@@ -69,7 +67,7 @@ def rule_metric_mock():
     def _create(
         rule: str = "test_rule",
         status: Status = Status.FAIL,
-        column: List[str] = None,
+        column: list[str] | None = None,
         violations: int = 0,
         rows: int = 0,
         value: Any = None,
@@ -90,6 +88,8 @@ def rule_metric_mock():
 class TestSlackMessageRendererUnit:
     def test_when_data_validation_pass(self, data_validation_result_mock):
         result = data_validation_result_mock(Status.PASS, datetime.now())
+        # 1 header + 1 section
+        expected_len_of_blocks = 2
         slack_message_render = SlackMessageRenderer()
 
         message = slack_message_render.render(result)
@@ -101,7 +101,7 @@ class TestSlackMessageRendererUnit:
             f"start time: {result.start_time.isoformat()}, "
             f"end time: {result.end_time.isoformat()}."
         )
-        assert len(message.blocks) == 2
+        assert len(message.blocks) == expected_len_of_blocks
         # Test blocks structure
         assert message.blocks[0]["type"] == "header"
         assert message.blocks[1]["type"] == "section"
@@ -165,6 +165,15 @@ class TestSlackMessageRendererUnit:
                 )
             ],
         )
+        # 1 header + 1 section + 1 section (failed checks title) + 1 section (1 failed check)
+        expected_len_of_blocks = 4
+
+        # 1 rich_text_section (check name) + 1 rich_text_section (check class)
+        # + 1 rich_text_section (check level) + 1 rich_text_section (failed rules title)
+        # + 1 rich_text_section (failed rules info)
+        expected_len_of_blocks_in_failed_check_info = 5
+
+        expected_len_of_blocks_in_failed_rules_info = 3  # 3 failed rules
 
         slack_message_render = SlackMessageRenderer()
 
@@ -181,23 +190,23 @@ class TestSlackMessageRendererUnit:
             f"[rule=is_custom, value=package.module.function, violations=1, rows=2])"
         )
         # Test blocks structure
-        assert len(message.blocks) == 4
+        assert len(message.blocks) == expected_len_of_blocks
         assert message.blocks[0]["type"] == "header"
-        assert (
-            message.blocks[0]["text"]["text"]
-            == "A data validation has failed! :alerta:"
-        )
+        assert message.blocks[0]["text"]["text"] == "A data validation has failed! :alerta:"
         assert message.blocks[1]["type"] == "section"
         assert message.blocks[2]["text"]["text"] == "*Failed Checks*:"
         assert message.blocks[3]["type"] == "rich_text"
-        assert len(message.blocks[3]["elements"]) == 5
-        assert len(message.blocks[3]["elements"][4]["elements"]) == 3
-        assert message.blocks[3]["elements"][4]["elements"][2]["elements"][0][
-            "text"
-        ] == ("rule=is_custom, value=package.module.function, violations=1, rows=2")
-        assert message.blocks[3]["elements"][4]["elements"][0]["elements"][0][
-            "text"
-        ] == ("rule=test_rule, column=[test_column], violations=1, rows=2")
+        assert len(message.blocks[3]["elements"]) == expected_len_of_blocks_in_failed_check_info
+        assert (
+            len(message.blocks[3]["elements"][4]["elements"])
+            == expected_len_of_blocks_in_failed_rules_info
+        )
+        assert message.blocks[3]["elements"][4]["elements"][2]["elements"][0]["text"] == (
+            "rule=is_custom, value=package.module.function, violations=1, rows=2"
+        )
+        assert message.blocks[3]["elements"][4]["elements"][0]["elements"][0]["text"] == (
+            "rule=test_rule, column=[test_column], violations=1, rows=2"
+        )
 
     def test_when_checks_display_limit_is_lower_than_failed_checks_count(
         self, data_validation_result_mock, check_result_mock, rule_metric_mock
@@ -219,17 +228,17 @@ class TestSlackMessageRendererUnit:
                 ),
             ],
         )
+        # 1 header + 1 section + 1 section (failed checks title)
+        # + 1 section (1 of 2 failed checks displayed)
+        expected_len_of_blocks = 4
 
         slack_message_render = SlackMessageRenderer(checks_display_limit=1)
 
         message = slack_message_render.render(result)
 
-        assert len(message.blocks) == 4
+        assert len(message.blocks) == expected_len_of_blocks
         assert message.blocks[2]["type"] == "section"
-        assert (
-            message.blocks[2]["text"]["text"]
-            == "*Failed Checks (Showing only 1 of 2)*:"
-        )
+        assert message.blocks[2]["text"]["text"] == "*Failed Checks (Showing only 1 of 2)*:"
 
     def test_when_rules_display_limit_is_lower_than_failed_rules_count(
         self, data_validation_result_mock, check_result_mock, rule_metric_mock
@@ -245,6 +254,8 @@ class TestSlackMessageRendererUnit:
                 ),
             ],
         )
+        # 1 header + 1 section + 1 section (failed checks title) + 1 section (1 failed check)
+        expected_len_of_blocks = 4
 
         slack_message_render = SlackMessageRenderer(rules_display_limit=1)
 
@@ -253,7 +264,7 @@ class TestSlackMessageRendererUnit:
         with open("test_slack_message_renderer.json", "w") as f:
             f.write(json.dumps(message.blocks, indent=4))
 
-        assert len(message.blocks) == 4
+        assert len(message.blocks) == expected_len_of_blocks
         assert message.blocks[3]["elements"][3]["elements"][0]["text"] == (
             "Failed rules (Showing only 1 of 2): "
         )

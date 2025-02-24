@@ -1,12 +1,11 @@
 import threading
-from typing import Dict, List
 
 from dataguard.store.result.core import (
     AbstractResultStore,
-    ResultStoreNotFoundError,
-    ResultStoreAlreadyExistsError,
     AbstractResultStoreManager,
+    ResultStoreAlreadyExistsError,
     ResultStoreError,
+    ResultStoreNotFoundError,
 )
 from dataguard.validation.result import DataValidationResult
 
@@ -15,7 +14,7 @@ class ResultStoreManager(AbstractResultStoreManager):
     _lock = threading.Lock()
 
     def __init__(self):
-        self._result_stores: Dict[str, AbstractResultStore] = {}
+        self._result_stores: dict[str, AbstractResultStore] = {}
 
     def count(self, enabled_only: bool = False) -> int:
         return len(
@@ -28,9 +27,7 @@ class ResultStoreManager(AbstractResultStoreManager):
 
     def get(self, name: str) -> AbstractResultStore:
         if not self.exists(name):
-            raise ResultStoreNotFoundError(
-                f"A result store with name '{name}' does not exist."
-            )
+            raise ResultStoreNotFoundError(f"A result store with name '{name}' does not exist.")
         return self._result_stores[name]
 
     def register(self, result_store: AbstractResultStore, replace: bool = False):
@@ -43,16 +40,14 @@ class ResultStoreManager(AbstractResultStoreManager):
 
     def remove(self, name: str):
         if not self.exists(name):
-            raise ResultStoreNotFoundError(
-                f"A result store with name '{name}' does not exist."
-            )
+            raise ResultStoreNotFoundError(f"A result store with name '{name}' does not exist.")
         with self._lock:
             del self._result_stores[name]
 
     def exists(self, name: str) -> bool:
         return name in self._result_stores
 
-    def store_all(self, result_stores: List[str], result: DataValidationResult):
+    def store_all(self, result_stores: list[str], result: DataValidationResult):
         for result_store in result_stores:
             self._store(result_store=self.get(result_store), result=result)
 
@@ -67,5 +62,5 @@ class ResultStoreManager(AbstractResultStoreManager):
         except ResultStoreError as e:
             self._logger.error(
                 f"There was an error while trying to save results "
-                f"using result store '{result_store.name}'. Error: {str(e)}"
+                f"using result store '{result_store.name}'. Error: {e!s}"
             )

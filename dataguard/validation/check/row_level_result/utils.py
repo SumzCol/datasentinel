@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 from dataguard.validation.check.row_level_result.rule import Rule
 
@@ -24,10 +24,6 @@ def value(rule: Rule) -> str:
         return str(rule.value)
 
 
-def are_id_columns_in_rule_columns(
-    id_columns: List[str], rule_columns: str | List[str]
-) -> bool:
+def are_id_columns_in_rule_columns(id_columns: list[str], rule_columns: str | list[str]) -> bool:
     rule_columns = [rule_columns] if isinstance(rule_columns, str) else rule_columns
-    return bool(
-        {item.lower() for item in id_columns} & {item.lower() for item in rule_columns}
-    )
+    return bool({item.lower() for item in id_columns} & {item.lower() for item in rule_columns})

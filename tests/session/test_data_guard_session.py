@@ -1,16 +1,16 @@
 import threading
+from unittest.mock import Mock
 
 import pytest
 
 from dataguard.notification.notifier.core import AbstractNotifierManager
-from dataguard.session.data_guard_session import DataGuardSession
-from dataguard.session.core import SessionAlreadyExistsError, SessionNotSpecifiedError
 from dataguard.notification.notifier.manager import NotifierManager
+from dataguard.session.core import SessionAlreadyExistsError, SessionNotSpecifiedError
+from dataguard.session.data_guard_session import DataGuardSession
 from dataguard.store.audit.core import AbstractAuditStoreManager
+from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
-from dataguard.store.audit.manager import AuditStoreManager
-from unittest.mock import Mock
 
 
 @pytest.mark.unit
@@ -38,18 +38,17 @@ class TestDataGuardSessionUnit:
         def get_or_create_session(name):
             DataGuardSession.get_or_create(name=name)
 
+        expected_active_session = 10
         threads = []
-        for i in range(10):
-            thread = threading.Thread(
-                target=get_or_create_session, args=(f"session_{i}",)
-            )
+        for i in range(expected_active_session):
+            thread = threading.Thread(target=get_or_create_session, args=(f"session_{i}",))
             threads.append(thread)
             thread.start()
 
         for thread in threads:
             thread.join()
 
-        assert len(DataGuardSession._active_sessions) == 10
+        assert len(DataGuardSession._active_sessions) == expected_active_session
 
     def test_get_or_create_single_session_multithreaded(self):
         def get_or_create_session():

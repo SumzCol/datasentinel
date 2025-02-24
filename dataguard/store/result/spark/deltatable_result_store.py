@@ -1,16 +1,16 @@
 import json
-from typing import Literal, Dict, Any
+from typing import Any, Literal
 
 from pyspark.sql import DataFrame, Row
 from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    TimestampType,
-    IntegerType,
     ArrayType,
-    LongType,
     DoubleType,
+    IntegerType,
+    LongType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
 )
 
 from dataguard.store.result.core import AbstractResultStore, ResultStoreError
@@ -21,20 +21,20 @@ from dataguard.validation.rule.metric import RuleMetric
 
 
 class DeltaTableResultStore(AbstractResultStore):
-    def __init__(
+    def __init__(  # noqa PLR0913
         self,
         name: str,
         table: str,
         schema: str,
         dataset_type: Literal["file", "table"],
-        external_path: str = None,
-        save_args: Dict[str, Any] = None,
+        external_path: str | None = None,
+        save_args: dict[str, Any] | None = None,
         failed_rows_limit: int = 100,
         disabled: bool = False,
     ):
         super().__init__(name, disabled)
-        if not 0 <= failed_rows_limit <= 1000:
-            raise ResultStoreError("Failed rows limit must be between 0 and 1000")
+        if not failed_rows_limit > 0:
+            raise ResultStoreError("Failed rows limit must be greater than 0")
         self._failed_rows_limit = failed_rows_limit
         self._delta_table_appender = DeltaTableAppender(
             table=table,
@@ -67,9 +67,7 @@ class DeltaTableResultStore(AbstractResultStore):
                         rule_name=rule_metric.rule,
                         rule_column=rule_metric.column,
                         rule_id_columns=rule_metric.id_columns,
-                        rule_value=str(rule_metric.value)
-                        if rule_metric.value
-                        else None,
+                        rule_value=str(rule_metric.value) if rule_metric.value else None,
                         rule_function=(
                             RuleMetric.function_to_string(rule_metric.function)
                             if rule_metric.function
@@ -80,14 +78,10 @@ class DeltaTableResultStore(AbstractResultStore):
                         rule_pass_rate=rule_metric.pass_rate,
                         rule_pass_threshold=rule_metric.pass_threshold,
                         rule_options=(
-                            json.dumps(rule_metric.options)
-                            if rule_metric.options
-                            else None
+                            json.dumps(rule_metric.options) if rule_metric.options else None
                         ),
                         rule_failed_rows_dataset=(
-                            rule_metric.failed_rows_dataset.to_json(
-                                limit=self._failed_rows_limit
-                            )
+                            rule_metric.failed_rows_dataset.to_json(limit=self._failed_rows_limit)
                             if rule_metric.failed_rows_dataset
                             else None
                         ),
@@ -115,9 +109,7 @@ class DeltaTableResultStore(AbstractResultStore):
                     StructField(name="rule_index", dataType=IntegerType()),
                     StructField(name="rule_name", dataType=StringType()),
                     StructField(name="rule_column", dataType=ArrayType(StringType())),
-                    StructField(
-                        name="rule_id_columns", dataType=ArrayType(StringType())
-                    ),
+                    StructField(name="rule_id_columns", dataType=ArrayType(StringType())),
                     StructField(name="rule_value", dataType=StringType()),
                     StructField(name="rule_function", dataType=StringType()),
                     StructField(name="rule_rows", dataType=LongType()),
@@ -136,5 +128,5 @@ class DeltaTableResultStore(AbstractResultStore):
             self._delta_table_appender.append(self._result_to_df(result))
         except Exception as e:
             raise ResultStoreError(
-                f"Error while saving data validation result in delta table: {str(e)}"
+                f"Error while saving data validation result in delta table: {e!s}"
             ) from e

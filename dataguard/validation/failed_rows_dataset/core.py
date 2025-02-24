@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, TypeVar, Generic
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -20,7 +20,7 @@ class AbstractFailedRowsDataset(ABC, Generic[T]):
         """Returns the number of bad records"""
 
     @abstractmethod
-    def to_dict(self, limit: int = None) -> List[Dict[str, Any]]:
+    def to_dict(self, limit: int | None = None) -> list[dict[str, Any]]:
         """
         Returns bad records as a list of dictionaries
 
@@ -29,7 +29,7 @@ class AbstractFailedRowsDataset(ABC, Generic[T]):
         """
 
     @abstractmethod
-    def to_json(self, limit: int = None) -> str:
+    def to_json(self, limit: int | None = None) -> str:
         """
         Returns bad records as JSON string
 

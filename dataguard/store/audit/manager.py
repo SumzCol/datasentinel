@@ -1,13 +1,12 @@
 import logging
 import threading
-from typing import Dict
 
 from dataguard.store.audit.core import (
     AbstractAuditStore,
-    AuditStoreNotFoundError,
+    AbstractAuditStoreManager,
     AuditStoreAlreadyExistsError,
     AuditStoreError,
-    AbstractAuditStoreManager,
+    AuditStoreNotFoundError,
 )
 from dataguard.store.audit.row import BaseAuditRow
 
@@ -16,7 +15,7 @@ class AuditStoreManager(AbstractAuditStoreManager):
     _lock = threading.Lock()
 
     def __init__(self):
-        self._audit_stores: Dict[str, AbstractAuditStore] = {}
+        self._audit_stores: dict[str, AbstractAuditStore] = {}
 
     @property
     def _logger(self) -> logging.Logger:
@@ -33,9 +32,7 @@ class AuditStoreManager(AbstractAuditStoreManager):
 
     def get(self, name: str) -> AbstractAuditStore:
         if not self.exists(name):
-            raise AuditStoreNotFoundError(
-                f"An audit store with '{name}' does not exist."
-            )
+            raise AuditStoreNotFoundError(f"An audit store with '{name}' does not exist.")
         return self._audit_stores[name]
 
     def register(self, audit_store: AbstractAuditStore, replace: bool = False):
@@ -48,9 +45,7 @@ class AuditStoreManager(AbstractAuditStoreManager):
 
     def remove(self, name: str):
         if not self.exists(name):
-            raise AuditStoreNotFoundError(
-                f"An audit store with name '{name}' does not exist."
-            )
+            raise AuditStoreNotFoundError(f"An audit store with name '{name}' does not exist.")
         with self._lock:
             del self._audit_stores[name]
 
@@ -79,5 +74,5 @@ class AuditStoreManager(AbstractAuditStoreManager):
         except AuditStoreError as e:
             self._logger.error(
                 f"There was an error while trying to append row "
-                f"to audit store '{audit_store.name}'. Error: {str(e)}"
+                f"to audit store '{audit_store.name}'. Error: {e!s}"
             )

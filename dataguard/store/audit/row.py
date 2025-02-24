@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from datetime import datetime, date
-from types import UnionType, NoneType
-from typing import Any, Dict, get_args, get_origin, Union
+from datetime import date, datetime
+from types import NoneType, UnionType
+from typing import Any, Union, get_args, get_origin
 
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-_VALID_SCALAR_TYPES = [str, int, float, bool, datetime, date]
-_VALID_COLLECTION_TYPES = [list, tuple, set]
-_VALID_TYPES = [*_VALID_SCALAR_TYPES, *_VALID_COLLECTION_TYPES, dict]
+_VALID_SCALAR_TYPES = {str, int, float, bool, datetime, date}
+_VALID_COLLECTION_TYPES = {list, tuple, set}
+_VALID_TYPES = {*_VALID_SCALAR_TYPES, *_VALID_COLLECTION_TYPES, dict}
 
 
 @dataclass
@@ -34,7 +34,7 @@ class BaseAuditRow(BaseModel):
         return list(self.model_fields.keys())
 
     @property
-    def row_fields(self) -> Dict[str, FieldInfo]:
+    def row_fields(self) -> dict[str, FieldInfo]:
         """Returns the schema of the row."""
         return {
             name: FieldInfo(
@@ -81,10 +81,19 @@ class BaseAuditRow(BaseModel):
         return True
 
     def _is_multi_typed_optional(self, field_type: type, args: tuple | None) -> bool:
-        if not field_type == Union and not field_type == UnionType:
+        if self._is_optional_field(field_type=field_type, args=args) and not self._is_multi_type(
+            args[0]
+        ):
             return False
 
-        if len(args) == 2 and args[1] == NoneType and not self._is_multi_type(args[0]):
+        return True
+
+    @staticmethod
+    def _is_optional_field(field_type: type, args: tuple | None) -> bool:
+        if field_type not in {Union, UnionType} or not args:
+            return False
+
+        if len(args) != 2 and args[1] is not NoneType:  # noqa PLR2004
             return False
 
         return True
@@ -102,7 +111,7 @@ class BaseAuditRow(BaseModel):
         if field_type is tuple and (
             (len(args) == 1 and args[0] in _VALID_SCALAR_TYPES)
             or (
-                len(args) == 2
+                len(args) == 2  # noqa PLR2004
                 and args[0] in _VALID_SCALAR_TYPES
                 and args[1] == Ellipsis
             )
@@ -114,18 +123,12 @@ class BaseAuditRow(BaseModel):
 
         return True
 
-    @staticmethod
-    def _is_complex(annotation: type) -> bool:
-        origin = get_origin(annotation)
-        args = get_args(annotation)
-
-        if annotation in _VALID_SCALAR_TYPES or not origin:
+    def _is_complex(self, field_type: type, args: tuple | None) -> bool:
+        if field_type in _VALID_SCALAR_TYPES:
             return False
 
-        if (origin == Union or origin == UnionType) and (
-            args and len(args) == 2 and args[1] == NoneType
-        ):
-            return False
+        if self._is_optional_field(field_type=field_type, args=args):
+            return self._is_complex(args[0], args=get_args(args[0]))
 
         return True
 
@@ -135,12 +138,12 @@ class BaseAuditRow(BaseModel):
         if not origin:
             return annotation
 
-        if origin != Union and origin != UnionType:
+        if origin not in {Union, UnionType}:
             return origin
 
         args = get_args(annotation)
 
-        if len(args) == 1 or (len(args) == 2 and args[1] == NoneType):
+        if len(args) == 1 or (len(args) == 2 and args[1] == NoneType):  # noqa PLR2004
             if self._is_complex(args[0]):
                 return self._field_type(args[0])
             return args[0]

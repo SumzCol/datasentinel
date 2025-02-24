@@ -18,9 +18,7 @@ class TestRowLevelResultCheck:
                 .is_complete(id_columns=["id"], column="ID")
             )
 
-    @pytest.mark.parametrize(
-        "id_columns", [tuple(), list(), set()], ids=("tuple", "list", "set")
-    )
+    @pytest.mark.parametrize("id_columns", [tuple(), list(), set()], ids=("tuple", "list", "set"))
     def test_is_complete_with_no_id_columns_specified(self, id_columns):
         with pytest.raises(BadArgumentError):
             (

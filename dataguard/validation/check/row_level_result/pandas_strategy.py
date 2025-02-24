@@ -1,24 +1,24 @@
 import operator
-from typing import Dict, Callable, List
+from typing import TYPE_CHECKING
 
 import pandas as pd
-
 import pandas.api.types as pdt
 
-from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
-from dataguard.validation.check.row_level_result.rule import Rule
+from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
 from dataguard.validation.check.row_level_result.validation_strategy import (
     ValidationStrategy,
 )
+from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 from dataguard.validation.rule.metric import RuleMetric
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class PandasValidationStrategy(ValidationStrategy):
     def __init__(self):
-        self._compute_instructions: Dict[
-            str, Callable[[pd.DataFrame], pd.DataFrame]
-        ] = {}
+        self._compute_instructions: dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {}
 
     def is_complete(self, rule: Rule):
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
@@ -44,12 +44,7 @@ class PandasValidationStrategy(ValidationStrategy):
     def is_unique(self, rule: Rule):
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
-            return (
-                df[rule.column]
-                .value_counts()
-                .reset_index()
-                .query("count > 1")[[rule.column]]
-            )
+            return df[rule.column].value_counts().reset_index().query("count > 1")[[rule.column]]
 
         self._compute_instructions[rule.key] = _execute
 
@@ -98,9 +93,7 @@ class PandasValidationStrategy(ValidationStrategy):
     def is_between(self, rule: Rule):
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
-            return df[
-                (df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1])
-            ]
+            return df[(df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1])]
 
         self._compute_instructions[rule.key] = _execute
 
@@ -118,33 +111,32 @@ class PandasValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def _generate_compute_instructions(self, rules: Dict[str, Rule]) -> None:
+    def _generate_compute_instructions(self, rules: dict[str, Rule]) -> None:
         for v in rules.values():
             operator.methodcaller(v.method, v)(self)
 
     def _compute_bad_records(
         self,
         dataframe: pd.DataFrame,
-    ) -> Dict[str, pd.DataFrame]:
+    ) -> dict[str, pd.DataFrame]:
         """Compute bad records"""
         return {
             k: compute_instruction(dataframe)  # type: ignore
             for k, compute_instruction in self._compute_instructions.items()
         }
 
-    def validate_data_types(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> bool:
+    def validate_data_types(self, df: pd.DataFrame, rules: dict[str, Rule]) -> bool:
         valid = True
         for key, rule in rules.items():
-            dtype = rule.data_type.value
-            if dtype == 1:
+            if rule.data_type == RuleDataType.NUMERIC:
                 valid = valid and pdt.is_numeric_dtype(df[rule.column])
-            elif dtype == 2:
+            elif rule.data_type == RuleDataType.STRING:
                 valid = valid and pdt.is_string_dtype(df[rule.column])
-            elif dtype in [3, 4]:
+            elif rule.data_type in {RuleDataType.DATE, RuleDataType.TIMESTAMP}:
                 valid = valid and pdt.is_datetime64_any_dtype(df[rule.column])
         return valid
 
-    def compute(self, df: pd.DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
+    def compute(self, df: pd.DataFrame, rules: dict[str, Rule]) -> list[RuleMetric]:
         rows = df.shape[0]
         self._generate_compute_instructions(rules)
         bad_records = self._compute_bad_records(df)

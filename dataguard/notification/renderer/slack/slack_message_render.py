@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Any
 
 from pydantic.dataclasses import dataclass
 
@@ -11,23 +11,22 @@ from dataguard.validation.status import Status
 @dataclass
 class SlackMessage:
     text: str
-    blocks: List[Dict[str, Any]]
+    blocks: list[dict[str, Any]]
 
 
 class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
+    _FAILED_CHECKS_DISPLAY_LIMIT = 5
+    _FAILED_RULES_DISPLAY_LIMIT = 5
+
     def __init__(self, checks_display_limit: int = 3, rules_display_limit: int = 5):
-        if not 0 < checks_display_limit <= 5:
-            raise RendererError(
-                "Checks display limit must be greater than 0 and less than 5."
-            )
-        if not 0 < rules_display_limit <= 5:
-            raise RendererError(
-                "Rules display limit must be greater than 0 and less than 5."
-            )
+        if not 0 < checks_display_limit <= self._FAILED_CHECKS_DISPLAY_LIMIT:
+            raise RendererError("Checks display limit must be greater than 0 and less than 5.")
+        if not 0 < rules_display_limit <= self._FAILED_RULES_DISPLAY_LIMIT:
+            raise RendererError("Rules display limit must be greater than 0 and less than 5.")
         self._checks_display_limit = checks_display_limit
         self._rules_display_limit = rules_display_limit
 
-    def _render_text_rules_metric(self, rules_metric: List[RuleMetric]) -> str:
+    def _render_text_rules_metric(self, rules_metric: list[RuleMetric]) -> str:
         return ", ".join(
             [
                 f"[{self._render_rule_metric_info(rule_metric)}]"
@@ -74,9 +73,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
             f"rows={rule_metric.rows}"
         )
 
-    def _render_block_rules_metric(
-        self, rules_metric: List[RuleMetric]
-    ) -> List[Dict[str, Any]]:
+    def _render_rules_metric_blocks(self, rules_metric: list[RuleMetric]) -> list[dict[str, Any]]:
         return [
             {
                 "type": "rich_text_section",
@@ -87,9 +84,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
             for rule_metric in rules_metric[: self._rules_display_limit]
         ]
 
-    def _render_blocks_message(
-        self, result: DataValidationResult
-    ) -> List[Dict[str, Any]]:
+    def _render_blocks_message(self, result: DataValidationResult) -> list[dict[str, Any]]:
         blocks = [
             {
                 "type": "header",
@@ -204,9 +199,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                             "style": "bullet",
                             "indent": 0,
                             "elements": [
-                                *self._render_block_rules_metric(
-                                    failed_check.failed_rules
-                                )
+                                *self._render_rules_metric_blocks(failed_check.failed_rules)
                             ],
                         },
                     ],

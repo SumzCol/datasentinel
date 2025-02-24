@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 import pytest
 from pyspark.sql import SparkSession
@@ -33,6 +33,8 @@ class TestIsComplete:
                 "timestamp_col",
             ],
         )
+        evaluated_rows = df.count()
+        expected_violations = 0
 
         result = (
             RowLevelResultCheck(
@@ -44,8 +46,8 @@ class TestIsComplete:
         )
 
         assert result.status == Status.PASS
-        assert result.rule_metrics[0].rows == 4
-        assert result.rule_metrics[0].violations == 0
+        assert result.rule_metrics[0].rows == evaluated_rows
+        assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.to_dict() == []
 
     @pytest.mark.parametrize(
@@ -72,6 +74,8 @@ class TestIsComplete:
                 "timestamp_col",
             ],
         )
+        evaluated_rows = df.count()
+        expected_violations = 2
 
         result = (
             RowLevelResultCheck(
@@ -83,8 +87,8 @@ class TestIsComplete:
         )
 
         assert result.status == Status.FAIL
-        assert result.rule_metrics[0].rows == 4
-        assert result.rule_metrics[0].violations == 2
+        assert result.rule_metrics[0].rows == evaluated_rows
+        assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.to_dict() == [
             {"id": 2, evaluated_column: None},
             {"id": 4, evaluated_column: None},

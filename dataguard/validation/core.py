@@ -11,5 +11,5 @@ class NotifyOnEvent(Enum):
     """
 
     FAIL = "FAIL"
-    PASS = "PASS"
+    PASS = "PASS"  # noqa: S105
     ALL = "ALL"

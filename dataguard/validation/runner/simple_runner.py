@@ -3,8 +3,8 @@ from datetime import datetime
 from ulid import ULID
 
 from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.result import DataValidationResult
 from dataguard.validation.data_validation import DataValidation
+from dataguard.validation.result import DataValidationResult
 from dataguard.validation.runner.core import (
     AbstractRunner,
 )

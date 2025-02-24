@@ -1,27 +1,30 @@
 import importlib
 from collections.abc import Callable
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
 from dataguard.validation.check.core import (
     AbstractCheck,
     BadArgumentError,
+    CheckError,
     DataframeType,
     EmptyCheckError,
     UnsupportedDataframeTypeError,
 )
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
-from dataguard.validation.check.row_level_result.rule import CheckDataType, Rule
+from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 from dataguard.validation.check.row_level_result.utils import (
     are_id_columns_in_rule_columns,
 )
-from dataguard.validation.check.row_level_result.validation_strategy import (
-    ValidationStrategy,
-)
 from dataguard.validation.check.utils import to_df_if_delta_table
+
+if TYPE_CHECKING:
+    from dataguard.validation.check.row_level_result.validation_strategy import (
+        ValidationStrategy,
+    )
 
 
 class RowLevelResultCheck(AbstractCheck):
@@ -38,9 +41,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_complete(self, id_columns: list[str], column: str, pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
-            raise BadArgumentError(
-                "ID columns cannot be evaluated in 'is_complete' rule"
-            )
+            raise BadArgumentError("ID columns cannot be evaluated in 'is_complete' rule")
         if not id_columns:
             raise BadArgumentError("ID columns cannot be empty in 'is_complete' rule")
         (
@@ -48,7 +49,7 @@ class RowLevelResultCheck(AbstractCheck):
                 method="is_complete",
                 column=column,
                 id_columns=id_columns,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -57,15 +58,13 @@ class RowLevelResultCheck(AbstractCheck):
 
     def are_complete(self, id_columns: list[str], column: list[str], pct: float = 1.0):
         if are_id_columns_in_rule_columns(id_columns, column):
-            raise BadArgumentError(
-                "ID columns cannot be evaluated in 'are_complete' rule"
-            )
+            raise BadArgumentError("ID columns cannot be evaluated in 'are_complete' rule")
         (
             Rule(
                 method="are_complete",
                 column=column,
                 id_columns=id_columns,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -77,7 +76,7 @@ class RowLevelResultCheck(AbstractCheck):
             Rule(
                 method="is_unique",
                 column=column,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
                 options={"ignore_nulls": ignore_nulls},
             )
@@ -85,14 +84,12 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def are_unique(
-        self, column: list[str], pct: float = 1.0, ignore_nulls: bool = False
-    ):
+    def are_unique(self, column: list[str], pct: float = 1.0, ignore_nulls: bool = False):
         (
             Rule(
                 method="are_unique",
                 column=column,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
                 options={"ignore_nulls": ignore_nulls},
             )
@@ -101,7 +98,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def has_pattern(
-        self, column: str, value: str, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: str, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -109,7 +106,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.STRING,
+                data_type=RuleDataType.STRING,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -117,7 +114,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_greater_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -125,7 +122,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.NUMERIC,
+                data_type=RuleDataType.NUMERIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -133,7 +130,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_greater_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -141,7 +138,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.NUMERIC,
+                data_type=RuleDataType.NUMERIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -149,7 +146,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_less_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -157,7 +154,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.NUMERIC,
+                data_type=RuleDataType.NUMERIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -165,7 +162,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_less_or_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -173,7 +170,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.NUMERIC,
+                data_type=RuleDataType.NUMERIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -181,7 +178,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_equal_than(
-        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -189,7 +186,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.NUMERIC,
+                data_type=RuleDataType.NUMERIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -201,9 +198,9 @@ class RowLevelResultCheck(AbstractCheck):
         column: str,
         value: list[float] | list[int] | list[datetime] | list[date],
         pct: float = 1.0,
-        id_columns: list[str] = None,
+        id_columns: list[str] | None = None,
     ):
-        if len(value) != 2 or not isinstance(value, list):
+        if len(value) != 2 or not isinstance(value, list):  # noqa PLR2004
             raise BadArgumentError("Value must be a list containing min and max values")
         (
             Rule(
@@ -211,7 +208,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -219,7 +216,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_in(
-        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -227,7 +224,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -235,7 +232,7 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def not_in(
-        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] = None
+        self, column: str, value: list, pct: float = 1.0, id_columns: list[str] | None = None
     ):
         (
             Rule(
@@ -243,7 +240,7 @@ class RowLevelResultCheck(AbstractCheck):
                 column=column,
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )
             >> self._rules
@@ -251,13 +248,13 @@ class RowLevelResultCheck(AbstractCheck):
         return self
 
     def is_custom(
-        self, fn: Callable, pct: float = 1.0, options: dict[str, Any] = None
+        self, fn: Callable, pct: float = 1.0, options: dict[str, Any] | None = None
     ) -> Self:
         (
             Rule(
                 method="is_custom",
                 function=fn,
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
                 options=options,
             )
@@ -280,13 +277,13 @@ class RowLevelResultCheck(AbstractCheck):
                 "dataguard.validation.check.row_level_result.pandas_strategy"
             ).PandasValidationStrategy()
         else:
-            raise UnsupportedDataframeTypeError(
-                f"Unsupported dataframe type: {df_type.value}"
-            )
+            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
-        assert validation_strategy.validate_data_types(df, self._rules), (
-            "One or more evaluated columns have a data type incompatible with the defined rules."
-        )
+        if not validation_strategy.validate_data_types(df, self._rules):
+            raise CheckError(
+                "One or more evaluated columns have a data type incompatible with the "
+                "defined rules."
+            )
         start_time = datetime.now()
         rule_metrics = validation_strategy.compute(df, self._rules)
         end_time = datetime.now()

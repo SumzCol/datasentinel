@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 from slack_sdk import WebClient
 
@@ -13,7 +13,7 @@ class SlackNotifier(AbstractNotifier):
         self,
         name: str,
         channel: str,
-        credentials: Dict[str, Any],
+        credentials: dict[str, Any],
         renderer: AbstractRenderer[SlackMessage],
         disabled: bool = False,
     ):
@@ -31,6 +31,4 @@ class SlackNotifier(AbstractNotifier):
     def notify(self, result: DataValidationResult):
         message = self._renderer.render(result)
         client = WebClient(token=self._slack_token)
-        client.chat_postMessage(
-            channel=self._channel, text=message.text, blocks=message.blocks
-        )
+        client.chat_postMessage(channel=self._channel, text=message.text, blocks=message.blocks)

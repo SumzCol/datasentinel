@@ -1,23 +1,26 @@
 import operator
-from typing import Callable, Dict, List
+from typing import TYPE_CHECKING
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
-from pyspark.sql.types import NumericType, StringType, DateType, TimestampType
+from pyspark.sql.types import DateType, NumericType, StringType, TimestampType
 
-from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
+from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 from dataguard.validation.check.row_level_result.utils import evaluate_pass_rate
 from dataguard.validation.check.row_level_result.validation_strategy import (
     ValidationStrategy,
 )
-from dataguard.validation.check.row_level_result.rule import Rule
+from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 from dataguard.validation.rule.metric import RuleMetric
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class PysparkValidationStrategy(ValidationStrategy):
     def __init__(self):
         """Determine the computational options for Rules"""
-        self._compute_instructions: Dict[str, Callable[[DataFrame], DataFrame]] = {}
+        self._compute_instructions: dict[str, Callable[[DataFrame], DataFrame]] = {}
 
     def is_complete(self, rule: Rule):
         def _execute(dataframe: DataFrame) -> DataFrame:
@@ -117,9 +120,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(
-                f"{rule.column} < {rule.value[0]} or {rule.column} > {rule.value[1]}"
-            )
+            ).filter(f"{rule.column} < {rule.value[0]} or {rule.column} > {rule.value[1]}")
 
         self._compute_instructions[rule.key] = _execute
 
@@ -142,24 +143,22 @@ class PysparkValidationStrategy(ValidationStrategy):
     def is_custom(self, rule: Rule):
         def _execute(dataframe: DataFrame):
             computed_frame = rule.function(dataframe, rule.options)
-            assert "pyspark" in str(type(computed_frame)), (
-                "Custom function does not return a PySpark DataFrame"
-            )
-            assert len(computed_frame.columns) >= 1, (
-                "Custom function should return at least one column"
-            )
+            if "pyspark" not in str(type(computed_frame)):
+                raise ValueError("Custom function does not return a PySpark DataFrame")
+            if not len(computed_frame.columns) >= 1:
+                raise ValueError("Custom function should return at least one column")
             return computed_frame
 
         self._compute_instructions[rule.key] = _execute
 
-    def _generate_compute_instructions(self, rules: Dict[str, Rule]) -> None:
+    def _generate_compute_instructions(self, rules: dict[str, Rule]) -> None:
         for k, v in rules.items():
             operator.methodcaller(v.method, v)(self)
 
     def _compute_bad_records(
         self,
         dataframe: DataFrame,
-    ) -> Dict[str, DataFrame]:
+    ) -> dict[str, DataFrame]:
         """Compute rules through spark transform"""
 
         return {
@@ -167,30 +166,23 @@ class PysparkValidationStrategy(ValidationStrategy):
             for k, compute_instruction in self._compute_instructions.items()
         }
 
-    def validate_data_types(self, df: DataFrame, rules: Dict[str, Rule]) -> bool:
+    def validate_data_types(self, df: DataFrame, rules: dict[str, Rule]) -> bool:
         """
         Validate the datatype of each column according to the CheckDataType of the rule's method
         """
         valid = True
         for key, rule in rules.items():
-            dtype = rule.data_type.value
-            if dtype == 1:
-                valid = valid and isinstance(
-                    df.schema[rule.column].dataType, NumericType
-                )
-            elif dtype == 2:
-                valid = valid and isinstance(
-                    df.schema[rule.column].dataType, StringType
-                )
-            elif dtype == 3:
+            if rule.data_type == RuleDataType.NUMERIC:
+                valid = valid and isinstance(df.schema[rule.column].dataType, NumericType)
+            elif rule.data_type == RuleDataType.STRING:
+                valid = valid and isinstance(df.schema[rule.column].dataType, StringType)
+            elif rule.data_type == RuleDataType.DATE:
                 valid = valid and isinstance(df.schema[rule.column].dataType, DateType)
-            elif dtype == 4:
-                valid = valid and isinstance(
-                    df.schema[rule.column].dataType, TimestampType
-                )
+            elif rule.data_type == RuleDataType.TIMESTAMP:
+                valid = valid and isinstance(df.schema[rule.column].dataType, TimestampType)
         return valid
 
-    def compute(self, df: DataFrame, rules: Dict[str, Rule]) -> List[RuleMetric]:
+    def compute(self, df: DataFrame, rules: dict[str, Rule]) -> list[RuleMetric]:
         """Compute and returns calculated rule metrics"""
         rows = df.count()
         self._generate_compute_instructions(rules)

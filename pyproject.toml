@@ -155,7 +155,15 @@ lint.select = [
     "TCH",  # flake8-type-checking
     "RUF",  # Ruff-specific rules
 ]
-lint.ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["UP007", "S101"]
+
+[tool.ruff.lint.pylint]
+max-args = 7  # Set the maximum number of arguments for a function
+
+[tool.ruff.lint.isort]
+known-first-party = ["dataguard"]
 
 [tool.mypy]
 strict = true

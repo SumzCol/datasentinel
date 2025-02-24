@@ -1,15 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List
 
 from dataguard.core import DataGuardError
-from dataguard.store.result.manager import ResultStoreManager
 from dataguard.notification.notifier.manager import NotifierManager
+from dataguard.store.result.manager import ResultStoreManager
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
 from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.result import DataValidationResult
 from dataguard.validation.data_validation import DataValidation
+from dataguard.validation.result import DataValidationResult
 from dataguard.validation.status import Status
 
 
@@ -56,9 +55,7 @@ class AbstractRunner(ABC):
                 f"No checks were defined in validation node '{data_validation.name}'"
             )
 
-        validation_node_result = self._run(
-            data_validation=data_validation, data_asset=data_asset
-        )
+        validation_node_result = self._run(data_validation=data_validation, data_asset=data_asset)
 
         self._log_status(result=validation_node_result)
 
@@ -87,8 +84,7 @@ class AbstractRunner(ABC):
 
         if result.status == Status.PASS:
             self._logger.info(
-                f"{data_asset_info} passed all checks on "
-                f"validation node '{result.name}'"
+                f"{data_asset_info} passed all checks on validation node '{result.name}'"
             )
             return
 
@@ -109,7 +105,7 @@ class AbstractRunner(ABC):
             )
 
 
-def _failed_checks_summary(failed_checks: List[CheckResult]) -> str:
+def _failed_checks_summary(failed_checks: list[CheckResult]) -> str:
     failed_checks_str = []
     for failed_check in failed_checks:
         failed_rules_str = ", ".join(

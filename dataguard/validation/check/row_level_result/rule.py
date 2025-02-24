@@ -1,16 +1,17 @@
 import enum
 import hashlib
 from collections import Counter
-from datetime import datetime, date
-from typing import Optional, Any, Dict, List, Callable
+from collections.abc import Callable
+from datetime import date, datetime
+from typing import Any
 
-from pydantic import model_validator, field_validator
+from pydantic import field_validator, model_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
 
-class CheckDataType(enum.Enum):
-    """Accepted data types in checks"""
+class RuleDataType(enum.Enum):
+    """Accepted data types in rule"""
 
     AGNOSTIC = 0
     NUMERIC = 1
@@ -36,14 +37,14 @@ class Rule:
     """
 
     method: str
-    data_type: CheckDataType
+    data_type: RuleDataType
     pass_threshold: float = 1.0
-    value: Optional[int | float | str | datetime | date | List] = None
-    function: Optional[Callable] = None
-    column: Optional[str | List[str]] = None
-    id_columns: Optional[List[str]] = None
-    options: Optional[Dict[str, Any]] = None
-    status: Optional[str] = None
+    value: int | float | str | datetime | date | list | None = None
+    function: Callable | None = None
+    column: str | list[str] | None = None
+    id_columns: list[str] | None = None
+    options: dict[str, Any] | None = None
+    status: str | None = None
 
     @field_validator("pass_threshold", mode="after")
     def validate_pass_threshold(cls, pass_threshold: float) -> float:
@@ -55,14 +56,12 @@ class Rule:
     def validate_value(self) -> Self:
         if self.value is None:
             return self
-        if isinstance(self.value, List) & (self.data_type == CheckDataType.AGNOSTIC):
+        if isinstance(self.value, list) & (self.data_type == RuleDataType.AGNOSTIC):
             # All values can only be of one data type in a rule
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
         if self.method == "is_custom" and self.function is None:
-            raise ValueError(
-                "When 'is_custom' method is used, a function must be provided"
-            )
+            raise ValueError("When 'is_custom' method is used, a function must be provided")
         return self
 
     @property
@@ -86,6 +85,6 @@ class Rule:
             f"pass_threshold:{self.pass_threshold})"
         )
 
-    def __rshift__(self, rule_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def __rshift__(self, rule_dict: dict[str, Any]) -> dict[str, Any]:
         rule_dict[self.key] = self
         return rule_dict

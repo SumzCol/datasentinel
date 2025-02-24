@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from dataguard.validation.check.row_level_result.rule import Rule, CheckDataType
+from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 
 
 class TestRuleClass:
@@ -10,7 +10,7 @@ class TestRuleClass:
         with pytest.raises(ValidationError):
             Rule(
                 method="is_complete",
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pass_threshold,
             )
 
@@ -18,6 +18,6 @@ class TestRuleClass:
         with pytest.raises(ValidationError):
             Rule(
                 method="is_between",
-                data_type=CheckDataType.AGNOSTIC,
+                data_type=RuleDataType.AGNOSTIC,
                 value=[1, "2"],
             )

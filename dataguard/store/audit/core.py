@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 from dataguard.core import DataGuardError
 from dataguard.store.audit.row import BaseAuditRow

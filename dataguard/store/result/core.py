@@ -1,6 +1,5 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List
 
 from dataguard.core import DataGuardError
 from dataguard.validation.result import DataValidationResult
@@ -111,7 +110,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def store_all(self, result_stores: List[str], result: DataValidationResult):
+    def store_all(self, result_stores: list[str], result: DataValidationResult):
         """Store a result in all the given result stores
 
         Args:

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
 
 from pydantic.dataclasses import dataclass
 
@@ -27,7 +27,7 @@ class CheckResult:
     class_name: str
     start_time: datetime
     end_time: datetime
-    rule_metrics: List[RuleMetric]
+    rule_metrics: list[RuleMetric]
 
     @property
     def status(self):
@@ -39,7 +39,7 @@ class CheckResult:
         )
 
     @property
-    def failed_rules(self) -> List[RuleMetric]:
+    def failed_rules(self) -> list[RuleMetric]:
         """Return the metrics of the rules that failed."""
         return [metric for metric in self.rule_metrics if metric.status == Status.FAIL]
 
@@ -48,7 +48,7 @@ class CheckResult:
         """Return the number of rules that failed."""
         return len(self.failed_rules)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the result of the check as a dictionary."""
         return {
             "name": self.name,
@@ -56,8 +56,6 @@ class CheckResult:
             "check_class": self.class_name,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "rule_metrics": [
-                rule_metric.to_dict() for rule_metric in self.rule_metrics
-            ],
+            "rule_metrics": [rule_metric.to_dict() for rule_metric in self.rule_metrics],
             "status": self.status.value,
         }
