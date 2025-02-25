@@ -73,7 +73,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
             f"rows={rule_metric.rows}"
         )
 
-    def _render_rules_metric_blocks(self, rules_metric: list[RuleMetric]) -> list[dict[str, Any]]:
+    def _render_rules_metric_blocks(self, rules_metric: list[RuleMetric]) -> list[dict]:
         return [
             {
                 "type": "rich_text_section",
@@ -84,7 +84,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
             for rule_metric in rules_metric[: self._rules_display_limit]
         ]
 
-    def _render_blocks_message(self, result: DataValidationResult) -> list[dict[str, Any]]:
+    def _render_blocks_message(self, result: DataValidationResult) -> list[dict]:
         blocks = [
             {
                 "type": "header",

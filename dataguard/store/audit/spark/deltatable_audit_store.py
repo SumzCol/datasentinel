@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pyspark.sql.types import (
     ArrayType,
@@ -24,7 +24,7 @@ class DeltaTableAuditStore(AbstractAuditStore):
         schema: str,
         dataset_type: Literal["file", "table"],
         external_path: str | None = None,
-        save_args: dict[str, any] | None = None,
+        save_args: dict[str, Any] | None = None,
         failed_rows_limit: int = 100,
         disabled: bool = False,
     ):
@@ -40,12 +40,12 @@ class DeltaTableAuditStore(AbstractAuditStore):
             save_args=save_args,
         )
 
-    def append(self, row: BaseAuditRow):
+    def append(self, row: BaseAuditRow) -> None:
         raise NotImplementedError
 
-    def _infer_spark_type(self, field_info: FieldInfo) -> any:
+    def _infer_spark_type(self, field_info: FieldInfo) -> Any:
         if field_info.type in {list, tuple, set}:
-            if len(field_info.args) > 1:
+            if not field_info.args and len(field_info.args) > 1:
                 raise AuditStoreError("Multi-typed collections are not supported")
 
             return ArrayType(self._infer_spark_type(field_info.args[0]))

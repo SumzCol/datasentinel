@@ -30,7 +30,7 @@ class CheckResult:
     rule_metrics: list[RuleMetric]
 
     @property
-    def status(self):
+    def status(self) -> Status:
         """Return the status of the check."""
         return (
             Status.PASS

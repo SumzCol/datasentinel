@@ -1,8 +1,3 @@
-from collections.abc import Callable
-
-from dataguard.validation.check.row_level_result.rule import Rule
-
-
 def evaluate_pass_rate(total_rows: int, bad_records: int) -> float:
     if bad_records <= total_rows:
         try:
@@ -14,14 +9,6 @@ def evaluate_pass_rate(total_rows: int, bad_records: int) -> float:
             return total_rows / bad_records
         except ZeroDivisionError:
             return 0.0
-
-
-def value(rule: Rule) -> str:
-    """Removes verbosity for Callable values"""
-    if isinstance(rule.value, Callable):
-        return f"{rule.value.__module__}.{rule.value.__name__}"
-    else:
-        return str(rule.value)
 
 
 def are_id_columns_in_rule_columns(id_columns: list[str], rule_columns: str | list[str]) -> bool:

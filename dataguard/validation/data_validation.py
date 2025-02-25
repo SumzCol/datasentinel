@@ -1,3 +1,5 @@
+from typing import Self
+
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
@@ -28,14 +30,14 @@ class DataValidation:
     notifiers_by_event: dict[NotifyOnEvent, list[str]] | None = Field(default_factory=dict)
 
     @property
-    def checks_count(self):
+    def checks_count(self) -> int:
         return len(self.check_list)
 
     @property
     def has_checks(self) -> bool:
         return self.checks_count > 0
 
-    def add_check(self, check: AbstractCheck):
+    def add_check(self, check: AbstractCheck) -> Self:
         self.check_list.append(check)
         return self
 

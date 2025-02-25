@@ -86,7 +86,7 @@ class DatabaseAuditStore(AbstractAuditStore):
                 f"There was an error while trying to create table '{self._table}'. Error: {e!s}"
             ) from e
 
-    def append(self, row: BaseAuditRow):
+    def append(self, row: BaseAuditRow) -> None:
         table = self._get_or_create_table(row)
         with self._session_maker() as session:
             try:

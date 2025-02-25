@@ -37,7 +37,7 @@ class Rule:
     """
 
     method: str
-    data_type: RuleDataType
+    data_type: set[RuleDataType]
     pass_threshold: float = 1.0
     value: int | float | str | datetime | date | list | None = None
     function: Callable | None = None
@@ -56,7 +56,7 @@ class Rule:
     def validate_value(self) -> Self:
         if self.value is None:
             return self
-        if isinstance(self.value, list) & (self.data_type == RuleDataType.AGNOSTIC):
+        if isinstance(self.value, list) and (self.data_type == RuleDataType.AGNOSTIC):
             # All values can only be of one data type in a rule
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
@@ -65,7 +65,7 @@ class Rule:
         return self
 
     @property
-    def key(self):
+    def key(self) -> str:
         """blake2s hash of the rule, made of method, column, value, options and coverage"""
         return (
             hashlib.blake2s(

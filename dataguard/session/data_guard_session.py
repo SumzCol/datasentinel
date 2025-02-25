@@ -42,7 +42,7 @@ class DataGuardSession:
         DataGuardSession._active_sessions[name] = self
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @classmethod
@@ -95,7 +95,7 @@ class DataGuardSession:
         data_validation: DataValidation,
         data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None,
-    ):
+    ) -> None:
         """Runs a data validation.
 
         Args:
@@ -112,5 +112,5 @@ class DataGuardSession:
             result_store_manager=self._result_store_manager,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name={self.name})"

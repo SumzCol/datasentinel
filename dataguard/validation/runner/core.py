@@ -75,7 +75,7 @@ class AbstractRunner(ABC):
     ) -> DataValidationResult:
         pass
 
-    def _log_status(self, result: DataValidationResult):
+    def _log_status(self, result: DataValidationResult) -> None:
         data_asset_info = (
             f"Data asset '{result.data_asset}' in schema '{result.data_asset_schema}'"
             if result.data_asset_schema is not None
@@ -121,7 +121,7 @@ def _failed_checks_summary(failed_checks: list[CheckResult]) -> str:
     return ", ".join(failed_checks_str)
 
 
-def _raise_exc_on_failed_critical_checks(result: DataValidationResult):
+def _raise_exc_on_failed_critical_checks(result: DataValidationResult) -> None:
     critical_failed_checks = result.failed_checks_by_level(CheckLevel.CRITICAL)
     if critical_failed_checks:
         summary = _failed_checks_summary(critical_failed_checks)

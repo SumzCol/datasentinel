@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from dataguard.notification.notifier.core import AbstractNotifier
@@ -10,10 +9,6 @@ class EmailNotifier(AbstractNotifier):
         self._credentials = credentials
         super().__init__(name, disabled)
 
-    @property
-    def logger(self):
-        return logging.getLogger(__name__)
-
     def notify(self, result: DataValidationResult):
-        self.logger.info(f"Credentials: {self._credentials}")
-        self.logger.info("Sending email!")
+        self._logger.info(f"Credentials: {self._credentials}")
+        self._logger.info("Sending email!")

@@ -51,12 +51,12 @@ class DeltaTableAppender:
         if "format" in self._save_args:
             del self._save_args["format"]
 
-    def _save_as_file(self, df: DataFrame):
+    def _save_as_file(self, df: DataFrame) -> None:
         df.write.save(
             path=self._full_table_path, format="delta", mode="append", **self._save_args
         )
 
-    def _save_as_table(self, df: DataFrame):
+    def _save_as_table(self, df: DataFrame) -> None:
         _options = {
             "name": self._full_table_path,
             "mode": "append",
@@ -69,7 +69,7 @@ class DeltaTableAppender:
 
         df.write.saveAsTable(**_options)
 
-    def append(self, df: DataFrame):
+    def append(self, df: DataFrame) -> None:
         if self._dataset_type == "file":
             self._save_as_file(df)
         else:

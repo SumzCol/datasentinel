@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 
 
 class PysparkValidationStrategy(ValidationStrategy):
-    def __init__(self):
+    def __init__(self) -> None:
         """Determine the computational options for Rules"""
         self._compute_instructions: dict[str, Callable[[DataFrame], DataFrame]] = {}
 
-    def is_complete(self, rule: Rule):
+    def is_complete(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 *rule.id_columns,
@@ -31,7 +31,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def are_complete(self, rule: Rule):
+    def are_complete(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 *rule.id_columns,
@@ -40,7 +40,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_unique(self, rule: Rule):
+    def is_unique(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return (
                 dataframe.select(
@@ -54,7 +54,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def are_unique(self, rule: Rule):
+    def are_unique(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return (
                 dataframe.select(
@@ -68,7 +68,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def has_pattern(self, rule: Rule):
+    def has_pattern(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -76,7 +76,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_greater_than(self, rule: Rule):
+    def is_greater_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -84,7 +84,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_greater_or_equal_than(self, rule: Rule):
+    def is_greater_or_equal_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -92,7 +92,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_than(self, rule: Rule):
+    def is_less_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -100,7 +100,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_or_equal_than(self, rule: Rule):
+    def is_less_or_equal_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -108,7 +108,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_equal_than(self, rule: Rule):
+    def is_equal_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -116,7 +116,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_between(self, rule: Rule):
+    def is_between(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -124,7 +124,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_in(self, rule: Rule):
+    def is_in(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -132,7 +132,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def not_in(self, rule: Rule):
+    def not_in(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
@@ -140,7 +140,7 @@ class PysparkValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_custom(self, rule: Rule):
+    def is_custom(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame):
             computed_frame = rule.function(dataframe, rule.options)
             if "pyspark" not in str(type(computed_frame)):

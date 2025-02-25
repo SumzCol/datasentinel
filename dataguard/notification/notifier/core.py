@@ -40,7 +40,7 @@ class AbstractNotifier(ABC):
         return logging.getLogger(__name__)
 
     @abstractmethod
-    def notify(self, result: DataValidationResult):
+    def notify(self, result: DataValidationResult) -> None:
         pass
 
 
@@ -71,7 +71,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def register(self, notifier: AbstractNotifier, replace: bool = False):
+    def register(self, notifier: AbstractNotifier, replace: bool = False) -> None:
         """Register notifier
 
         Args:
@@ -83,7 +83,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def remove(self, name: str):
+    def remove(self, name: str) -> None:
         """Remove notifier by name
 
         Args:
@@ -109,7 +109,7 @@ class AbstractNotifierManager(ABC):
         self,
         notifiers_by_events: dict[NotifyOnEvent, list[str]],
         result: DataValidationResult,
-    ):
+    ) -> None:
         """
         Notify a validation node result using the specified notifiers for each event.
 

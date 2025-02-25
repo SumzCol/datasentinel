@@ -15,7 +15,7 @@ from dataguard.validation.status import Status
 class NotifierManager(AbstractNotifierManager):
     _lock = threading.Lock()
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._notifiers: dict[str, AbstractNotifier] = {}
 
     def count(self, enabled_only: bool = False) -> int:
@@ -32,7 +32,7 @@ class NotifierManager(AbstractNotifierManager):
             raise NotifierNotFoundError(f"Notifier '{name}' does not exist.")
         return self._notifiers[name]
 
-    def register(self, notifier: AbstractNotifier, replace: bool = False):
+    def register(self, notifier: AbstractNotifier, replace: bool = False) -> None:
         if notifier.name in self._notifiers and not replace:
             raise NotifierAlreadyExistsError(
                 f"Notifier with name '{notifier.name}' already exists."
@@ -40,7 +40,7 @@ class NotifierManager(AbstractNotifierManager):
         with self._lock:
             self._notifiers[notifier.name] = notifier
 
-    def remove(self, name: str):
+    def remove(self, name: str) -> None:
         if not self.exists(name):
             raise NotifierNotFoundError(f"Notifier '{name}' does not exist.")
         with self._lock:
@@ -53,7 +53,7 @@ class NotifierManager(AbstractNotifierManager):
         self,
         notifiers_by_events: dict[NotifyOnEvent, list[str]],
         result: DataValidationResult,
-    ):
+    ) -> None:
         status = result.status
         notifiers = []
         if status == Status.PASS:
@@ -66,7 +66,7 @@ class NotifierManager(AbstractNotifierManager):
         for notifier in notifiers:
             self._notify(notifier=self.get(notifier), result=result)
 
-    def _notify(self, notifier: AbstractNotifier, result: DataValidationResult):
+    def _notify(self, notifier: AbstractNotifier, result: DataValidationResult) -> None:
         if notifier.disabled:
             self._logger.warning(
                 f"Notifier '{notifier.name}' is disabled, skipping sending notification."

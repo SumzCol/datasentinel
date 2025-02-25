@@ -35,11 +35,11 @@ class RowLevelResultCheck(AbstractCheck):
         super().__init__(level, name)
 
     @property
-    def rules(self):
+    def rules(self) -> list[Rule]:
         """Returns all rules defined in check"""
         return list(self._rules.values())
 
-    def is_complete(self, id_columns: list[str], column: str, pct: float = 1.0):
+    def is_complete(self, id_columns: list[str], column: str, pct: float = 1.0) -> Self:
         if are_id_columns_in_rule_columns(id_columns, column):
             raise BadArgumentError("ID columns cannot be evaluated in 'is_complete' rule")
         if not id_columns:
@@ -56,7 +56,7 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def are_complete(self, id_columns: list[str], column: list[str], pct: float = 1.0):
+    def are_complete(self, id_columns: list[str], column: list[str], pct: float = 1.0) -> Self:
         if are_id_columns_in_rule_columns(id_columns, column):
             raise BadArgumentError("ID columns cannot be evaluated in 'are_complete' rule")
         (
@@ -71,7 +71,7 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def is_unique(self, column: str, pct: float = 1.0, ignore_nulls: bool = False):
+    def is_unique(self, column: str, pct: float = 1.0, ignore_nulls: bool = False) -> Self:
         (
             Rule(
                 method="is_unique",
@@ -84,7 +84,7 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def are_unique(self, column: list[str], pct: float = 1.0, ignore_nulls: bool = False):
+    def are_unique(self, column: list[str], pct: float = 1.0, ignore_nulls: bool = False) -> Self:
         (
             Rule(
                 method="are_unique",
@@ -99,7 +99,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def has_pattern(
         self, column: str, value: str, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="has_pattern",
@@ -115,7 +115,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_greater_than(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_greater_than",
@@ -131,7 +131,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_greater_or_equal_than(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_greater_or_equal_than",
@@ -147,7 +147,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_less_than(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_less_than",
@@ -163,7 +163,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_less_or_equal_than(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_less_or_equal_than",
@@ -179,7 +179,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_equal_than(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_equal_than",
@@ -199,7 +199,7 @@ class RowLevelResultCheck(AbstractCheck):
         value: list[float] | list[int] | list[datetime] | list[date],
         pct: float = 1.0,
         id_columns: list[str] | None = None,
-    ):
+    ) -> Self:
         if len(value) != 2 or not isinstance(value, list):  # noqa PLR2004
             raise BadArgumentError("Value must be a list containing min and max values")
         (
@@ -217,7 +217,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def is_in(
         self, column: str, value: list, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="is_in",
@@ -233,7 +233,7 @@ class RowLevelResultCheck(AbstractCheck):
 
     def not_in(
         self, column: str, value: list, pct: float = 1.0, id_columns: list[str] | None = None
-    ):
+    ) -> Self:
         (
             Rule(
                 method="not_in",

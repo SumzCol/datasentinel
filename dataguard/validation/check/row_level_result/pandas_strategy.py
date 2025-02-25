@@ -17,94 +17,94 @@ if TYPE_CHECKING:
 
 
 class PandasValidationStrategy(ValidationStrategy):
-    def __init__(self):
+    def __init__(self) -> None:
         self._compute_instructions: dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {}
 
-    def is_complete(self, rule: Rule):
+    def is_complete(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[*rule.id_columns, rule.column]]
             return df[df[rule.column].isna()]
 
         self._compute_instructions[rule.key] = _execute
 
-    def are_complete(self, rule: Rule):
+    def are_complete(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[*rule.id_columns, *rule.column]]
             return df[df[list(rule.column)].isnull().any(axis=1)]
 
         self._compute_instructions[rule.key] = _execute
 
-    def has_pattern(self, rule: Rule):
+    def has_pattern(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[~df[rule.column].astype(str).str.match(rule.value, na=False)]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_unique(self, rule: Rule):
+    def is_unique(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[rule.column].value_counts().reset_index().query("count > 1")[[rule.column]]
 
         self._compute_instructions[rule.key] = _execute
 
-    def are_unique(self, rule: Rule):  ## ojo
+    def are_unique(self, rule: Rule) -> None:  ## ojo
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[*rule.column]]
             return df[df[list(rule.column)].isnull().any(axis=1)]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_greater_than(self, rule: Rule):
+    def is_greater_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column] <= rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_greater_or_equal_than(self, rule: Rule):
+    def is_greater_or_equal_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column] < rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_than(self, rule: Rule):
+    def is_less_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column] >= rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_or_equal_than(self, rule: Rule):
+    def is_less_or_equal_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column] > rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_equal_than(self, rule: Rule):
+    def is_equal_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column] != rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_between(self, rule: Rule):
+    def is_between(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[(df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1])]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_in(self, rule: Rule):
+    def is_in(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[~df[rule.column].isin(rule.value)]
 
         self._compute_instructions[rule.key] = _execute
 
-    def not_in(self, rule: Rule):
+    def not_in(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
             df = df[[rule.column]]
             return df[df[rule.column].isin(rule.value)]

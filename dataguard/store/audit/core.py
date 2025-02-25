@@ -29,17 +29,17 @@ class AbstractAuditStore(ABC):
         self._name = name
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the audit store."""
         return self._name
 
     @property
-    def disabled(self):
+    def disabled(self) -> bool:
         """Return whether the audit store is disabled."""
         return self._disabled
 
     @abstractmethod
-    def append(self, row: BaseAuditRow):
+    def append(self, row: BaseAuditRow) -> None:
         """Append a row to the audit store.
 
         Args:
@@ -79,7 +79,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def register(self, audit_store: AbstractAuditStore, replace: bool = False):
+    def register(self, audit_store: AbstractAuditStore, replace: bool = False) -> None:
         """Register an audit store.
 
         Args:
@@ -92,7 +92,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def remove(self, name: str):
+    def remove(self, name: str) -> None:
         """Remove an audit store with the given name.
 
         Args:
@@ -114,7 +114,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def append(self, audit_store: str, row: BaseAuditRow):
+    def append(self, audit_store: str, row: BaseAuditRow) -> None:
         """Append a row to the audit store with the given name.
 
         Args:
@@ -123,7 +123,7 @@ class AbstractAuditStoreManager(ABC):
         """
 
     @abstractmethod
-    def append_to_all_stores(self, row: BaseAuditRow):
+    def append_to_all_stores(self, row: BaseAuditRow) -> None:
         """Append a row all the audit stores registered.
 
         Args:

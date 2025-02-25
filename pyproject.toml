@@ -172,5 +172,4 @@ known-first-party = ["dataguard"]
 strict = true
 allow_any_generics = true
 no_warn_unused_ignores = true
-ignore_missing_imports = true
 exclude = ['^docs/']

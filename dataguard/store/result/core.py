@@ -29,17 +29,17 @@ class AbstractResultStore(ABC):
         self._disabled = disabled
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Returns the name of the result store."""
         return self._name
 
     @property
-    def disabled(self):
+    def disabled(self) -> bool:
         """Returns whether the result store is disabled."""
         return self._disabled
 
     @abstractmethod
-    def store(self, result: DataValidationResult):
+    def store(self, result: DataValidationResult) -> None:
         """Store a data validation result"""
 
 
@@ -75,7 +75,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def register(self, result_store: AbstractResultStore, replace: bool = False):
+    def register(self, result_store: AbstractResultStore, replace: bool = False) -> None:
         """Register a result store
 
         Args:
@@ -88,7 +88,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def remove(self, name: str):
+    def remove(self, name: str) -> None:
         """Remove a result store by name
 
         Args:
@@ -110,7 +110,7 @@ class AbstractResultStoreManager(ABC):
         """
 
     @abstractmethod
-    def store_all(self, result_stores: list[str], result: DataValidationResult):
+    def store_all(self, result_stores: list[str], result: DataValidationResult) -> None:
         """Store a result in all the given result stores
 
         Args:

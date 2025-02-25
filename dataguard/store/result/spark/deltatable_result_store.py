@@ -123,7 +123,7 @@ class DeltaTableResultStore(AbstractResultStore):
             ),
         )
 
-    def store(self, result: DataValidationResult):
+    def store(self, result: DataValidationResult) -> None:
         try:
             self._delta_table_appender.append(self._result_to_df(result))
         except Exception as e:
