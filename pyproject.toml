@@ -105,15 +105,11 @@ all-auditstores = [
 slack-slacknotifier = [
   "slack-sdk~=3.34.0"
 ]
-#email-smtpemailnotifier = [
-#  "smtplib"
-#]
-all-notifiers = [
-  "dataguard[slack-slacknotifier]"
+email-smtpemailnotifier = [
+  "smtplib"
 ]
-
-all = [
-  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]"
+all-notifiers = [
+  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
 ]
 
 # Testing dependencies
@@ -121,7 +117,12 @@ test = [
   "pytest>=7.2,<9.0",
   "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
-  "dataguard[all]",
+  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]",
+]
+
+# Scripts dependencies
+scripts = [
+    "click==8.1.0"
 ]
 
 # Lint dependencies
@@ -131,10 +132,15 @@ lint = [
   "mypy~=1.15.0",
 ]
 
+all = [
+  "dataguard[test,scripts,lint]"
+]
+
 [tool.pytest.ini_options]
 markers = [
     "unit: mark a test as a unit test",
     "functional: mark a test as a functional test",
+    "slow: mark a test as a slow test",
 ]
 testpaths = [
   "tests"

@@ -10,6 +10,9 @@ install-lint-reqs: install-uv
 install-test-reqs: install-uv
 	uv pip install --system "dataguard[test] @ ."
 
+install-scripts-reqs: install-uv
+	uv pip install --system "dataguard[scripts] @ ."
+
 install-pre-commit:
 	pre-commit install --install-hooks
 

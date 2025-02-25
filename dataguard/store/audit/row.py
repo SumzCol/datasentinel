@@ -8,13 +8,27 @@ from typing_extensions import Self
 
 _VALID_SCALAR_TYPES = {str, int, float, bool, datetime, date}
 _VALID_COLLECTION_TYPES = {list, tuple, set}
-_VALID_TYPES = {*_VALID_SCALAR_TYPES, *_VALID_COLLECTION_TYPES, dict}
+_VALID_OPTIONAL_TYPES = {Union, UnionType}
+_VALID_TYPES = {*_VALID_SCALAR_TYPES, *_VALID_COLLECTION_TYPES, *_VALID_OPTIONAL_TYPES, dict}
+_VALID_TYPES_STR = ",".join([t.__name__ for t in _VALID_TYPES])
 
 
 @dataclass
 class FieldInfo:
+    """
+    Information about a field in a row.
+
+    Attributes:
+        annotation: The annotation/type of the field.
+        type: The normalized type of the field.
+        args: The arguments of the type of the field.
+        required: Whether the field is required.
+        complex: Whether the field is complex.
+    """
+
     annotation: type | None
     type: type
+    args: tuple | None
     required: bool
     complex: bool
 
@@ -36,72 +50,60 @@ class BaseAuditRow(BaseModel):
     @property
     def row_fields(self) -> dict[str, FieldInfo]:
         """Returns the schema of the row."""
-        return {
-            name: FieldInfo(
+        row_fields = {}
+
+        for name, pydantic_field_info in self.model_fields.items():
+            field_type, args = self._field_type(pydantic_field_info.annotation)
+            row_fields[name] = FieldInfo(
                 annotation=pydantic_field_info.annotation,
-                type=self._field_type(pydantic_field_info.annotation),
+                type=field_type,
+                args=args,
                 required=pydantic_field_info.is_required(),
                 complex=self._is_complex(pydantic_field_info.annotation),
             )
-            for name, pydantic_field_info in self.model_fields.items()
-        }
+
+        return row_fields
 
     def _validate_fields(self) -> None:
         for name, pydantic_field_info in self.model_fields.items():
             if self._is_multi_type(pydantic_field_info.annotation):
                 raise ValueError(f"Multi-type fields are not supported '{name}'.")
 
-            # _field_type = self._field_type(pydantic_field_info.annotation)
-            # if _field_type not in _VALID_TYPES:
-            #     _str_types = ", ".join([t.__name__ for t in _VALID_TYPES])
-            #     raise ValueError(
-            #         f"Field '{name}' has an invalid type '{_field_type}'. "
-            #         f"Valid types are: {_str_types}"
-            #     )
-
-    def _is_multi_type(self, annotation: type) -> bool:
+    def _is_multi_type(self, annotation: type) -> bool:  # noqa PLR0911
         field_type = get_origin(annotation) or annotation
+        if field_type is Any:
+            return True
+        if field_type not in _VALID_TYPES:
+            raise ValueError(
+                f"Unsupported field type '{annotation}'. Supported types: {_VALID_TYPES_STR}"
+            )
+
         args = get_args(annotation)
 
         if field_type in _VALID_SCALAR_TYPES:
             return False
-
-        if field_type is Any:
-            return True
-
         if field_type is dict:
             return False
-
-        if not (
-            self._is_multi_typed_collection(field_type=field_type, args=args)
-            or self._is_multi_typed_optional(field_type=field_type, args=args)
-        ):
-            return False
-
-        return True
-
-    def _is_multi_typed_optional(self, field_type: type, args: tuple | None) -> bool:
-        if self._is_optional_field(field_type=field_type, args=args) and not self._is_multi_type(
-            args[0]
-        ):
-            return False
-
+        if field_type in _VALID_COLLECTION_TYPES:
+            return self._is_multi_typed_collection(field_type=field_type, args=args)
+        if self._is_optional_field(field_type, args):
+            if args[0] in _VALID_OPTIONAL_TYPES:
+                return True
+            return self._is_multi_type(args[0])
         return True
 
     @staticmethod
     def _is_optional_field(field_type: type, args: tuple | None) -> bool:
-        if field_type not in {Union, UnionType} or not args:
+        if field_type not in _VALID_OPTIONAL_TYPES:
             return False
 
-        if len(args) != 2 and args[1] is not NoneType:  # noqa PLR2004
+        if len(args) != 2 or args[1] is not NoneType:  # noqa PLR2004
             return False
 
         return True
 
     @staticmethod
     def _is_multi_typed_collection(field_type: type, args: tuple | None) -> bool:
-        if field_type not in _VALID_COLLECTION_TYPES:
-            return False
         if not args:
             return True
 
@@ -123,29 +125,28 @@ class BaseAuditRow(BaseModel):
 
         return True
 
-    def _is_complex(self, field_type: type, args: tuple | None) -> bool:
+    def _is_complex(self, annotation: type) -> bool:
+        field_type = get_origin(annotation) or annotation
+        args = get_args(annotation)
         if field_type in _VALID_SCALAR_TYPES:
             return False
 
         if self._is_optional_field(field_type=field_type, args=args):
-            return self._is_complex(args[0], args=get_args(args[0]))
+            if args[0] in _VALID_OPTIONAL_TYPES:
+                return True
+            return self._is_complex(args[0])
 
         return True
 
-    def _field_type(self, annotation: type) -> type:
-        origin = get_origin(annotation)
+    def _field_type(self, annotation: type) -> tuple[type, tuple[type, ...] | None]:
+        field_type = get_origin(annotation) or annotation
 
-        if not origin:
-            return annotation
-
-        if origin not in {Union, UnionType}:
-            return origin
+        if field_type in _VALID_SCALAR_TYPES:
+            return field_type, None
 
         args = get_args(annotation)
 
-        if len(args) == 1 or (len(args) == 2 and args[1] == NoneType):  # noqa PLR2004
-            if self._is_complex(args[0]):
-                return self._field_type(args[0])
-            return args[0]
+        if field_type in _VALID_OPTIONAL_TYPES:
+            return self._field_type(args[0])
 
-        return annotation
+        return field_type, args

@@ -29,19 +29,23 @@ jobs:
         run: |
           python -m pip install --upgrade pip
         shell: bash
-      - name: Install base dependencies
+      - name: Install scripts dependencies
         run: |
-          make install-base-reqs
+          make install-scripts-reqs
         shell: bash
       - name: Build project
         run: |
           make build-package
         shell: bash
+      - name: Extract release notes
+        run: |
+          python scripts/gh_actions/extract_release_notes.py \
+          -f CHANGELOG.md -o release_notes.md -v ${{inputs.version}}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{inputs.version}}
           name: ${{inputs.version}}
-          body: "This is a release for version ${{inputs.version}}"
+          body_path: release_notes.md
           draft: false
           prerelease: false
