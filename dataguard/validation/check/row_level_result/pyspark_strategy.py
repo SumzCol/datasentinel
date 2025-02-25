@@ -26,8 +26,8 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 *rule.id_columns,
-                rule.column,
-            ).where(F.col(f"{rule.column}").isNull())
+                rule.column[0],
+            ).where(F.col(rule.column[0]).isNull())
 
         self._compute_instructions[rule.key] = _execute
 
@@ -44,7 +44,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return (
                 dataframe.select(
-                    rule.column,
+                    F.col(rule.column[0]),
                 )
                 .groupBy(rule.column)
                 .count()
@@ -58,7 +58,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return (
                 dataframe.select(
-                    *rule.column,
+                    *[F.col(column) for column in rule.column],
                 )
                 .groupBy(rule.column)
                 .count()
@@ -72,7 +72,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(~F.col(rule.column).rlike(rule.value))
+            ).filter(~F.col(rule.column[0]).rlike(rule.value))
 
         self._compute_instructions[rule.key] = _execute
 
@@ -80,7 +80,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} <= {rule.value}")
+            ).where(F.col(rule.column[0]) <= rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
@@ -88,7 +88,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} < {rule.value}")
+            ).where(F.col(rule.column[0]) < rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
@@ -96,7 +96,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} >= {rule.value}")
+            ).where(F.col(rule.column[0]) >= rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
@@ -104,7 +104,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} > {rule.value}")
+            ).where(F.col(rule.column[0]) > rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
@@ -112,7 +112,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} != {rule.value}")
+            ).where(F.col(rule.column[0]) != rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
@@ -120,7 +120,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(f"{rule.column} < {rule.value[0]} or {rule.column} > {rule.value[1]}")
+            ).where(~F.col(rule.column[0]).between(rule.value[0], rule.value[1]))
 
         self._compute_instructions[rule.key] = _execute
 
@@ -128,7 +128,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(~F.col(rule.column).isin(rule.value))
+            ).filter(~F.col(rule.column[0]).isin(rule.value))
 
         self._compute_instructions[rule.key] = _execute
 
@@ -136,7 +136,7 @@ class PysparkValidationStrategy(ValidationStrategy):
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
                 rule.column,
-            ).filter(F.col(rule.column).isin(rule.value))
+            ).filter(F.col(rule.column[0]).isin(rule.value))
 
         self._compute_instructions[rule.key] = _execute
 
@@ -166,21 +166,25 @@ class PysparkValidationStrategy(ValidationStrategy):
             for k, compute_instruction in self._compute_instructions.items()
         }
 
-    def validate_data_types(self, df: DataFrame, rules: dict[str, Rule]) -> bool:
+    def validate_data_types(self, df: DataFrame, rules: dict[str, Rule]) -> None:
         """
         Validate the datatype of each column according to the CheckDataType of the rule's method
         """
-        valid = True
+        types_map = {
+            RuleDataType.NUMERIC: NumericType,
+            RuleDataType.STRING: StringType,
+            RuleDataType.DATE: DateType,
+            RuleDataType.TIMESTAMP: TimestampType,
+        }
         for key, rule in rules.items():
-            if rule.data_type == RuleDataType.NUMERIC:
-                valid = valid and isinstance(df.schema[rule.column].dataType, NumericType)
-            elif rule.data_type == RuleDataType.STRING:
-                valid = valid and isinstance(df.schema[rule.column].dataType, StringType)
-            elif rule.data_type == RuleDataType.DATE:
-                valid = valid and isinstance(df.schema[rule.column].dataType, DateType)
-            elif rule.data_type == RuleDataType.TIMESTAMP:
-                valid = valid and isinstance(df.schema[rule.column].dataType, TimestampType)
-        return valid
+            if rule.data_type == RuleDataType.AGNOSTIC:
+                continue
+            for col in rule.column:
+                if not isinstance(df.schema[col].dataType, types_map[rule.data_type]):
+                    raise TypeError(
+                        f"Column '{col}' type is not compatible with rule '{rule.method}' "
+                        f"data type: '{rule.data_type}'"
+                    )
 
     def compute(self, df: DataFrame, rules: dict[str, Rule]) -> list[RuleMetric]:
         """Compute and returns calculated rule metrics"""

@@ -125,16 +125,23 @@ class PandasValidationStrategy(ValidationStrategy):
             for k, compute_instruction in self._compute_instructions.items()
         }
 
-    def validate_data_types(self, df: pd.DataFrame, rules: dict[str, Rule]) -> bool:
-        valid = True
+    def validate_data_types(self, df: pd.DataFrame, rules: dict[str, Rule]) -> None:
+        function_map = {
+            RuleDataType.NUMERIC: pdt.is_numeric_dtype,
+            RuleDataType.STRING: pdt.is_string_dtype,
+            RuleDataType.DATE: pdt.is_datetime64_any_dtype,
+            RuleDataType.TIMESTAMP: pdt.is_datetime64_any_dtype,
+        }
         for key, rule in rules.items():
-            if rule.data_type == RuleDataType.NUMERIC:
-                valid = valid and pdt.is_numeric_dtype(df[rule.column])
-            elif rule.data_type == RuleDataType.STRING:
-                valid = valid and pdt.is_string_dtype(df[rule.column])
-            elif rule.data_type in {RuleDataType.DATE, RuleDataType.TIMESTAMP}:
-                valid = valid and pdt.is_datetime64_any_dtype(df[rule.column])
-        return valid
+            if rule.data_type == RuleDataType.AGNOSTIC:
+                continue
+
+            for col in rule.column:
+                if not function_map[rule.data_type](df[col]):
+                    raise TypeError(
+                        f"Column '{col}' type is not compatible with rule '{rule.method}' "
+                        f"data type: '{rule.data_type}'"
+                    )
 
     def compute(self, df: pd.DataFrame, rules: dict[str, Rule]) -> list[RuleMetric]:
         rows = df.shape[0]

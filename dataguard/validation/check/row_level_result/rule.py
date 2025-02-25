@@ -5,7 +5,7 @@ from collections.abc import Callable
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
@@ -33,18 +33,28 @@ class Rule:
         data_type: Rule data type
         pass_threshold: Rule pass threshold
         options: Rule options
-        status: Rule status
     """
 
     method: str
-    data_type: set[RuleDataType]
+    data_type: RuleDataType
     pass_threshold: float = 1.0
-    value: int | float | str | datetime | date | list | None = None
+    value: (
+        int
+        | float
+        | str
+        | datetime
+        | date
+        | list[int]
+        | list[float]
+        | list[str]
+        | list[datetime]
+        | list[date]
+        | None
+    ) = None
     function: Callable | None = None
-    column: str | list[str] | None = None
-    id_columns: list[str] | None = None
+    column: list[str] = Field(default_factory=list)
+    id_columns: list[str] = Field(default_factory=list)
     options: dict[str, Any] | None = None
-    status: str | None = None
 
     @field_validator("pass_threshold", mode="after")
     def validate_pass_threshold(cls, pass_threshold: float) -> float:
@@ -56,10 +66,21 @@ class Rule:
     def validate_value(self) -> Self:
         if self.value is None:
             return self
-        if isinstance(self.value, list) and (self.data_type == RuleDataType.AGNOSTIC):
-            # All values can only be of one data type in a rule
+        if self.data_type == RuleDataType.AGNOSTIC and isinstance(self.value, list):
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
+        if self.data_type == RuleDataType.NUMERIC and not isinstance(self.value, int | float):
+            raise ValueError("Numeric rule value should be int or float")
+        if self.data_type == RuleDataType.STRING and not isinstance(self.value, str):
+            raise ValueError("String rule value should be str")
+        if self.data_type == RuleDataType.DATE and not isinstance(self.value, date):
+            raise ValueError("Date rule value should be date")
+        if self.data_type == RuleDataType.TIMESTAMP and not isinstance(self.value, datetime):
+            raise ValueError("Timestamp rule value should be datetime")
+        return self
+
+    @model_validator(mode="after")
+    def validate_function(self) -> Self:
         if self.method == "is_custom" and self.function is None:
             raise ValueError("When 'is_custom' method is used, a function must be provided")
         return self

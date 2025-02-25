@@ -30,10 +30,10 @@ class TestRowLevelResultCheck:
 
     @pytest.mark.parametrize(
         "value",
-        [[1], [1, 2, 3], (1, 2), {1, 2}],
-        ids=("list with len equal to 1", "list with len equal to 3", "tuple", "set"),
+        [[1], [1, 2, 3]],
+        ids=("list with len equal to 1", "list with len equal to 3"),
     )
-    def test_is_between_with_invalid_value(self, value):
+    def test_is_between_with_invalid_value_len(self, value):
         with pytest.raises(BadArgumentError):
             (
                 RowLevelResultCheck(

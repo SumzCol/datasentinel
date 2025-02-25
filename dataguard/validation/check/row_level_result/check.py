@@ -8,7 +8,6 @@ from typing_extensions import Self
 from dataguard.validation.check.core import (
     AbstractCheck,
     BadArgumentError,
-    CheckError,
     DataframeType,
     EmptyCheckError,
     UnsupportedDataframeTypeError,
@@ -47,7 +46,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_complete",
-                column=column,
+                column=[column],
                 id_columns=id_columns,
                 data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
@@ -75,7 +74,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_unique",
-                column=column,
+                column=[column],
                 data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
                 options={"ignore_nulls": ignore_nulls},
@@ -103,7 +102,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="has_pattern",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.STRING,
@@ -119,7 +118,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_greater_than",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.NUMERIC,
@@ -135,7 +134,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_greater_or_equal_than",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.NUMERIC,
@@ -151,7 +150,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_less_than",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.NUMERIC,
@@ -167,7 +166,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_less_or_equal_than",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.NUMERIC,
@@ -183,7 +182,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_equal_than",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.NUMERIC,
@@ -200,12 +199,12 @@ class RowLevelResultCheck(AbstractCheck):
         pct: float = 1.0,
         id_columns: list[str] | None = None,
     ) -> Self:
-        if len(value) != 2 or not isinstance(value, list):  # noqa PLR2004
+        if len(value) != 2:  # noqa PLR2004
             raise BadArgumentError("Value must be a list containing min and max values")
         (
             Rule(
                 method="is_between",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.AGNOSTIC,
@@ -221,7 +220,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="is_in",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.AGNOSTIC,
@@ -237,7 +236,7 @@ class RowLevelResultCheck(AbstractCheck):
         (
             Rule(
                 method="not_in",
-                column=column,
+                column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
                 data_type=RuleDataType.AGNOSTIC,
@@ -269,21 +268,18 @@ class RowLevelResultCheck(AbstractCheck):
 
         df_type = DataframeType.from_df(df)
         if df_type == DataframeType.PYSPARK:
-            validation_strategy: ValidationStrategy = importlib.import_module(
+            validation_strategy = importlib.import_module(
                 "dataguard.validation.check.row_level_result.pyspark_strategy"
             ).PysparkValidationStrategy()
         elif df_type == DataframeType.PANDAS:
-            validation_strategy: ValidationStrategy = importlib.import_module(
+            validation_strategy = importlib.import_module(
                 "dataguard.validation.check.row_level_result.pandas_strategy"
             ).PandasValidationStrategy()
         else:
             raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
-        if not validation_strategy.validate_data_types(df, self._rules):
-            raise CheckError(
-                "One or more evaluated columns have a data type incompatible with the "
-                "defined rules."
-            )
+        validation_strategy: ValidationStrategy
+        validation_strategy.validate_data_types(df, self._rules)
         start_time = datetime.now()
         rule_metrics = validation_strategy.compute(df, self._rules)
         end_time = datetime.now()

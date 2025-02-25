@@ -1,7 +1,6 @@
-from typing import Self
-
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
+from typing_extensions import Self
 
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.core import NotifyOnEvent

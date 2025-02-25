@@ -9,15 +9,15 @@ class ValidationStrategy(ABC):
     """An interface for validation strategies to adhere to"""
 
     @abstractmethod
-    def validate_data_types(self, df: Any, rules: dict[str, Rule]) -> bool:
+    def validate_data_types(self, df: Any, rules: dict[str, Rule]) -> None:
         """Validate that each rule evaluated columns have correct data types
 
         Args:
             df: The dataframe to validate
             rules: The rules to validate
 
-        Returns:
-            Whether the evaluated columns have correct data types
+        Raises:
+            CheckError if validation fails
         """
 
     @abstractmethod

@@ -51,7 +51,7 @@ class RuleMetric:
         return self
 
     @field_validator("column", mode="before")
-    def validate_column(cls, value: Any) -> Any:
+    def validate_column(cls, value: Any) -> list:
         if isinstance(value, str):
             return [value]
         if isinstance(value, tuple) or isinstance(value, set):
