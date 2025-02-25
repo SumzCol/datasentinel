@@ -8,7 +8,9 @@ from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.status import Status
 
 
-class TestIsComplete:
+@pytest.mark.unit
+@pytest.mark.slow
+class TestIsCompleteUnit:
     @pytest.mark.parametrize(
         "evaluated_column",
         ["string_col", "integer_col", "float_col", "date_col", "timestamp_col"],
