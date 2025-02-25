@@ -105,11 +105,8 @@ all-auditstores = [
 slack-slacknotifier = [
   "slack-sdk~=3.34.0"
 ]
-email-smtpemailnotifier = [
-  "smtplib"
-]
 all-notifiers = [
-  "dataguard[slack-slacknotifier,email-smtpemailnotifier]"
+  "dataguard[slack-slacknotifier]"
 ]
 
 # Testing dependencies
