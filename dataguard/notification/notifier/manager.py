@@ -4,9 +4,10 @@ from dataguard.notification.notifier.core import (
     AbstractNotifier,
     AbstractNotifierManager,
     NotifierAlreadyExistsError,
+    NotifierError,
     NotifierNotFoundError,
 )
-from dataguard.store.result.core import ResultStoreError
+from dataguard.notification.renderer.core import RendererError
 from dataguard.validation.core import NotifyOnEvent
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.status import Status
@@ -74,7 +75,7 @@ class NotifierManager(AbstractNotifierManager):
             return
         try:
             notifier.notify(result=result)
-        except ResultStoreError as e:
+        except (NotifierError, RendererError) as e:
             self._logger.error(
                 f"There was an error while trying to send notification "
                 f"using notifier '{notifier.name}'. Error: {e!s}"

@@ -12,6 +12,9 @@ class RendererError(DataGuardError):
 
 
 class AbstractRenderer(ABC, Generic[T]):
+    """Base class for all renderer implementations."""
+
     @abstractmethod
     def render(self, result: DataValidationResult) -> T:
+        """Render a data validation result into a notification message."""
         pass
