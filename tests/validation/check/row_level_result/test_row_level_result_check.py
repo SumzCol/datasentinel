@@ -5,7 +5,8 @@ from dataguard.validation.check.core import BadArgumentError
 from dataguard.validation.check.level import CheckLevel
 
 
-class TestRowLevelResultCheck:
+@pytest.mark.unit
+class TestRowLevelResultCheckUnit:
     def test_is_complete_id_columns_in_evaluated_columns(self):
         with pytest.raises(BadArgumentError):
             (

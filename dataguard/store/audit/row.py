@@ -43,6 +43,7 @@ class BaseAuditRow(BaseModel):
         """Returns the row as a dictionary."""
         return self.model_dump()
 
+    @property
     def columns(self) -> list[str]:
         """Returns the columns of the row."""
         return list(self.model_fields.keys())
@@ -107,20 +108,25 @@ class BaseAuditRow(BaseModel):
         if not args:
             return True
 
-        if field_type is list and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
-            return False
-
-        if field_type is tuple and (
-            (len(args) == 1 and args[0] in _VALID_SCALAR_TYPES)
-            or (
-                len(args) == 2  # noqa PLR2004
-                and args[0] in _VALID_SCALAR_TYPES
-                and args[1] == Ellipsis
-            )
+        if (
+            field_type is list
+            and args[0] in _VALID_SCALAR_TYPES
+            and all(arg == args[0] for arg in args)
         ):
             return False
 
-        if field_type is set and len(args) == 1 and args[0] in _VALID_SCALAR_TYPES:
+        if (
+            field_type is tuple
+            and args[0] in _VALID_SCALAR_TYPES
+            and all(arg == args[0] or arg is Ellipsis for arg in args)
+        ):
+            return False
+
+        if (
+            field_type is set
+            and args[0] in _VALID_SCALAR_TYPES
+            and all(arg == args[0] for arg in args)
+        ):
             return False
 
         return True
@@ -132,8 +138,6 @@ class BaseAuditRow(BaseModel):
             return False
 
         if self._is_optional_field(field_type=field_type, args=args):
-            if args[0] in _VALID_OPTIONAL_TYPES:
-                return True
             return self._is_complex(args[0])
 
         return True
@@ -148,5 +152,8 @@ class BaseAuditRow(BaseModel):
 
         if field_type in _VALID_OPTIONAL_TYPES:
             return self._field_type(args[0])
+
+        if field_type is tuple:
+            return field_type, (args[0],)
 
         return field_type, args

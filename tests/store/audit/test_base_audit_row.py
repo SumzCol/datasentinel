@@ -47,6 +47,7 @@ class TestBaseAuditRowUnit:
         [
             list[int | float | str],
             list[int] | list[float],
+            list[int, float, str],
             Union[list[int], list[float]],
             list,
             Optional[list[int | float | str]],
@@ -64,8 +65,10 @@ class TestBaseAuditRowUnit:
         [
             set[int | float | str],
             set[int] | set[float],
+            set[int, float, str],
             Union[set[int], set[float]],
             set,
+            Optional[set[int | float | str]],
         ],
     )
     def test_error_on_set_with_multi_type_values(self, field_type):
@@ -76,23 +79,31 @@ class TestBaseAuditRowUnit:
             AuditRow(field={1, 2})
 
     @pytest.mark.parametrize(
-        "field_type",
+        "field_type, value",
         [
-            tuple[int | float | str, ...],
-            tuple[int | float | str],
-            tuple[int] | tuple[float],
-            Union[tuple[int], tuple[float]],
-            tuple,
-            Optional[tuple[int | float | str]],
-            Optional[tuple[int | float | str, ...]],
+            (tuple[int | float | str, ...], (1,)),
+            (tuple[int | float | str], (1,)),
+            (tuple[int] | tuple[float], (1,)),
+            (tuple[int, str], (1, "1")),
+            (Union[tuple[int], tuple[float]], (1,)),
+            (tuple, (1,)),
+            (Optional[tuple[int | float | str]], (1,)),
+            (Optional[tuple[int | float | str, ...]], (1,)),
         ],
     )
-    def test_error_on_tuple_with_multi_type_values(self, field_type):
+    def test_error_on_tuple_with_multi_type_values(self, field_type, value):
         class AuditRow(BaseAuditRow):
             field: field_type
 
         with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
-            AuditRow(field=(1,))
+            AuditRow(field=value)
+
+    def test_error_on_union_as_optional_field(self):
+        class AuditRow(BaseAuditRow):
+            field: Optional[Union[int, str]]
+
+        with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
+            AuditRow(field="test")
 
     def test_error_on_enum_field(self):
         class TestEnum(str, Enum):
@@ -188,6 +199,7 @@ class TestBaseAuditRowUnit:
         "field_type, field_value, expected_args",
         [
             (tuple[int], (1,), (int,)),
+            (tuple[int, ...], (1, 1), (int,)),
             (tuple[str], ("a",), (str,)),
             (tuple[float], (1.0,), (float,)),
             (tuple[bool], (True,), (bool,)),
@@ -226,3 +238,19 @@ class TestBaseAuditRowUnit:
         assert result.args == expected_args
         assert result.complex
         assert result.required
+
+    def test_columns(self):
+        class AuditRow(BaseAuditRow):
+            field1: int
+            field2: str
+
+        audit_row = AuditRow(field1=1, field2="test")
+        assert audit_row.columns == ["field1", "field2"]
+
+    def test_to_dict(self):
+        class AuditRow(BaseAuditRow):
+            field1: int
+            field2: str
+
+        audit_row = AuditRow(field1=1, field2="test")
+        assert audit_row.to_dict() == {"field1": 1, "field2": "test"}

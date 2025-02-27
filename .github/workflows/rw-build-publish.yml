@@ -19,6 +19,8 @@ on:
 jobs:
   build-and-publish:
     runs-on: ${{ inputs.os }}
+    env:
+      RELEASE_NOTES_FILE: release_notes.md
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ inputs.python-version }}
@@ -40,12 +42,13 @@ jobs:
       - name: Extract release notes
         run: |
           python scripts/gh_actions/extract_release_notes.py \
-          -f CHANGELOG.md -o release_notes.md -v ${{inputs.version}}
+          -f CHANGELOG.md -o $RELEASE_NOTES_FILE -v ${{ inputs.version }}
+        shell: bash
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{inputs.version}}
-          name: ${{inputs.version}}
-          body_path: release_notes.md
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          body_path: ${{ env.RELEASE_NOTES_FILE }}
           draft: false
           prerelease: false

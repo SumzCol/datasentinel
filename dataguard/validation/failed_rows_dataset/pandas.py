@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from pandas import DataFrame
@@ -18,11 +17,13 @@ class PandasFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
         return self._data.shape[0]
 
     def to_dict(self, limit: int | None = None) -> list[dict[str, Any]]:
+        return self._apply_limit(limit).to_dict(orient="records")
+
+    def to_json(self, limit: int | None = None) -> str:
+        return self._apply_limit(limit).to_json(orient="records")
+
+    def _apply_limit(self, limit: int | None) -> DataFrame:
         if limit is not None and not limit > 0:
             raise ValueError("Limit must be greater than 0")
 
-        data = self._data.head(limit) if limit is not None else self._data
-        return data.to_dict(orient="records")
-
-    def to_json(self, limit: int | None = None) -> str:
-        return json.dumps(self.to_dict(limit))
+        return self._data.head(limit) if limit is not None else self._data

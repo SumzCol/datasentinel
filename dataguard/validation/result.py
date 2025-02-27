@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, model_validator
 from pydantic.dataclasses import dataclass
+from typing_extensions import Self
 from ulid import ULID
 
 from dataguard.validation.check.level import CheckLevel
@@ -27,10 +28,16 @@ class DataValidationResult:
     run_id: ULID
     name: str
     data_asset: str
-    data_asset_schema: str | None
     start_time: datetime
     end_time: datetime
     check_results: list[CheckResult]
+    data_asset_schema: str | None = None
+
+    @model_validator(mode="after")
+    def validate_start_end_time(self) -> Self:
+        if self.start_time > self.end_time:
+            raise ValueError("Start time must be before end time")
+        return self
 
     @property
     def status(self) -> Status:

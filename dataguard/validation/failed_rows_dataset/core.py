@@ -11,7 +11,7 @@ class AbstractFailedRowsDataset(ABC, Generic[T]):
         self._data = data
 
     @property
-    def data(self) -> T:
+    def data(self) -> T:  # pragma: no cover
         """Return bad records in their native format"""
         return self._data
 

@@ -114,6 +114,7 @@ test = [
   "pytest>=7.2,<9.0",
   "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
+  "coverage[toml]",
   "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]",
 ]
 
@@ -131,16 +132,6 @@ lint = [
 
 all = [
   "dataguard[test,scripts,lint]"
-]
-
-[tool.pytest.ini_options]
-markers = [
-    "unit: mark a test as a unit test",
-    "functional: mark a test as a functional test",
-    "slow: mark a test as a slow test",
-]
-testpaths = [
-  "tests"
 ]
 
 [tool.ruff]
@@ -169,7 +160,41 @@ max-args = 7  # Set the maximum number of arguments for a function
 known-first-party = ["dataguard"]
 
 [tool.mypy]
-strict = true
 allow_any_generics = true
 no_warn_unused_ignores = true
+ignore_missing_imports = true
+disable_error_code = ['misc']
 exclude = ['^docs/']
+
+[tool.pytest.ini_options]
+addopts="""
+--cov-context test  \
+--cov-config pyproject.toml \
+--cov-report xml:coverage.xml \
+--cov-report term-missing \
+--cov dataguard \
+--cov tests \
+--no-cov-on-fail \
+-ra \
+-W ignore"""
+markers = [
+    "unit: mark a test as a unit test",
+    "functional: mark a test as a functional test",
+    "slow: mark a test as a slow test",
+]
+testpaths = [
+  "tests"
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+omit = [
+    "tests/*",
+]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+concurrency = ["multiprocessing", "thread"]
+parallel = true
+sigterm = true

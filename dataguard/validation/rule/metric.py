@@ -2,7 +2,7 @@ from collections.abc import Callable
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import ConfigDict, field_validator, model_validator
+from pydantic import ConfigDict, model_validator
 from pydantic.dataclasses import dataclass
 from typing_extensions import Self
 
@@ -44,27 +44,11 @@ class RuleMetric:
     failed_rows_dataset: AbstractFailedRowsDataset | None = None
 
     @model_validator(mode="after")
-    def validate_model(self) -> Self:
+    def validate_violations_less_than_rows(self) -> Self:
         if self.violations > self.rows:
             raise ValueError("Violations cannot be greater than rows")
 
         return self
-
-    @field_validator("column", mode="before")
-    def validate_column(cls, value: Any) -> list:
-        if isinstance(value, str):
-            return [value]
-        if isinstance(value, tuple) or isinstance(value, set):
-            return list(value)
-        return value
-
-    @field_validator("id_columns", mode="before")
-    def validate_id_columns(cls, value: Any) -> Any:
-        if isinstance(value, str):
-            return [value]
-        if isinstance(value, tuple) or isinstance(value, set):
-            return list(value)
-        return value
 
     @property
     def status(self):
@@ -80,7 +64,7 @@ class RuleMetric:
         return {
             "id": self.id,
             "rule": self.rule,
-            "columns": self.column,
+            "column": self.column,
             "id_columns": self.id_columns,
             "value": self.value,
             "function": self.function,
@@ -90,5 +74,5 @@ class RuleMetric:
             "pass_threshold": self.pass_threshold,
             "options": self.options,
             "failed_rows_dataset": self.failed_rows_dataset,
-            "status": self.status.value,
+            "status": self.status,
         }

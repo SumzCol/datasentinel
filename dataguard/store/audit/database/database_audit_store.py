@@ -48,6 +48,23 @@ class DatabaseAuditStore(AbstractAuditStore):
         self._session_maker = sessionmaker(bind=self._engine)
         super().__init__(name, disabled)
 
+    def append(self, row: BaseAuditRow) -> None:
+        table = self._get_or_create_table(row)
+        with self._session_maker() as session:
+            try:
+                row_dict = {
+                    field: self._serialize_field_value(value)
+                    for field, value in row.to_dict().items()
+                }
+                insert_statement = table.insert().values(row_dict)
+                session.execute(insert_statement)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                raise AuditStoreError(
+                    f"There was an error while trying to append row. Error: {e!s}"
+                ) from e
+
     def _get_or_create_table(self, row: BaseAuditRow) -> Table:
         try:
             return Table(
@@ -85,23 +102,6 @@ class DatabaseAuditStore(AbstractAuditStore):
             raise AuditStoreError(
                 f"There was an error while trying to create table '{self._table}'. Error: {e!s}"
             ) from e
-
-    def append(self, row: BaseAuditRow) -> None:
-        table = self._get_or_create_table(row)
-        with self._session_maker() as session:
-            try:
-                row_dict = {
-                    field: self._serialize_field_value(value)
-                    for field, value in row.to_dict().items()
-                }
-                insert_statement = table.insert().values(row_dict)
-                session.execute(insert_statement)
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                raise AuditStoreError(
-                    f"There was an error while trying to append row. Error: {e!s}"
-                ) from e
 
     @staticmethod
     def _serialize_field_value(value: Any) -> Any:

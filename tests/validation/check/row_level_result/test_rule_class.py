@@ -6,7 +6,8 @@ from pydantic import ValidationError
 from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 
 
-class TestRuleClass:
+@pytest.mark.unit
+class TestRuleClassUnit:
     @pytest.mark.parametrize("pass_threshold", [-2.0, 2.0])
     def test_error_on_invalid_pass_threshold(self, pass_threshold: float):
         with pytest.raises(ValidationError):
@@ -21,7 +22,7 @@ class TestRuleClass:
             Rule(
                 method="is_between",
                 data_type=RuleDataType.AGNOSTIC,
-                value=[1, "2"],
+                value=[1, "a", "2022-01-01"],
             )
 
     @pytest.mark.parametrize(

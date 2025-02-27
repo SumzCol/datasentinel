@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from typing import Any
 from unittest.mock import Mock
@@ -260,9 +259,6 @@ class TestSlackMessageRendererUnit:
         slack_message_render = SlackMessageRenderer(rules_display_limit=1)
 
         message = slack_message_render.render(result)
-
-        with open("test_slack_message_renderer.json", "w") as f:
-            f.write(json.dumps(message.blocks, indent=4))
 
         assert len(message.blocks) == expected_len_of_blocks
         assert message.blocks[3]["elements"][3]["elements"][0]["text"] == (

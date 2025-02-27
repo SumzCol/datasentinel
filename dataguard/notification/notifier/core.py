@@ -41,7 +41,7 @@ class AbstractNotifier(ABC):
 
     @abstractmethod
     def notify(self, result: DataValidationResult) -> None:
-        pass
+        """Notify a data validation result"""
 
 
 class AbstractNotifierManager(ABC):

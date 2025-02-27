@@ -10,6 +10,10 @@ class SparkFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
     def __init__(self, data: DataFrame):
         super().__init__(data)
 
+    @property
+    def data(self) -> DataFrame:
+        return self._data
+
     def count(self) -> int:
         return self._data.count()
 

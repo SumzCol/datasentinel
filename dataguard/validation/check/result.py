@@ -57,5 +57,5 @@ class CheckResult:
             "start_time": self.start_time,
             "end_time": self.end_time,
             "rule_metrics": [rule_metric.to_dict() for rule_metric in self.rule_metrics],
-            "status": self.status.value,
+            "status": self.status,
         }

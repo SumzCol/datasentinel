@@ -1,6 +1,5 @@
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, field_validator
 from pydantic.dataclasses import dataclass
-from typing_extensions import Self
 
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.core import NotifyOnEvent
@@ -25,20 +24,18 @@ class DataValidation:
     name: str
     check_list: list[AbstractCheck]
     data_asset: AbstractDataAsset | None = None
-    result_stores: list[str] | None = Field(default_factory=list)
-    notifiers_by_event: dict[NotifyOnEvent, list[str]] | None = Field(default_factory=dict)
+    result_stores: list[str] = Field(default_factory=list)
+    notifiers_by_event: dict[NotifyOnEvent, list[str]] = Field(default_factory=dict)
+
+    @field_validator("check_list", mode="after")
+    def validate_check_list(cls, check_list: list[AbstractCheck]) -> list[AbstractCheck]:
+        if not check_list:
+            raise ValueError("Data validation must have at least one check")
+        return check_list
 
     @property
     def checks_count(self) -> int:
         return len(self.check_list)
-
-    @property
-    def has_checks(self) -> bool:
-        return self.checks_count > 0
-
-    def add_check(self, check: AbstractCheck) -> Self:
-        self.check_list.append(check)
-        return self
 
     def check_exists(self, check_name: str) -> bool:
         return any(check.name == check_name for check in self.check_list)

@@ -30,5 +30,8 @@ class SlackNotifier(AbstractNotifier):
 
     def notify(self, result: DataValidationResult):
         message = self._renderer.render(result)
-        client = WebClient(token=self._slack_token)
-        client.chat_postMessage(channel=self._channel, text=message.text, blocks=message.blocks)
+        try:
+            client = WebClient(token=self._slack_token)
+            client.chat_postMessage(channel=self._channel, blocks=message.blocks)
+        except Exception as e:
+            raise NotifierError(f"Error while sending slack message: {e!s}") from e

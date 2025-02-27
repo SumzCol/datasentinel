@@ -45,7 +45,6 @@ class SMTPEmailNotifier(AbstractNotifier):
 
     def notify(self, result: DataValidationResult):
         message = self._define_recipients(self._renderer.render(result))
-
         try:
             with smtplib.SMTP(self._server, self._port) as server:
                 server.ehlo(self._domain)

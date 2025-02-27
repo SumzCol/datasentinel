@@ -66,7 +66,7 @@ class Rule:
     def validate_value(self) -> Self:
         if self.value is None:
             return self
-        if self.data_type == RuleDataType.AGNOSTIC and isinstance(self.value, list):
+        if isinstance(self.value, list):
             if len(Counter(map(type, self.value)).keys()) > 1:
                 raise ValueError("Data types in rule values are inconsistent")
         if self.data_type == RuleDataType.NUMERIC and not isinstance(self.value, int | float):
