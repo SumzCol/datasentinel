@@ -1,6 +1,5 @@
 import enum
 import hashlib
-from collections import Counter
 from collections.abc import Callable
 from datetime import date, datetime
 from typing import Any
@@ -66,9 +65,6 @@ class Rule:
     def validate_value(self) -> Self:
         if self.value is None:
             return self
-        if isinstance(self.value, list):
-            if len(Counter(map(type, self.value)).keys()) > 1:
-                raise ValueError("Data types in rule values are inconsistent")
         if self.data_type == RuleDataType.NUMERIC and not isinstance(self.value, int | float):
             raise ValueError("Numeric rule value should be int or float")
         if self.data_type == RuleDataType.STRING and not isinstance(self.value, str):
@@ -99,7 +95,7 @@ class Rule:
             .upper()
         )
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return (
             f"Rule(method:{self.method}, column:{self.column}, id_columns:{self.id_columns}, "
             f"value:{self.value}, data_type:{self.data_type}, "

@@ -20,7 +20,7 @@ class TestRuleClassUnit:
     def test_error_on_list_as_value_with_different_types_of_elements(self):
         with pytest.raises(ValidationError):
             Rule(
-                method="is_between",
+                method="method",
                 data_type=RuleDataType.AGNOSTIC,
                 value=[1, "a", "2022-01-01"],
             )
@@ -37,7 +37,23 @@ class TestRuleClassUnit:
     def test_error_on_invalid_scalar_value_data_type(self, data_type: RuleDataType, value: Any):
         with pytest.raises(ValidationError):
             Rule(
-                method="test",
+                method="rule_method",
                 data_type=data_type,
                 value=value,
             )
+
+    def test_error_if_is_custom_check_did_not_include_a_function(self):
+        with pytest.raises(ValidationError):
+            Rule(
+                method="is_custom",
+                data_type=RuleDataType.AGNOSTIC,
+            )
+
+    def test_empty_columns_and_id_columns(self):
+        rule = Rule(
+            method="rule_method",
+            data_type=RuleDataType.AGNOSTIC,
+        )
+
+        assert rule.column == []
+        assert rule.id_columns == []

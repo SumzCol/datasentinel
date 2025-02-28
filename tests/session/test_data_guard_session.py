@@ -1,5 +1,5 @@
 import threading
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -11,6 +11,10 @@ from dataguard.store.audit.core import AbstractAuditStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
+from dataguard.validation.data_asset.core import AbstractDataAsset
+from dataguard.validation.data_validation import DataValidation
+from dataguard.validation.runner.core import AbstractRunner
+from dataguard.validation.runner.simple_runner import SimpleRunner
 
 
 @pytest.mark.unit
@@ -152,3 +156,45 @@ class TestDataGuardSessionUnit:
         # Verify that the session is correctly registered
         assert session.name == "custom_session"
         assert session in DataGuardSession._active_sessions.values()
+
+    @pytest.mark.parametrize(
+        "data_asset",
+        [
+            Mock(spec=AbstractDataAsset),
+            None,
+        ],
+    )
+    def test_run_data_validation_with_custom_runner_and_data_asset(self, data_asset):
+        session = DataGuardSession(name="test_session")
+        data_validation = Mock(spec=DataValidation)
+        runner = Mock(spec=AbstractRunner)
+        session.run_data_validation(
+            data_validation=data_validation, runner=runner, data_asset=data_asset
+        )
+
+        runner.run.assert_called_once_with(
+            data_validation=data_validation,
+            data_asset=data_asset,
+            notifier_manager=session.notifier_manager,
+            result_store_manager=session.result_store_manager,
+        )
+
+    @pytest.mark.parametrize(
+        "data_asset",
+        [
+            Mock(spec=AbstractDataAsset),
+            None,
+        ],
+    )
+    @patch.object(SimpleRunner, "run")
+    def test_run_data_validation_without_custom_runner_and_data_asset(self, mock_run, data_asset):
+        session = DataGuardSession(name="test_session")
+        data_validation = Mock(spec=DataValidation)
+        session.run_data_validation(data_validation=data_validation, data_asset=data_asset)
+
+        mock_run.assert_called_once_with(
+            data_validation=data_validation,
+            data_asset=data_asset,
+            notifier_manager=session.notifier_manager,
+            result_store_manager=session.result_store_manager,
+        )

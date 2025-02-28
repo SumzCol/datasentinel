@@ -6,4 +6,3 @@ class Status(Enum):
 
     FAIL = "FAIL"
     PASS = "PASS"  # noqa: S105
-    NO_RUN = "NO_RUN"

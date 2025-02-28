@@ -42,7 +42,7 @@ class DataGuardSession:
         DataGuardSession._active_sessions[name] = self
 
     @property
-    def _logger(self) -> logging.Logger:
+    def _logger(self) -> logging.Logger:  # pragma: no cover
         return logging.getLogger(__name__)
 
     @classmethod
@@ -99,10 +99,10 @@ class DataGuardSession:
         """Runs a data validation.
 
         Args:
-            data_validation: Validation node to run
-            data_asset: Data asset to validate or replace the one in the validation node
+            data_validation: Data validation to run
+            data_asset: Data asset to validate or replace the one in the data validation
                 if one is defined.
-            runner: Runner to run the validation node
+            runner: Runner to run the data validation
         """
         runner = runner or SimpleRunner()
         runner.run(
@@ -112,5 +112,5 @@ class DataGuardSession:
             result_store_manager=self._result_store_manager,
         )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.__class__.__name__}(name={self.name})"

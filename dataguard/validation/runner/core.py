@@ -38,11 +38,11 @@ class AbstractRunner(ABC):
     def run(
         self,
         data_validation: DataValidation,
-        data_asset: AbstractDataAsset | None,
         result_store_manager: ResultStoreManager,
         notifier_manager: NotifierManager,
+        data_asset: AbstractDataAsset | None = None,
     ) -> None:
-        """Run a validation node"""
+        """Run a data validation."""
         if data_asset is None and data_validation.data_asset is None:
             raise NoDatasetDefinedError(
                 f"No dataset to be validated was passed or defined inside the "

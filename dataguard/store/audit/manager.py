@@ -1,4 +1,3 @@
-import logging
 import threading
 
 from dataguard.store.audit.core import (
@@ -16,10 +15,6 @@ class AuditStoreManager(AbstractAuditStoreManager):
 
     def __init__(self) -> None:
         self._audit_stores: dict[str, AbstractAuditStore] = {}
-
-    @property
-    def _logger(self) -> logging.Logger:
-        return logging.getLogger(__name__)
 
     def count(self, enabled_only: bool = False) -> int:
         return len(

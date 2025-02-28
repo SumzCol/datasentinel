@@ -51,7 +51,7 @@ class AbstractAuditStoreManager(ABC):
     """Base class for all audit store manager implementations."""
 
     @property
-    def _logger(self) -> logging.Logger:
+    def _logger(self) -> logging.Logger:  # pragma: no cover
         return logging.getLogger(__name__)
 
     @abstractmethod

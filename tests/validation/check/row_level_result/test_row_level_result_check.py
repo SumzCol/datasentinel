@@ -22,12 +22,10 @@ class TestRowLevelResultCheckUnit:
     @pytest.mark.parametrize("id_columns", [tuple(), list(), set()], ids=("tuple", "list", "set"))
     def test_is_complete_with_no_id_columns_specified(self, id_columns):
         with pytest.raises(BadArgumentError):
-            (
-                RowLevelResultCheck(
-                    level=CheckLevel.ERROR,
-                    name="test",
-                ).is_complete(id_columns=id_columns, column="id")
-            )
+            RowLevelResultCheck(
+                level=CheckLevel.ERROR,
+                name="test",
+            ).is_complete(id_columns=id_columns, column="id")
 
     @pytest.mark.parametrize(
         "value",
