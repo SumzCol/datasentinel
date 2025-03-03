@@ -1,4 +1,5 @@
 import importlib
+import inspect
 from collections.abc import Callable
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any
@@ -160,12 +161,12 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def is_less_or_equal_than(
+    def is_less_or_equal_to(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ) -> Self:
         (
             Rule(
-                method="is_less_or_equal_than",
+                method="is_less_or_equal_to",
                 column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
@@ -176,12 +177,12 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def is_equal_than(
+    def is_equal_to(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ) -> Self:
         (
             Rule(
-                method="is_equal_than",
+                method="is_equal_to",
                 column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
@@ -249,6 +250,18 @@ class RowLevelResultCheck(AbstractCheck):
     def is_custom(
         self, fn: Callable, pct: float = 1.0, options: dict[str, Any] | None = None
     ) -> Self:
+        if fn is None or not callable(fn):
+            raise BadArgumentError("The function must be callable.")
+
+        n_params = len(inspect.signature(fn).parameters)
+        if not 0 < n_params <= 2:  # noqa PLR2004
+            raise BadArgumentError(
+                "The function must have exactly 1 or 2 parameters:\n"
+                "1. The first parameter should be the dataframe to be validated.\n"
+                "2. The optional second parameter should be a dictionary with the options to be "
+                "used inside the function."
+            )
+
         (
             Rule(
                 method="is_custom",

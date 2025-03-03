@@ -1,9 +1,12 @@
 from copy import deepcopy
 from typing import Any, Literal
 
+from delta import DeltaTable
+from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame
 
 from dataguard.core import DataGuardError
+from dataguard.store.utils.spark_utils import get_spark
 
 
 class DeltaTableAppenderError(DataGuardError):
@@ -68,6 +71,21 @@ class DeltaTableAppender:
             _options["path"] = self._external_path
 
         df.write.saveAsTable(**_options)
+
+    def exists(self) -> bool:
+        fullpath = (
+            self._full_table_path
+            if self._dataset_type == "table"
+            else f"DELTA.`{self._full_table_path}`"
+        )
+        try:
+            DeltaTable.forName(get_spark(), fullpath)
+        except AnalysisException as exception:
+            if "is not a Delta table" in str(exception):
+                return False
+            raise
+
+        return True
 
     def append(self, df: DataFrame) -> None:
         if self._dataset_type == "file":

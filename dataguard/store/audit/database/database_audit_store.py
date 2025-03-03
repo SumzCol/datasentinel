@@ -21,7 +21,7 @@ from sqlalchemy.exc import (
 from sqlalchemy.orm import sessionmaker
 
 from dataguard.store.audit.core import AbstractAuditStore, AuditStoreError
-from dataguard.store.audit.row import BaseAuditRow
+from dataguard.store.audit.row import BaseAuditRow, FieldInfo
 
 
 class DatabaseAuditStore(AbstractAuditStore):
@@ -49,11 +49,12 @@ class DatabaseAuditStore(AbstractAuditStore):
         super().__init__(name, disabled)
 
     def append(self, row: BaseAuditRow) -> None:
-        table = self._get_or_create_table(row)
+        row_fields = row.row_fields
+        table = self._get_or_create_table(row_fields)
         with self._session_maker() as session:
             try:
                 row_dict = {
-                    field: self._serialize_field_value(value)
+                    field: self._format_field_value(value)
                     for field, value in row.to_dict().items()
                 }
                 insert_statement = table.insert().values(row_dict)
@@ -65,7 +66,7 @@ class DatabaseAuditStore(AbstractAuditStore):
                     f"There was an error while trying to append row. Error: {e!s}"
                 ) from e
 
-    def _get_or_create_table(self, row: BaseAuditRow) -> Table:
+    def _get_or_create_table(self, row_fields: dict[str, FieldInfo]) -> Table:
         try:
             return Table(
                 self._table,
@@ -85,14 +86,13 @@ class DatabaseAuditStore(AbstractAuditStore):
                 f"Error: {e!s}"
             ) from e
 
-        return self._create_table(row)
+        return self._create_table(row_fields=row_fields)
 
-    def _create_table(self, row: BaseAuditRow) -> Table:
+    def _create_table(self, row_fields: dict[str, FieldInfo]) -> Table:
         try:
-            columns = []
-            for name, info in row.row_fields.items():
-                column_type = self._infer_sql_type(info.type)
-                columns.append(Column(name, column_type))
+            columns = [
+                Column(name, self._infer_sql_type(info.type)) for name, info in row_fields.items()
+            ]
 
             table = Table(self._table, self._metadata, schema=self._schema, *columns)
             self._metadata.create_all(self._engine)
@@ -104,22 +104,20 @@ class DatabaseAuditStore(AbstractAuditStore):
             ) from e
 
     @staticmethod
-    def _serialize_field_value(value: Any) -> Any:
-        """Serialize a field value."""
-        if isinstance(value, int | str | float | bool):
+    def _format_field_value(value: Any, field_info: FieldInfo) -> Any:
+        """Formats a field value."""
+        if value is None or field_info.type in {int, str, float, bool}:
             return value
-        elif isinstance(value, datetime):
+        elif field_info.type == datetime:
             return value.isoformat()
-        elif isinstance(value, date):
+        elif field_info.type == date:
             return value.isoformat()
-        elif value is None:
-            return value
         else:
             return json.dumps(value)
 
     @staticmethod
     def _infer_sql_type(
-        python_type: type[int | str | bool | float | datetime | date],
+        python_type: type[int | str | bool | float | datetime | date | list | dict | tuple | set],
     ) -> type[Integer | String | Boolean | Float | DateTime | Date]:
         """Infer the SQLAlchemy column type based on the Python data type."""
         type_map = {

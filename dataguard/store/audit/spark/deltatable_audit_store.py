@@ -1,6 +1,8 @@
+import json
 from datetime import date, datetime
 from typing import Any, Literal
 
+from pyspark.sql import Row
 from pyspark.sql.types import (
     ArrayType,
     BooleanType,
@@ -8,12 +10,15 @@ from pyspark.sql.types import (
     DoubleType,
     LongType,
     StringType,
+    StructField,
+    StructType,
     TimestampType,
 )
 
 from dataguard.store.audit.core import AbstractAuditStore, AuditStoreError
 from dataguard.store.audit.row import BaseAuditRow, FieldInfo
 from dataguard.store.utils.deltatable_appender import DeltaTableAppender
+from dataguard.store.utils.spark_utils import get_spark
 
 
 class DeltaTableAuditStore(AbstractAuditStore):
@@ -41,11 +46,48 @@ class DeltaTableAuditStore(AbstractAuditStore):
         )
 
     def append(self, row: BaseAuditRow) -> None:
-        raise NotImplementedError
+        row_fields = row.row_fields
+        df = get_spark().createDataFrame(
+            data=[
+                Row(
+                    **{
+                        field_name: self._format_field_value(
+                            field_info=row_fields.get(field_name), value=value
+                        )
+                        for field_name, value in row.to_dict().items()
+                    }
+                )
+            ],
+            schema=StructType(
+                [
+                    StructField(
+                        name=field_name,
+                        dataType=self._infer_spark_type(field_info=field_info),
+                    )
+                    for field_name, field_info in row_fields.items()
+                ]
+            ),
+        )
 
-    def _infer_spark_type(self, field_info: FieldInfo) -> Any:
+        self._delta_table_appender.append(df)
+
+    @staticmethod
+    def _format_field_value(field_info: FieldInfo, value: Any) -> Any:
+        if value is None or field_info.type in {int, str, float, bool, datetime, date, list}:
+            return value
+        elif field_info.type in {tuple, set}:
+            return list(value)
+        else:
+            return json.dumps(value)
+
+    def _infer_spark_type(
+        self, field_info: FieldInfo
+    ) -> (
+        type[LongType | StringType | BooleanType | DoubleType | TimestampType | DateType]
+        | ArrayType
+    ):
         if field_info.type in {list, tuple, set}:
-            if not field_info.args and len(field_info.args) > 1:
+            if not field_info.args or len(field_info.args) > 1:
                 raise AuditStoreError("Multi-typed collections are not supported")
 
             return ArrayType(self._infer_spark_type(field_info.args[0]))

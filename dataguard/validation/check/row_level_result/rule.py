@@ -75,11 +75,10 @@ class Rule:
             raise ValueError("Timestamp rule value should be datetime")
         return self
 
-    @model_validator(mode="after")
-    def validate_function(self) -> Self:
-        if self.method == "is_custom" and self.function is None:
-            raise ValueError("When 'is_custom' method is used, a function must be provided")
-        return self
+    @property
+    def queried_columns(self) -> list[str]:
+        """List of columns that are used in the rule, these are id_columns and column"""
+        return list(dict.fromkeys(self.id_columns + self.column))
 
     @property
     def key(self) -> str:

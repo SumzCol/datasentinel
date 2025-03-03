@@ -1,3 +1,4 @@
+import inspect
 import operator
 from typing import TYPE_CHECKING
 
@@ -24,94 +25,85 @@ class PysparkValidationStrategy(ValidationStrategy):
 
     def is_complete(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return dataframe.select(
-                *rule.id_columns,
-                rule.column[0],
-            ).where(F.col(rule.column[0]).isNull())
+            return dataframe.select(*rule.queried_columns).where(F.col(rule.column[0]).isNull())
 
         self._compute_instructions[rule.key] = _execute
 
     def are_complete(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return dataframe.select(
-                *rule.id_columns,
-                *rule.column,
-            ).where(" OR ".join([f"{column} IS NULL" for column in rule.column]))
+            return dataframe.select(*rule.queried_columns).where(
+                " OR ".join([f"{column} IS NULL" for column in rule.column])
+            )
 
         self._compute_instructions[rule.key] = _execute
 
     def is_unique(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
+            _df = dataframe.select(rule.column[0])
+            if rule.options.get("ignore_nulls"):
+                _df = _df.where(F.col(rule.column[0]).isNotNull())
             return (
-                dataframe.select(
-                    F.col(rule.column[0]),
-                )
-                .groupBy(rule.column)
+                _df.groupBy(rule.column[0])
                 .count()
                 .where(F.col("count") > 1)
-                .select(rule.column)
+                .select(rule.column[0])
             )
 
         self._compute_instructions[rule.key] = _execute
 
     def are_unique(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return (
-                dataframe.select(
-                    *[F.col(column) for column in rule.column],
-                )
-                .groupBy(rule.column)
-                .count()
-                .where(F.col("count") > 1)
-                .select(*rule.column)
-            )
+            _df = dataframe.select(*rule.column)
+            if rule.options.get("ignore_nulls"):
+                _df = _df.where(" AND ".join([f"{column} IS NOT NULL" for column in rule.column]))
+            return _df.groupBy(rule.column).count().where(F.col("count") > 1).select(*rule.column)
 
         self._compute_instructions[rule.key] = _execute
 
     def has_pattern(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return dataframe.select(
-                rule.column,
-            ).filter(~F.col(rule.column[0]).rlike(rule.value))
+            return dataframe.select(*rule.queried_columns).filter(
+                ~F.col(rule.column[0]).rlike(rule.value)
+            )
 
         self._compute_instructions[rule.key] = _execute
 
     def is_greater_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return dataframe.select(
-                rule.column,
-            ).where(F.col(rule.column[0]) <= rule.value)
+            return dataframe.select(*rule.queried_columns).where(
+                F.col(rule.column[0]) <= rule.value
+            )
 
         self._compute_instructions[rule.key] = _execute
 
     def is_greater_or_equal_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).where(F.col(rule.column[0]) < rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
     def is_less_than(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
-            return dataframe.select(
-                rule.column,
-            ).where(F.col(rule.column[0]) >= rule.value)
+            return dataframe.select(*rule.queried_columns).where(
+                F.col(rule.column[0]) >= rule.value
+            )
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_or_equal_than(self, rule: Rule) -> None:
+    def is_less_or_equal_to(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).where(F.col(rule.column[0]) > rule.value)
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_equal_than(self, rule: Rule) -> None:
+    def is_equal_to(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).where(F.col(rule.column[0]) != rule.value)
 
         self._compute_instructions[rule.key] = _execute
@@ -119,7 +111,7 @@ class PysparkValidationStrategy(ValidationStrategy):
     def is_between(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).where(~F.col(rule.column[0]).between(rule.value[0], rule.value[1]))
 
         self._compute_instructions[rule.key] = _execute
@@ -127,7 +119,7 @@ class PysparkValidationStrategy(ValidationStrategy):
     def is_in(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).filter(~F.col(rule.column[0]).isin(rule.value))
 
         self._compute_instructions[rule.key] = _execute
@@ -135,19 +127,20 @@ class PysparkValidationStrategy(ValidationStrategy):
     def not_in(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame) -> DataFrame:
             return dataframe.select(
-                rule.column,
+                *rule.queried_columns,
             ).filter(F.col(rule.column[0]).isin(rule.value))
 
         self._compute_instructions[rule.key] = _execute
 
     def is_custom(self, rule: Rule) -> None:
         def _execute(dataframe: DataFrame):
-            computed_frame = rule.function(dataframe, rule.options)
-            if "pyspark" not in str(type(computed_frame)):
+            if len(inspect.signature(rule.function).parameters) == 1:
+                computed_df = rule.function(dataframe)
+            else:
+                computed_df = rule.function(dataframe, rule.options)
+            if "pyspark" not in str(type(computed_df)):
                 raise ValueError("Custom function does not return a PySpark DataFrame")
-            if not len(computed_frame.columns) >= 1:
-                raise ValueError("Custom function should return at least one column")
-            return computed_frame
+            return computed_df
 
         self._compute_instructions[rule.key] = _execute
 

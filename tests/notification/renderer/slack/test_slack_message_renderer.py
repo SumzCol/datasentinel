@@ -111,7 +111,7 @@ class TestSlackMessageRendererUnit:
         [0, -1, 7],
         ids=["zero", "negative", "greater than 5"],
     )
-    def test_with_bad_checks_display_limit_value(self, checks_display_limit: int):
+    def test_error_with_bad_checks_display_limit_value(self, checks_display_limit: int):
         with pytest.raises(RendererError):
             SlackMessageRenderer(checks_display_limit=checks_display_limit)
 
@@ -120,7 +120,7 @@ class TestSlackMessageRendererUnit:
         [0, -1, 7],
         ids=["zero", "negative", "greater than 5"],
     )
-    def test_with_bad_rules_display_limit_value(self, rules_display_limit: int):
+    def test_error_with_bad_rules_display_limit_value(self, rules_display_limit: int):
         with pytest.raises(RendererError):
             SlackMessageRenderer(rules_display_limit=rules_display_limit)
 

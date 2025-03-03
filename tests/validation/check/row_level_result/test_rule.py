@@ -42,13 +42,6 @@ class TestRuleClassUnit:
                 value=value,
             )
 
-    def test_error_if_is_custom_check_did_not_include_a_function(self):
-        with pytest.raises(ValidationError):
-            Rule(
-                method="is_custom",
-                data_type=RuleDataType.AGNOSTIC,
-            )
-
     def test_empty_columns_and_id_columns(self):
         rule = Rule(
             method="rule_method",

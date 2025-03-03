@@ -26,7 +26,7 @@ class FieldInfo:
         complex: Whether the field is complex.
     """
 
-    annotation: type | None
+    annotation: type
     type: type
     args: tuple | None
     required: bool
