@@ -14,7 +14,6 @@ from dataguard.store.audit.core import AbstractAuditStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
-from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.runner.core import AbstractRunner
 from dataguard.validation.runner.simple_runner import SimpleRunner
@@ -93,21 +92,17 @@ class DataGuardSession:
     def run_data_validation(
         self,
         data_validation: DataValidation,
-        data_asset: AbstractDataAsset | None = None,
         runner: AbstractRunner | None = None,
     ) -> None:
         """Runs a data validation.
 
         Args:
             data_validation: Data validation to run
-            data_asset: Data asset to validate or replace the one in the data validation
-                if one is defined.
-            runner: Runner to run the data validation
+            runner: Runner to be used to run the data validation
         """
         runner = runner or SimpleRunner()
         runner.run(
             data_validation=data_validation,
-            data_asset=data_asset,
             notifier_manager=self._notifier_manager,
             result_store_manager=self._result_store_manager,
         )

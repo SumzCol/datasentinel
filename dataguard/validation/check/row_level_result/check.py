@@ -280,6 +280,7 @@ class RowLevelResultCheck(AbstractCheck):
         df = to_df_if_delta_table(df=df)
 
         df_type = DataframeType.from_df(df)
+        validation_strategy: ValidationStrategy
         if df_type == DataframeType.PYSPARK:
             validation_strategy = importlib.import_module(
                 "dataguard.validation.check.row_level_result.pyspark_strategy"
@@ -291,7 +292,6 @@ class RowLevelResultCheck(AbstractCheck):
         else:
             raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
-        validation_strategy: ValidationStrategy
         validation_strategy.validate_data_types(df, self._rules)
         start_time = datetime.now()
         rule_metrics = validation_strategy.compute(df, self._rules)

@@ -160,7 +160,7 @@ max-args = 7  # Set the maximum number of arguments for a function
 known-first-party = ["dataguard"]
 
 [tool.mypy]
-allow_any_generics = true
+plugins = ['pydantic.mypy']
 no_warn_unused_ignores = true
 ignore_missing_imports = true
 disable_error_code = ['misc']

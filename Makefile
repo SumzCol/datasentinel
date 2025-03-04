@@ -25,7 +25,7 @@ build-package:
 lint:
 	pre-commit run --all-files --hook-stage manual
 
-typecheck:
+type-check:
 	mypy dataguard
 
 unit-test:

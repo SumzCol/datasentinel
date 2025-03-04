@@ -23,7 +23,7 @@ class DataValidation:
 
     name: str
     check_list: list[AbstractCheck]
-    data_asset: AbstractDataAsset | None = None
+    data_asset: AbstractDataAsset
     result_stores: list[str] = Field(default_factory=list)
     notifiers_by_event: dict[NotifyOnEvent, list[str]] = Field(default_factory=dict)
 

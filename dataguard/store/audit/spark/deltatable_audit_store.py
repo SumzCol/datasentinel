@@ -6,6 +6,7 @@ from pyspark.sql import Row
 from pyspark.sql.types import (
     ArrayType,
     BooleanType,
+    DataType,
     DateType,
     DoubleType,
     LongType,
@@ -80,12 +81,7 @@ class DeltaTableAuditStore(AbstractAuditStore):
         else:
             return json.dumps(value)
 
-    def _infer_spark_type(
-        self, field_info: FieldInfo
-    ) -> (
-        type[LongType | StringType | BooleanType | DoubleType | TimestampType | DateType]
-        | ArrayType
-    ):
+    def _infer_spark_type(self, field_info: FieldInfo) -> DataType | type[DataType]:
         if field_info.type in {list, tuple, set}:
             if not field_info.args or len(field_info.args) > 1:
                 raise AuditStoreError("Multi-typed collections are not supported")

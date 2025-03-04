@@ -42,5 +42,5 @@ jobs:
       - name: Run type checking
         if: ${{ !cancelled() && steps.install-lint-reqs.outcome == 'success' }}
         run: |
-          make typecheck
+          make type-check
         shell: bash

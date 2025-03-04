@@ -2,11 +2,10 @@ import logging
 from abc import ABC, abstractmethod
 
 from dataguard.core import DataGuardError
-from dataguard.notification.notifier.manager import NotifierManager
-from dataguard.store.result.manager import ResultStoreManager
+from dataguard.notification.notifier.core import AbstractNotifierManager
+from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.validation.check.level import CheckLevel
 from dataguard.validation.check.result import CheckResult
-from dataguard.validation.data_asset.core import AbstractDataAsset
 from dataguard.validation.data_validation import DataValidation
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.status import Status
@@ -17,10 +16,6 @@ class RunnerError(DataGuardError):
 
 
 class NoDatasetDefinedError(RunnerError):
-    pass
-
-
-class NoChecksDefinedError(RunnerError):
     pass
 
 
@@ -38,19 +33,11 @@ class AbstractRunner(ABC):
     def run(
         self,
         data_validation: DataValidation,
-        result_store_manager: ResultStoreManager,
-        notifier_manager: NotifierManager,
-        data_asset: AbstractDataAsset | None = None,
+        result_store_manager: AbstractResultStoreManager,
+        notifier_manager: AbstractNotifierManager,
     ) -> None:
         """Run a data validation."""
-        if data_asset is None and data_validation.data_asset is None:
-            raise NoDatasetDefinedError(
-                f"No dataset to be validated was passed or defined inside the "
-                f"validation node '{data_validation.name}'"
-            )
-        data_asset = data_asset or data_validation.data_asset
-
-        validation_node_result = self._run(data_validation=data_validation, data_asset=data_asset)
+        validation_node_result = self._run(data_validation=data_validation)
 
         self._log_status(result=validation_node_result)
 
@@ -65,14 +52,11 @@ class AbstractRunner(ABC):
         self._raise_exc_on_failed_critical_checks(result=validation_node_result)
 
     @abstractmethod
-    def _run(
-        self, data_validation: DataValidation, data_asset: AbstractDataAsset
-    ) -> DataValidationResult:
+    def _run(self, data_validation: DataValidation) -> DataValidationResult:
         """Run a data validation.
 
         Args:
             data_validation: data validation to run
-            data_asset: Data asset to validate
 
         Returns:
             Results of the data validation process
