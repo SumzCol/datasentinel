@@ -21,6 +21,7 @@ def rule_mock():
 
 
 @pytest.mark.unit
+@pytest.mark.slow
 class TestValidateDataTypesUnit:
     @pytest.mark.parametrize(
         "data",

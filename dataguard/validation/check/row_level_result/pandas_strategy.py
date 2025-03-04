@@ -22,8 +22,8 @@ class PandasValidationStrategy(ValidationStrategy):
 
     def is_complete(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[*rule.id_columns, rule.column]]
-            return df[df[rule.column].isna()]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]].isna()]
 
         self._compute_instructions[rule.key] = _execute
 
@@ -43,8 +43,13 @@ class PandasValidationStrategy(ValidationStrategy):
 
     def is_unique(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[rule.column].value_counts().reset_index().query("count > 1")[[rule.column]]
+            df = df[[rule.column[0]]]
+            return (
+                df[rule.column[0]]
+                .value_counts()
+                .reset_index()
+                .query("count > 1")[[rule.column[0]]]
+            )
 
         self._compute_instructions[rule.key] = _execute
 

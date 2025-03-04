@@ -50,3 +50,23 @@ class TestRuleClassUnit:
 
         assert rule.column == []
         assert rule.id_columns == []
+
+    @pytest.mark.parametrize(
+        "column, id_columns, expected_queried_columns",
+        [
+            (["col1", "col2"], ["id1", "id2"], ["id1", "id2", "col1", "col2"]),
+            (["col1", "col2"], [], ["col1", "col2"]),
+            (["col1", "col2", "id"], ["id"], ["id", "col1", "col2"]),
+        ],
+    )
+    def test_queried_columns_property(
+        self, column: list[str], id_columns: list[str], expected_queried_columns: list[str]
+    ):
+        rule = Rule(
+            method="rule_method",
+            data_type=RuleDataType.AGNOSTIC,
+            column=column,
+            id_columns=id_columns,
+        )
+
+        assert rule.queried_columns == expected_queried_columns
