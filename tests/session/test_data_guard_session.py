@@ -169,7 +169,7 @@ class TestDataGuardSessionUnit:
         )
 
     @patch.object(SimpleRunner, "run")
-    def test_run_data_validation_without_custom_runner_and_data_asset(self, mock_run):
+    def test_run_data_validation_without_custom_runner(self, mock_run):
         session = DataGuardSession(name="test_session")
         data_validation = Mock(spec=DataValidation)
         session.run_data_validation(data_validation=data_validation)

@@ -36,7 +36,19 @@ class RuleMetric:
     violations: int
     pass_rate: float
     pass_threshold: float
-    value: int | float | str | datetime | date | list | None = None
+    value: (
+        int
+        | float
+        | str
+        | datetime
+        | date
+        | list[int]
+        | list[float]
+        | list[str]
+        | list[datetime]
+        | list[date]
+        | None
+    ) = None
     function: Callable | None = None
     options: dict[str, Any] | None = None
     column: list[str] | None = None
@@ -47,6 +59,13 @@ class RuleMetric:
     def validate_violations_less_than_rows(self) -> Self:
         if self.violations > self.rows:
             raise ValueError("Violations cannot be greater than rows")
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_pass_rate_higher_than_1(self) -> Self:
+        if self.pass_rate > 1.0:
+            raise ValueError("Pass rate cannot be greater than 1.0 (100%)")
 
         return self
 

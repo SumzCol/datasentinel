@@ -1,5 +1,5 @@
-import smtplib
 from email.message import EmailMessage
+from smtplib import SMTP
 from typing import Any
 
 from dataguard.notification.notifier.core import AbstractNotifier, NotifierError
@@ -46,12 +46,12 @@ class SMTPEmailNotifier(AbstractNotifier):
     def notify(self, result: DataValidationResult):
         message = self._define_recipients(self._renderer.render(result))
         try:
-            with smtplib.SMTP(self._server, self._port) as server:
+            with SMTP(self._server, self._port) as server:
                 server.ehlo(self._domain)
                 server.starttls()
                 server.ehlo(self._domain)
                 server.login(self._username, self._password)
                 server.send_message(message)
                 server.quit()
-        except smtplib.SMTPException as e:
+        except Exception as e:
             raise NotifierError(f"Error while sending email: {e!s}") from e

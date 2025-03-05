@@ -12,11 +12,11 @@ from dataguard.validation.status import Status
 
 
 class RunnerError(DataGuardError):
-    pass
+    """Base class for runner errors."""
 
 
 class NoDatasetDefinedError(RunnerError):
-    pass
+    """"""
 
 
 class CriticalCheckFailedError(RunnerError):

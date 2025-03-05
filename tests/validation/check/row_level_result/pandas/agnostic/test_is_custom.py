@@ -79,7 +79,7 @@ class TestIsCustomUnit:
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.data.columns == [evaluated_column]
 
-    def test_error_on_fn_that_does_not_return_a_spark_dataframe(
+    def test_error_on_fn_that_does_not_return_a_pandas_dataframe(
         self, check: RowLevelResultCheck, pandas_df: DataFrame
     ):
         def fn(dataframe: DataFrame) -> bool:

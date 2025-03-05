@@ -357,6 +357,18 @@ class CualleeCheck(AbstractCheck):
         self._check.is_custom(column=column, fn=fn, pct=pct, options=options)
         return self
 
+    @staticmethod
+    def _format_rule_column(column: str | list[str] | tuple[str] | None) -> list[str]:
+        if column is None:
+            return []
+        if isinstance(column, str):
+            return [column]
+
+        if isinstance(column, tuple):
+            return list(column)
+
+        return column
+
     def _get_rule_metrics_pyspark(
         self,
         cuallee_result: Any,
@@ -365,7 +377,7 @@ class CualleeCheck(AbstractCheck):
             RuleMetric(
                 id=row.id,
                 rule=row.rule,
-                column=self._check.rules[i].column,
+                column=self._format_rule_column(self._check.rules[i].column),
                 value=(
                     self._check.rules[i].value
                     if not row.rule == "is_custom" and not self._check.rules[i].value == "N/A"
@@ -390,7 +402,7 @@ class CualleeCheck(AbstractCheck):
             RuleMetric(
                 id=row["id"],
                 rule=row["rule"],
-                column=self._check.rules[i].column,
+                column=self._format_rule_column(self._check.rules[i].column),
                 value=(self._check.rules[i].value if not row["rule"] == "is_custom" else None),
                 function=(self._check.rules[i].value if row["rule"] == "is_custom" else None),
                 rows=row["rows"],

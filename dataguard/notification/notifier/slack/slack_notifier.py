@@ -4,7 +4,7 @@ from slack_sdk import WebClient
 
 from dataguard.notification.notifier.core import AbstractNotifier, NotifierError
 from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.notification.renderer.slack.slack_message_render import SlackMessage
+from dataguard.notification.renderer.slack.slack_message import SlackMessage
 from dataguard.validation.result import DataValidationResult
 
 

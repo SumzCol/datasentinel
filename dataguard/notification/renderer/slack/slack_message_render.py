@@ -1,17 +1,8 @@
-from typing import Any
-
-from pydantic.dataclasses import dataclass
-
 from dataguard.notification.renderer.core import AbstractRenderer, RendererError
+from dataguard.notification.renderer.slack.slack_message import SlackMessage
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
-
-
-@dataclass
-class SlackMessage:
-    text: str
-    blocks: list[dict[str, Any]]
 
 
 class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
