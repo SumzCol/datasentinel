@@ -1,15 +1,14 @@
 from datetime import date, datetime
 
 import pytest
-from pyspark.sql import SparkSession
+from pandas import DataFrame
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status
 
 
 @pytest.mark.unit
-@pytest.mark.slow
-@pytest.mark.pyspark
+@pytest.mark.pandas
 class TestIsInUnit:
     @pytest.mark.parametrize(
         "data, value",
@@ -26,14 +25,12 @@ class TestIsInUnit:
             ([(datetime(2020, 1, 1),)], [datetime(2020, 1, 1), datetime(2020, 1, 2)]),
         ],
     )
-    def test_pass(
-        self, check: RowLevelResultCheck, spark: SparkSession, data: list[tuple], value: list
-    ) -> None:
+    def test_pass(self, check: RowLevelResultCheck, data: list[tuple], value: list) -> None:
         evaluated_rows = len(data)
         expected_violations = 0
         evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=[evaluated_column])
+        df = DataFrame(data, columns=[evaluated_column])
         result = check.is_in(column=evaluated_column, value=value).validate(df)
 
         assert result.status == Status.PASS
@@ -79,7 +76,6 @@ class TestIsInUnit:
     def test_fail_with_and_without_id_columns(
         self,
         check: RowLevelResultCheck,
-        spark: SparkSession,
         data: list[tuple],
         schema: list[str],
         id_columns: list[str],
@@ -89,7 +85,7 @@ class TestIsInUnit:
         expected_violations = 1
         evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=schema)
+        df = DataFrame(data, columns=schema)
         result = check.is_in(
             column=evaluated_column, id_columns=id_columns, value=value
         ).validate(df)
@@ -98,4 +94,4 @@ class TestIsInUnit:
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.data.columns == schema
+        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == schema

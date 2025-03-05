@@ -8,15 +8,15 @@ from dataguard.validation.status import Status
 @pytest.mark.unit
 @pytest.mark.slow
 @pytest.mark.pyspark
-class TestIsLessThanUnit:
+class TestIsGreaterOrEqualThanUnit:
     def test_pass(self, check: RowLevelResultCheck, spark: SparkSession):
-        data = [(0.9999999,), (0.1,)]
+        data = [(1.0,), (2.0,)]
+        df = spark.createDataFrame(data=data, schema=["col"])
         evaluated_rows = len(data)
         expected_violations = 0
         evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=[evaluated_column])
-        result = check.is_less_than(column=evaluated_column, value=1.0).validate(df)
+        result = check.is_greater_or_equal_to(column=evaluated_column, value=1.0).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
@@ -26,9 +26,9 @@ class TestIsLessThanUnit:
     @pytest.mark.parametrize(
         "data, schema, id_columns",
         [
-            ([(1.0000000000001,)], ["col"], []),
-            ([(1.0,)], ["col"], ["col"]),
-            ([(1, 2.0)], ["id", "col"], ["id"]),
+            ([(0.9999999999,)], ["col"], []),
+            ([(0.9999999999,)], ["col"], ["col"]),
+            ([(1, 0.98)], ["id", "col"], ["id"]),
         ],
     )
     def test_fail_with_and_without_id_columns(
@@ -44,7 +44,7 @@ class TestIsLessThanUnit:
         expected_violations = 1
 
         df = spark.createDataFrame(data=data, schema=schema)
-        result = check.is_less_than(
+        result = check.is_greater_or_equal_to(
             column=evaluated_column, value=1.0, id_columns=id_columns
         ).validate(df)
 

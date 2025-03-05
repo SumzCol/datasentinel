@@ -178,9 +178,15 @@ addopts="""
 -ra \
 -W ignore"""
 markers = [
-    "unit: mark a test as a unit test",
-    "functional: mark a test as a functional test",
-    "slow: mark a test as a slow test",
+    "unit: marker for unit tests",
+    "functional: marker for functional tests",
+    "slow: marker for slow tests",
+    "pandas: marker for pandas dependent tests",
+    "pyspark: marker for pyspark dependent tests",
+    "checks: marker for checks tests",
+    "resultstores: marker for resultstores tests",
+    "auditstores: marker for auditstores tests",
+    "notifiers: marker for notifiers tests",
 ]
 testpaths = [
   "tests"
@@ -192,7 +198,7 @@ show_missing = true
 omit = [
     "tests/*",
 ]
-exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "__all__"]
 
 [tool.coverage.run]
 concurrency = ["multiprocessing", "thread"]

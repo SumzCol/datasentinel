@@ -8,6 +8,7 @@ from dataguard.validation.status import Status
 
 
 @pytest.mark.unit
+@pytest.mark.pandas
 class TestAreCompleteUnit:
     @pytest.mark.parametrize(
         "data",
@@ -22,16 +23,16 @@ class TestAreCompleteUnit:
     def test_pass(self, check: RowLevelResultCheck, data: list[tuple]):
         evaluated_columns = ["col1", "col2"]
         id_columns = ["id"]
-        df = DataFrame(data=data, columns=[*id_columns, *evaluated_columns])
         evaluated_rows = len(data)
         expected_violations = 0
 
+        df = DataFrame(data=data, columns=[*id_columns, *evaluated_columns])
         result = check.are_complete(id_columns=id_columns, column=evaluated_columns).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.to_dict() == []
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data",
@@ -46,10 +47,10 @@ class TestAreCompleteUnit:
     def test_fail(self, check: RowLevelResultCheck, data: list[tuple]):
         evaluated_columns = ["col1", "col2"]
         id_columns = ["id"]
-        df = DataFrame(data=data, columns=[*id_columns, *evaluated_columns])
         evaluated_rows = len(data)
         expected_violations = 3
 
+        df = DataFrame(data=data, columns=[*id_columns, *evaluated_columns])
         result = check.are_complete(id_columns=id_columns, column=evaluated_columns).validate(df)
 
         assert result.status == Status.FAIL

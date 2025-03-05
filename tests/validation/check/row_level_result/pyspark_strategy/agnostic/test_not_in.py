@@ -9,6 +9,7 @@ from dataguard.validation.status import Status
 
 @pytest.mark.unit
 @pytest.mark.slow
+@pytest.mark.pyspark
 class TestIsInUnit:
     @pytest.mark.parametrize(
         "data, value",
@@ -28,15 +29,17 @@ class TestIsInUnit:
     def test_pass(
         self, check: RowLevelResultCheck, spark: SparkSession, data: list[tuple], value: list
     ) -> None:
-        df = spark.createDataFrame(data=data, schema=["col"])
         evaluated_rows = len(data)
         expected_violations = 0
+        evaluated_column = "col"
 
-        result = check.not_in(column="col", value=value).validate(df)
+        df = spark.createDataFrame(data=data, schema=[evaluated_column])
+        result = check.not_in(column=evaluated_column, value=value).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data, schema, id_columns, value",
@@ -44,12 +47,7 @@ class TestIsInUnit:
             # String
             ([("a",)], ["col"], [], ["a", "b"]),
             (
-                [
-                    (
-                        1,
-                        "b",
-                    )
-                ],
+                [(1, "b")],
                 ["id", "col"],
                 ["id"],
                 ["a", "b"],
@@ -92,11 +90,14 @@ class TestIsInUnit:
         id_columns: list[str],
         value: list,
     ) -> None:
-        df = spark.createDataFrame(data=data, schema=schema)
         evaluated_rows = len(data)
         expected_violations = 1
+        evaluated_column = "col"
 
-        result = check.not_in(column="col", id_columns=id_columns, value=value).validate(df)
+        df = spark.createDataFrame(data=data, schema=schema)
+        result = check.not_in(
+            column=evaluated_column, id_columns=id_columns, value=value
+        ).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows

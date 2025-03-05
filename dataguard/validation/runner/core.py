@@ -71,7 +71,7 @@ class AbstractRunner(ABC):
 
         if result.status == Status.PASS:
             self._logger.info(
-                f"{data_asset_info} passed all checks on validation node '{result.name}'"
+                f"{data_asset_info} passed all checks on data validation '{result.name}'"
             )
             return
 
@@ -88,7 +88,7 @@ class AbstractRunner(ABC):
 
             summary = self._failed_checks_summary(result.failed_checks_by_level(level))
             method(
-                f"{data_asset_info} failed checks: {summary} on validation node '{result.name}'"
+                f"{data_asset_info} failed checks: {summary} on data validation '{result.name}'"
             )
 
     @staticmethod
@@ -117,5 +117,5 @@ class AbstractRunner(ABC):
                 else f"Data asset '{result.data_asset}'"
             )
             raise CriticalCheckFailedError(
-                f"{data_asset_info} failed checks: {summary} on validation node '{result.name}'"
+                f"{data_asset_info} failed checks: {summary} on data validation '{result.name}'"
             )

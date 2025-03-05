@@ -9,6 +9,7 @@ from dataguard.validation.status import Status
 
 @pytest.mark.unit
 @pytest.mark.slow
+@pytest.mark.pyspark
 class TestIsBetweenUnit:
     @pytest.mark.parametrize(
         "data, value",
@@ -28,15 +29,19 @@ class TestIsBetweenUnit:
     def test_pass(
         self, check: RowLevelResultCheck, spark: SparkSession, data: list[tuple], value: list
     ) -> None:
-        df = spark.createDataFrame(data=data, schema=["col"])
         evaluated_rows = len(data)
         expected_violations = 0
+        evaluated_column = "col"
 
-        result = check.is_between(column="col", value=value).validate(df)
+        df = spark.createDataFrame(data=data, schema=[evaluated_column])
+        result = check.is_between(
+            column=evaluated_column, lower_bound=value[0], upper_bound=value[1]
+        ).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data, schema, id_columns, value",
@@ -44,12 +49,7 @@ class TestIsBetweenUnit:
             # String
             ([("c",)], ["col"], [], ["a", "b"]),
             (
-                [
-                    (
-                        1,
-                        "c",
-                    )
-                ],
+                [(1, "c")],
                 ["id", "col"],
                 ["id"],
                 ["a", "b"],
@@ -57,12 +57,7 @@ class TestIsBetweenUnit:
             # Int
             ([(3,)], ["col"], [], [1, 2]),
             (
-                [
-                    (
-                        1,
-                        0,
-                    )
-                ],
+                [(1, 0)],
                 ["id", "col"],
                 ["id"],
                 [1, 2],
@@ -70,12 +65,7 @@ class TestIsBetweenUnit:
             # Float
             ([(2.0000001,)], ["col"], [], [1.0, 2.0]),
             (
-                [
-                    (
-                        1,
-                        0.9999999,
-                    )
-                ],
+                [(1, 0.9999999)],
                 ["id", "col"],
                 ["id"],
                 [1.0, 2.0],
@@ -83,12 +73,7 @@ class TestIsBetweenUnit:
             # Date
             ([(date(2019, 12, 31),)], ["col"], [], [date(2020, 1, 1), date(2020, 1, 2)]),
             (
-                [
-                    (
-                        1,
-                        date(2020, 1, 3),
-                    )
-                ],
+                [(1, date(2020, 1, 3))],
                 ["id", "col"],
                 ["id"],
                 [date(2020, 1, 1), date(2020, 1, 2)],
@@ -101,12 +86,7 @@ class TestIsBetweenUnit:
                 [datetime(2020, 1, 1), datetime(2020, 1, 2)],
             ),
             (
-                [
-                    (
-                        1,
-                        datetime(2020, 1, 3),
-                    )
-                ],
+                [(1, datetime(2020, 1, 3))],
                 ["id", "col"],
                 ["id"],
                 [datetime(2020, 1, 1), datetime(2020, 1, 2)],
@@ -122,11 +102,16 @@ class TestIsBetweenUnit:
         id_columns: list[str],
         value: list,
     ) -> None:
-        df = spark.createDataFrame(data=data, schema=schema)
         evaluated_rows = len(data)
         expected_violations = 1
 
-        result = check.is_between(column="col", id_columns=id_columns, value=value).validate(df)
+        df = spark.createDataFrame(data=data, schema=schema)
+        result = check.is_between(
+            column="col",
+            id_columns=id_columns,
+            lower_bound=value[0],
+            upper_bound=value[1],
+        ).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows

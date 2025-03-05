@@ -9,6 +9,7 @@ from dataguard.validation.status import Status
 
 @pytest.mark.unit
 @pytest.mark.slow
+@pytest.mark.pyspark
 class TestIsCompleteUnit:
     @pytest.mark.parametrize(
         "data",
@@ -21,20 +22,21 @@ class TestIsCompleteUnit:
         ],
     )
     def test_pass(self, spark: SparkSession, check: RowLevelResultCheck, data: list[tuple]):
-        evaluated_column = "col"
-        df = spark.createDataFrame(
-            data=data,
-            schema=["id", evaluated_column],
-        )
         evaluated_rows = len(data)
         expected_violations = 0
+        evaluated_column = "col"
+        id_columns = ["id"]
 
-        result = check.is_complete(id_columns=["id"], column=evaluated_column).validate(df)
+        df = spark.createDataFrame(
+            data=data,
+            schema=[*id_columns, evaluated_column],
+        )
+        result = check.is_complete(id_columns=id_columns, column=evaluated_column).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.to_dict() == []
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data",
@@ -60,21 +62,24 @@ class TestIsCompleteUnit:
                 (2, None),
             ],
         ],
-        ids=("integer", "string", "float", "date", "timestamp"),
     )
     def test_fail(self, spark: SparkSession, check: RowLevelResultCheck, data: list[tuple]):
-        evaluated_column = "col"
-        df = spark.createDataFrame(
-            data=data,
-            schema=["id", evaluated_column],
-        )
         evaluated_rows = len(data)
         expected_violations = 1
+        evaluated_column = "col"
+        id_columns = ["id"]
 
-        result = check.is_complete(id_columns=["id"], column=evaluated_column).validate(df)
+        df = spark.createDataFrame(
+            data=data,
+            schema=[*id_columns, evaluated_column],
+        )
+        result = check.is_complete(id_columns=id_columns, column=evaluated_column).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.data.columns == ["id", evaluated_column]
+        assert result.rule_metrics[0].failed_rows_dataset.data.columns == [
+            *id_columns,
+            evaluated_column,
+        ]

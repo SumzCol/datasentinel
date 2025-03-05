@@ -1,3 +1,4 @@
+import inspect
 import operator
 from typing import TYPE_CHECKING
 
@@ -34,85 +35,96 @@ class PandasValidationStrategy(ValidationStrategy):
 
         self._compute_instructions[rule.key] = _execute
 
-    def has_pattern(self, rule: Rule) -> None:
-        def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[~df[rule.column].astype(str).str.match(rule.value, na=False)]
-
-        self._compute_instructions[rule.key] = _execute
-
     def is_unique(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column[0]]]
-            return (
-                df[rule.column[0]]
-                .value_counts()
-                .reset_index()
-                .query("count > 1")[[rule.column[0]]]
-            )
+            _df = df[[rule.column[0]]]
+            if rule.options.get("ignore_nulls"):
+                _df = _df.dropna()
+            return _df[_df.duplicated(keep="first")]
 
         self._compute_instructions[rule.key] = _execute
 
-    def are_unique(self, rule: Rule) -> None:  ## ojo
+    def are_unique(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[*rule.column]]
-            return df[df[list(rule.column)].isnull().any(axis=1)]
+            _df = df[rule.column]
+            if rule.options.get("ignore_nulls"):
+                _df = _df.dropna(subset=rule.column)
+            return _df[_df.duplicated(keep="first")]
+
+        self._compute_instructions[rule.key] = _execute
+
+    def has_pattern(self, rule: Rule) -> None:
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            df = df[rule.queried_columns]
+            return df[~df[rule.column[0]].str.match(rule.value, na=False)]
 
         self._compute_instructions[rule.key] = _execute
 
     def is_greater_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column] <= rule.value]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]] <= rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_greater_or_equal_than(self, rule: Rule) -> None:
+    def is_greater_or_equal_to(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column] < rule.value]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]] < rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
     def is_less_than(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column] >= rule.value]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]] >= rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_less_or_equal_than(self, rule: Rule) -> None:
+    def is_less_or_equal_to(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column] > rule.value]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]] > rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
-    def is_equal_than(self, rule: Rule) -> None:
+    def is_equal_to(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column] != rule.value]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]] != rule.value]
 
         self._compute_instructions[rule.key] = _execute
 
     def is_between(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[(df[rule.column] < rule.value[0]) | (df[rule.column] > rule.value[1])]
+            df = df[rule.queried_columns]
+            return df[~df[rule.column[0]].between(rule.value[0], rule.value[1])]
 
         self._compute_instructions[rule.key] = _execute
 
     def is_in(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[~df[rule.column].isin(rule.value)]
+            df = df[rule.queried_columns]
+            return df[~df[rule.column[0]].isin(rule.value)]
 
         self._compute_instructions[rule.key] = _execute
 
     def not_in(self, rule: Rule) -> None:
         def _execute(df: pd.DataFrame) -> pd.DataFrame:
-            df = df[[rule.column]]
-            return df[df[rule.column].isin(rule.value)]
+            df = df[rule.queried_columns]
+            return df[df[rule.column[0]].isin(rule.value)]
+
+        self._compute_instructions[rule.key] = _execute
+
+    def is_custom(self, rule: Rule) -> None:
+        def _execute(df: pd.DataFrame) -> pd.DataFrame:
+            if len(inspect.signature(rule.function).parameters) == 1:
+                computed_df = rule.function(df)
+            else:
+                computed_df = rule.function(df, rule.options)
+            if "pandas" not in str(type(computed_df)):
+                raise ValueError("Custom function does not return a Pandas DataFrame")
+            return computed_df
 
         self._compute_instructions[rule.key] = _execute
 
@@ -170,7 +182,11 @@ class PandasValidationStrategy(ValidationStrategy):
                     pass_rate=pass_rate,
                     pass_threshold=rule.pass_threshold,
                     options=rule.options,
-                    failed_rows_dataset=PandasFailedRowsDataset(bad_records[rule.key]),
+                    failed_rows_dataset=(
+                        PandasFailedRowsDataset(bad_records[rule.key])
+                        if bad_records_count > 0
+                        else None
+                    ),
                 )
             )
 

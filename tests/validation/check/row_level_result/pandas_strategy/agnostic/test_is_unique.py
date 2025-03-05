@@ -8,6 +8,7 @@ from dataguard.validation.status import Status
 
 
 @pytest.mark.unit
+@pytest.mark.pandas
 class TestIsUniqueUnit:
     @pytest.mark.parametrize(
         "data",
@@ -21,16 +22,16 @@ class TestIsUniqueUnit:
     )
     def test_pass(self, check: RowLevelResultCheck, data: list[tuple]):
         evaluated_column = "col"
-        df = DataFrame(data=data, columns=[evaluated_column])
         evaluated_rows = len(data)
         expected_violations = 0
 
+        df = DataFrame(data=data, columns=[evaluated_column])
         result = check.is_unique(column=evaluated_column).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.to_dict() == []
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data",
@@ -44,10 +45,10 @@ class TestIsUniqueUnit:
     )
     def test_fail(self, check: RowLevelResultCheck, data: list[tuple]):
         evaluated_column = "col"
-        df = DataFrame(data=data, columns=[evaluated_column])
         evaluated_rows = len(data)
         expected_violations = 1
 
+        df = DataFrame(data=data, columns=[evaluated_column])
         result = check.is_unique(column=evaluated_column).validate(df)
 
         assert result.status == Status.FAIL
@@ -70,6 +71,9 @@ class TestIsUniqueUnit:
         result_status: Status,
     ):
         data = [(1,), (None,), (None,)]
-        df = DataFrame(data=data, columns=["id"])
-        result = check.is_unique(column="id", ignore_nulls=ignore_nulls).validate(df)
+        evaluated_column = "id"
+
+        df = DataFrame(data=data, columns=[evaluated_column])
+        result = check.is_unique(column=evaluated_column, ignore_nulls=ignore_nulls).validate(df)
+
         assert result.status == result_status

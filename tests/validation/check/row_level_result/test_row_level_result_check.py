@@ -21,15 +21,6 @@ class TestRowLevelResultCheckUnit:
         with pytest.raises(BadArgumentError):
             check.is_complete(id_columns=id_columns, column="id")
 
-    @pytest.mark.parametrize(
-        "value",
-        [[1], [1, 2, 3]],
-        ids=("list with len equal to 1", "list with len equal to 3"),
-    )
-    def test_error_on_is_between_with_invalid_value_len(self, check: RowLevelResultCheck, value):
-        with pytest.raises(BadArgumentError):
-            check.is_between(column="id", value=value)
-
     def test_error_on_is_custom_with_no_callable_specified(self, check: RowLevelResultCheck):
         with pytest.raises(BadArgumentError):
             check.is_custom(fn=1)

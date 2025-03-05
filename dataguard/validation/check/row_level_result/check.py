@@ -129,12 +129,12 @@ class RowLevelResultCheck(AbstractCheck):
         )
         return self
 
-    def is_greater_or_equal_than(
+    def is_greater_or_equal_to(
         self, column: str, value: float, pct: float = 1.0, id_columns: list[str] | None = None
     ) -> Self:
         (
             Rule(
-                method="is_greater_or_equal_than",
+                method="is_greater_or_equal_to",
                 column=[column],
                 id_columns=[] if id_columns is None else id_columns,
                 value=value,
@@ -196,18 +196,17 @@ class RowLevelResultCheck(AbstractCheck):
     def is_between(
         self,
         column: str,
-        value: list[float] | list[int] | list[datetime] | list[date],
+        lower_bound: str | float | int | date | datetime,
+        upper_bound: str | float | int | date | datetime,
         pct: float = 1.0,
         id_columns: list[str] | None = None,
     ) -> Self:
-        if len(value) != 2:  # noqa PLR2004
-            raise BadArgumentError("Value must be a list containing min and max values")
         (
             Rule(
                 method="is_between",
                 column=[column],
                 id_columns=[] if id_columns is None else id_columns,
-                value=value,
+                value=[lower_bound, upper_bound],
                 data_type=RuleDataType.AGNOSTIC,
                 pass_threshold=pct,
             )

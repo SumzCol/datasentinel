@@ -1,40 +1,37 @@
 from datetime import date, datetime
 
 import pytest
-from pyspark.sql import SparkSession
+from pandas import DataFrame
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status
 
 
 @pytest.mark.unit
-@pytest.mark.slow
-@pytest.mark.pyspark
+@pytest.mark.pandas
 class TestIsInUnit:
     @pytest.mark.parametrize(
         "data, value",
         [
             # String
-            ([("a",)], ["a", "b"]),
+            ([("c",)], ["a", "b"]),
             # Integer
-            ([(1,)], [1, 2]),
+            ([(3,)], [1, 2]),
             # Float
-            ([(1.0,)], [1.0, 2.0]),
+            ([(3.0,)], [1.0, 2.0]),
             # Date
-            ([(date(2020, 1, 1),)], [date(2020, 1, 1), date(2020, 1, 2)]),
+            ([(date(2020, 1, 3),)], [date(2020, 1, 1), date(2020, 1, 2)]),
             # Timestamp
-            ([(datetime(2020, 1, 1),)], [datetime(2020, 1, 1), datetime(2020, 1, 2)]),
+            ([(datetime(2020, 1, 3),)], [datetime(2020, 1, 1), datetime(2020, 1, 2)]),
         ],
     )
-    def test_pass(
-        self, check: RowLevelResultCheck, spark: SparkSession, data: list[tuple], value: list
-    ) -> None:
+    def test_pass(self, check: RowLevelResultCheck, data: list[tuple], value: list) -> None:
         evaluated_rows = len(data)
         expected_violations = 0
         evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=[evaluated_column])
-        result = check.is_in(column=evaluated_column, value=value).validate(df)
+        df = DataFrame(data, columns=[evaluated_column])
+        result = check.not_in(column=evaluated_column, value=value).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
@@ -45,31 +42,36 @@ class TestIsInUnit:
         "data, schema, id_columns, value",
         [
             # String
-            ([("c",)], ["col"], [], ["a", "b"]),
-            ([(1, "c")], ["id", "col"], ["id"], ["a", "b"]),
-            # Int
-            ([(3,)], ["col"], [], [1, 2]),
-            ([(1, 0)], ["id", "col"], ["id"], [1, 2]),
-            # Float
-            ([(2.0000001,)], ["col"], [], [1.0, 2.0]),
-            ([(1, 0.9999999)], ["id", "col"], ["id"], [1.0, 2.0]),
-            # Date
-            ([(date(2019, 12, 31),)], ["col"], [], [date(2020, 1, 1), date(2020, 1, 2)]),
+            ([("a",)], ["col"], [], ["a", "b"]),
             (
-                [(1, date(2020, 1, 3))],
+                [(1, "b")],
+                ["id", "col"],
+                ["id"],
+                ["a", "b"],
+            ),
+            # Int
+            ([(1,)], ["col"], [], [1, 2]),
+            ([(1, 2)], ["id", "col"], ["id"], [1, 2]),
+            # Float
+            ([(1.0,)], ["col"], [], [1.0, 2.0]),
+            ([(1, 2.0)], ["id", "col"], ["id"], [1.0, 2.0]),
+            # Date
+            ([(date(2020, 1, 2),)], ["col"], [], [date(2020, 1, 1), date(2020, 1, 2)]),
+            (
+                [(1, date(2020, 1, 2))],
                 ["id", "col"],
                 ["id"],
                 [date(2020, 1, 1), date(2020, 1, 2)],
             ),
             # Timestamp
             (
-                [(datetime(2020, 12, 31),)],
+                [(datetime(2020, 1, 2),)],
                 ["col"],
                 [],
                 [datetime(2020, 1, 1), datetime(2020, 1, 2)],
             ),
             (
-                [(1, datetime(2020, 1, 3))],
+                [(1, datetime(2020, 1, 2))],
                 ["id", "col"],
                 ["id"],
                 [datetime(2020, 1, 1), datetime(2020, 1, 2)],
@@ -79,7 +81,6 @@ class TestIsInUnit:
     def test_fail_with_and_without_id_columns(
         self,
         check: RowLevelResultCheck,
-        spark: SparkSession,
         data: list[tuple],
         schema: list[str],
         id_columns: list[str],
@@ -89,8 +90,8 @@ class TestIsInUnit:
         expected_violations = 1
         evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=schema)
-        result = check.is_in(
+        df = DataFrame(data, columns=schema)
+        result = check.not_in(
             column=evaluated_column, id_columns=id_columns, value=value
         ).validate(df)
 
@@ -98,4 +99,4 @@ class TestIsInUnit:
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.data.columns == schema
+        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == schema

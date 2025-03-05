@@ -7,21 +7,23 @@ from dataguard.validation.status import Status
 
 @pytest.mark.unit
 @pytest.mark.slow
+@pytest.mark.pyspark
 class TestIsEqualToUnit:
     def test_pass(self, check: RowLevelResultCheck, spark: SparkSession):
         data = [
             (1.0,),
         ]
-        df = spark.createDataFrame(data=data, schema=["col"])
         evaluated_rows = len(data)
         expected_violations = 0
         evaluated_column = "col"
 
+        df = spark.createDataFrame(data=data, schema=[evaluated_column])
         result = check.is_equal_to(column=evaluated_column, value=1.0).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].failed_rows_dataset is None
 
     @pytest.mark.parametrize(
         "data, schema, id_columns",
@@ -39,11 +41,11 @@ class TestIsEqualToUnit:
         schema: list[str],
         id_columns: list[str],
     ):
-        df = spark.createDataFrame(data=data, schema=schema)
         evaluated_rows = len(data)
         evaluated_column = "col"
         expected_violations = 1
 
+        df = spark.createDataFrame(data=data, schema=schema)
         result = check.is_equal_to(
             column=evaluated_column, value=1.0, id_columns=id_columns
         ).validate(df)
