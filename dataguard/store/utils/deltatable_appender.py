@@ -31,11 +31,12 @@ class DeltaTableAppender:
         self._schema = schema.rstrip("/")
 
         if dataset_type == "table":
-            if not len(schema.split(".")) == 2:  # noqa PLR2004
+            if not 1 <= len(schema.split(".")) <= 2:  # noqa PLR2004
                 raise DeltaTableAppenderError(
-                    f"Invalid table schema: {schema}. It must be in the format 'catalog.schema'"
+                    f"Invalid table schema: {self._schema}. It must be in the format "
+                    "'catalog.schema'"
                 )
-            self._full_table_path = f"{schema}.{table}"
+            self._full_table_path = f"{self._schema}.{self._table}"
 
             if external_path:
                 self._external_path = external_path
@@ -43,7 +44,7 @@ class DeltaTableAppender:
             else:
                 self._is_external_table = False
         else:
-            self._full_table_path = f"{schema}/{table}"
+            self._full_table_path = f"{self._schema}/{self._table}"
             self._is_external_table = False
 
         self._save_args = deepcopy(save_args) if save_args else {}
@@ -53,6 +54,45 @@ class DeltaTableAppender:
 
         if "format" in self._save_args:
             del self._save_args["format"]
+
+    @property
+    def table(self) -> str:
+        return self._table
+
+    @property
+    def schema(self) -> str:
+        return self._schema
+
+    @property
+    def full_table_path(self) -> str:
+        return self._full_table_path
+
+    @property
+    def is_external_table(self) -> bool:
+        return self._is_external_table
+
+    def exists(self) -> bool:
+        fullpath = (
+            self._full_table_path
+            if self._dataset_type == "table"
+            else f"DELTA.`{self._full_table_path}`"
+        )
+        try:
+            DeltaTable.forName(get_spark(), fullpath)
+        except AnalysisException as exception:
+            if "is not a Delta table" in str(exception):
+                return False
+            raise DeltaTableAppenderError(
+                f"Error while checking if delta table exists: {exception!s}"
+            ) from exception
+
+        return True
+
+    def append(self, df: DataFrame) -> None:
+        if self._dataset_type == "file":
+            self._save_as_file(df)
+        else:
+            self._save_as_table(df)
 
     def _save_as_file(self, df: DataFrame) -> None:
         df.write.save(
@@ -71,24 +111,3 @@ class DeltaTableAppender:
             _options["path"] = self._external_path
 
         df.write.saveAsTable(**_options)
-
-    def exists(self) -> bool:
-        fullpath = (
-            self._full_table_path
-            if self._dataset_type == "table"
-            else f"DELTA.`{self._full_table_path}`"
-        )
-        try:
-            DeltaTable.forName(get_spark(), fullpath)
-        except AnalysisException as exception:
-            if "is not a Delta table" in str(exception):
-                return False
-            raise
-
-        return True
-
-    def append(self, df: DataFrame) -> None:
-        if self._dataset_type == "file":
-            self._save_as_file(df)
-        else:
-            self._save_as_table(df)

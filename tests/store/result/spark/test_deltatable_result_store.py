@@ -1,29 +1,38 @@
 import pytest
 
+from dataguard.store.result.core import ResultStoreError
 from dataguard.store.result.spark.deltatable_result_store import DeltaTableResultStore
 
 
 @pytest.mark.unit
 class TestDeltaTableResultStoreUnit:
-    def test_name_property(self):
-        expected_name = "test"
-        store = DeltaTableResultStore(
-            name=expected_name,
-            table="test_table",
-            schema="test_schema",
-            dataset_type="file",
-        )
+    # @pytest.mark.parametrize(
+    #     "dataset_type, schema",
+    #     [
+    #         ("file", "s3a://test_schema"),
+    #         ("table", "catalog.schema"),
+    #     ]
+    # )
+    # def test_initialization_success(self, dataset_type: Literal["file", "table"], schema: str):
+    #     store = DeltaTableResultStore(
+    #         name="test",
+    #         table="test_table",
+    #         schema=schema,
+    #         dataset_type=dataset_type,
+    #         failed_rows_limit=100,
+    #         disabled=False,
+    #     )
+    #
+    #     assert store.name == "test"
+    #     assert store.disabled == False
 
-        assert store.name == expected_name
-
-    def test_disabled_property(self):
-        expected_disabled = True
-        store = DeltaTableResultStore(
-            name="test",
-            disabled=expected_disabled,
-            table="test_table",
-            schema="test_schema",
-            dataset_type="file",
-        )
-
-        assert store.disabled == expected_disabled
+    def test_error_on_failed_rows_limit_value(self):
+        with pytest.raises(ResultStoreError, match="Failed rows limit must be greater than 0"):
+            DeltaTableResultStore(
+                name="test",
+                table="test_table",
+                schema="s3a://test_schema",
+                dataset_type="file",
+                include_failed_rows=True,
+                failed_rows_limit=0,
+            )

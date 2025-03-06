@@ -9,14 +9,15 @@ from dataguard.notification.renderer.core import AbstractRenderer
 from dataguard.validation.result import DataValidationResult
 
 
+@pytest.fixture
+def mock_renderer():
+    renderer = Mock(spec=AbstractRenderer)
+    renderer.render.return_value = EmailMessage()
+    return renderer
+
+
 @pytest.mark.unit
 class TestSMTPEmailNotifierUnit:
-    @pytest.fixture
-    def mock_renderer(self):
-        renderer = Mock(spec=AbstractRenderer)
-        renderer.render.return_value = EmailMessage()
-        return renderer
-
     def test_initialization_success(self, mock_renderer):
         credentials = {"username": "user@example.com", "password": "password123"}
         notifier = SMTPEmailNotifier(

@@ -29,11 +29,12 @@ class DeltaTableResultStore(AbstractResultStore):
         dataset_type: Literal["file", "table"],
         external_path: str | None = None,
         save_args: dict[str, Any] | None = None,
+        include_failed_rows: bool = False,
         failed_rows_limit: int = 100,
         disabled: bool = False,
     ):
         super().__init__(name, disabled)
-        if not failed_rows_limit > 0:
+        if include_failed_rows and not failed_rows_limit > 0:
             raise ResultStoreError("Failed rows limit must be greater than 0")
         self._failed_rows_limit = failed_rows_limit
         self._delta_table_appender = DeltaTableAppender(
@@ -82,7 +83,7 @@ class DeltaTableResultStore(AbstractResultStore):
                         ),
                         rule_failed_rows_dataset=(
                             rule_metric.failed_rows_dataset.to_json(limit=self._failed_rows_limit)
-                            if rule_metric.failed_rows_dataset
+                            if rule_metric.failed_rows_dataset is not None
                             else None
                         ),
                         rule_status=rule_metric.status.value,
