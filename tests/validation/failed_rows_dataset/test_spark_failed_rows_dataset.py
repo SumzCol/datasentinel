@@ -3,6 +3,7 @@ import json
 import pytest
 from pyspark.sql import DataFrame, SparkSession
 
+from dataguard.validation.failed_rows_dataset.core import FailedRowsDatasetError
 from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 
 
@@ -12,6 +13,8 @@ def spark_df(spark: SparkSession):
 
 
 @pytest.mark.unit
+@pytest.mark.slow
+@pytest.mark.pyspark
 class TestSparkFailedRowsDatasetUnit:
     def test_data_property(self, spark_df: DataFrame):
         spark_failed_rows_dataset = SparkFailedRowsDataset(data=spark_df)
@@ -46,7 +49,7 @@ class TestSparkFailedRowsDatasetUnit:
     def test_error_to_dict_with_less_than_zero_limit(self, limit: int, spark_df: DataFrame):
         failed_rows_dataset = SparkFailedRowsDataset(data=spark_df)
 
-        with pytest.raises(ValueError, match="Limit must be greater than 0"):
+        with pytest.raises(FailedRowsDatasetError, match="Limit must be greater than 0"):
             failed_rows_dataset.to_dict(limit=limit)
 
     @pytest.mark.parametrize(
@@ -70,5 +73,5 @@ class TestSparkFailedRowsDatasetUnit:
     def test_error_to_json_with_less_than_zero_limit(self, limit: int, spark_df: DataFrame):
         failed_rows_dataset = SparkFailedRowsDataset(data=spark_df)
 
-        with pytest.raises(ValueError, match="Limit must be greater than 0"):
+        with pytest.raises(FailedRowsDatasetError, match="Limit must be greater than 0"):
             failed_rows_dataset.to_json(limit=limit)

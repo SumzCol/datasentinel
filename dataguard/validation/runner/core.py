@@ -16,7 +16,7 @@ class RunnerError(DataGuardError):
 
 
 class NoDatasetDefinedError(RunnerError):
-    """"""
+    pass
 
 
 class CriticalCheckFailedError(RunnerError):

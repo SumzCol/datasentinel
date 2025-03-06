@@ -1,6 +1,7 @@
 import pytest
 from pandas import DataFrame
 
+from dataguard.validation.failed_rows_dataset.core import FailedRowsDatasetError
 from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 
 
@@ -49,7 +50,7 @@ class TestPandasFailedRowsDatasetUnit:
     def test_error_to_dict_with_less_than_zero_limit(self, limit: int, pandas_df: DataFrame):
         failed_rows_dataset = PandasFailedRowsDataset(data=pandas_df)
 
-        with pytest.raises(ValueError, match="Limit must be greater than 0"):
+        with pytest.raises(FailedRowsDatasetError, match="Limit must be greater than 0"):
             failed_rows_dataset.to_dict(limit=limit)
 
     @pytest.mark.parametrize(
@@ -73,5 +74,5 @@ class TestPandasFailedRowsDatasetUnit:
     def test_error_to_json_with_less_than_zero_limit(self, limit: int, pandas_df: DataFrame):
         failed_rows_dataset = PandasFailedRowsDataset(data=pandas_df)
 
-        with pytest.raises(ValueError, match="Limit must be greater than 0"):
+        with pytest.raises(FailedRowsDatasetError, match="Limit must be greater than 0"):
             failed_rows_dataset.to_json(limit=limit)

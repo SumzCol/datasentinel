@@ -2,7 +2,10 @@ from typing import Any
 
 from pandas import DataFrame
 
-from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
+from dataguard.validation.failed_rows_dataset.core import (
+    AbstractFailedRowsDataset,
+    FailedRowsDatasetError,
+)
 
 
 class PandasFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
@@ -24,6 +27,6 @@ class PandasFailedRowsDataset(AbstractFailedRowsDataset[DataFrame]):
 
     def _apply_limit(self, limit: int | None) -> DataFrame:
         if limit is not None and not limit > 0:
-            raise ValueError("Limit must be greater than 0")
+            raise FailedRowsDatasetError("Limit must be greater than 0")
 
         return self._data.head(limit) if limit is not None else self._data

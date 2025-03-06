@@ -29,8 +29,6 @@ def spark_schema(spark: SparkSession):
 
 
 @pytest.mark.unit
-@pytest.mark.slow
-@pytest.mark.pyspark
 class TestDeltaTableAppenderUnit:
     @pytest.mark.parametrize(
         "dataset_type, table, schema, external_path, expected_is_external, expected_full_path",
@@ -77,7 +75,7 @@ class TestDeltaTableAppenderUnit:
             "table_dataset_type_with_external_path_defined",
         ],
     )
-    def test_success_initialization(
+    def test_successful_initialization(
         self,
         dataset_type: Literal["file", "table"],
         table: str,
@@ -114,6 +112,8 @@ class TestDeltaTableAppenderUnit:
         with pytest.raises(DeltaTableAppenderError):
             DeltaTableAppender(table="test_table", schema=schema, dataset_type="table")
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_exists_method_with_table_as_dataset_type(
         self, spark_schema: str, sample_dataframe: DataFrame
     ):
@@ -133,6 +133,8 @@ class TestDeltaTableAppenderUnit:
 
         assert appender.exists()
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_exists_method_with_table_as_dataset_type_and_external_path_defined(
         self, spark_schema: str, tmp_path: Path, sample_dataframe: DataFrame
     ):
@@ -152,6 +154,8 @@ class TestDeltaTableAppenderUnit:
 
         assert appender.exists()
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_exists_method_with_file_as_dataset_type(
         self, tmp_path: Path, sample_dataframe: DataFrame
     ):
@@ -167,6 +171,8 @@ class TestDeltaTableAppenderUnit:
 
         assert appender.exists()
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_append_to_file(
         self,
         spark: SparkSession,
@@ -188,6 +194,8 @@ class TestDeltaTableAppenderUnit:
         assert df.count() == sample_dataframe.count()
         assert df.columns == sample_dataframe.columns
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_append_to_table(
         self,
         spark: SparkSession,
@@ -209,6 +217,8 @@ class TestDeltaTableAppenderUnit:
         assert df.count() == sample_dataframe.count()
         assert df.columns == sample_dataframe.columns
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_append_to_table_with_external_path(
         self,
         spark: SparkSession,
@@ -232,6 +242,8 @@ class TestDeltaTableAppenderUnit:
         assert df.count() == sample_dataframe.count()
         assert df.columns == sample_dataframe.columns
 
+    @pytest.mark.slow
+    @pytest.mark.pyspark
     def test_error_on_exists_method(self):
         """
         Tests that an error is raised if a AnalysisException is raised when checking if a table

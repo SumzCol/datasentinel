@@ -1,7 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
+from dataguard.core import DataGuardError
+
 T = TypeVar("T")
+
+
+class FailedRowsDatasetError(DataGuardError):
+    pass
 
 
 class AbstractFailedRowsDataset(ABC, Generic[T]):
