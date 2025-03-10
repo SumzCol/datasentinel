@@ -11,21 +11,21 @@ from dataguard.store.audit.row import BaseAuditRow
 @pytest.mark.unit
 class TestBaseAuditRowUnit:
     @pytest.mark.parametrize(
-        "field_type",
+        "field_type, field_value",
         [
-            Any,
-            list[Any],
-            set[Any],
-            tuple[Any],
-            Optional[Any],
+            (Any, "test"),
+            (list[Any], ["test"]),
+            (set[Any], {"test"}),
+            (tuple[Any], ("test",)),
+            (Optional[Any], None),
         ],
     )
-    def test_error_on_field_with_any_as_type(self, field_type):
+    def test_error_on_field_with_any_as_type(self, field_type, field_value):
         class AuditRow(BaseAuditRow):
-            field: Any
+            field: field_type
 
         with pytest.raises(ValidationError, match="Multi-type fields are not supported"):
-            AuditRow(field="test")
+            AuditRow(field=field_value)
 
     @pytest.mark.parametrize(
         "field_type",

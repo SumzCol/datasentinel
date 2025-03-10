@@ -2,7 +2,7 @@ import json
 from datetime import date, datetime
 from typing import Any, Literal
 
-from pyspark.sql import Row
+from pyspark.sql import DataFrame, Row
 from pyspark.sql.types import (
     ArrayType,
     BooleanType,
@@ -31,11 +31,12 @@ class DeltaTableAuditStore(AbstractAuditStore):
         dataset_type: Literal["file", "table"],
         external_path: str | None = None,
         save_args: dict[str, Any] | None = None,
+        include_failed_rows: bool = False,
         failed_rows_limit: int = 100,
         disabled: bool = False,
     ):
         super().__init__(name, disabled)
-        if not failed_rows_limit > 0:
+        if include_failed_rows and not failed_rows_limit > 0:
             raise AuditStoreError("Failed rows limit must be greater than 0")
         self._failed_rows_limit = failed_rows_limit
         self._delta_table_appender = DeltaTableAppender(
@@ -47,8 +48,14 @@ class DeltaTableAuditStore(AbstractAuditStore):
         )
 
     def append(self, row: BaseAuditRow) -> None:
+        try:
+            self._delta_table_appender.append(self._audit_row_to_df(row))
+        except Exception as e:
+            raise AuditStoreError(f"Failed to append row to audit store. Error: {e!s}") from e
+
+    def _audit_row_to_df(self, row: BaseAuditRow) -> DataFrame:
         row_fields = row.row_fields
-        df = get_spark().createDataFrame(
+        return get_spark().createDataFrame(
             data=[
                 Row(
                     **{
@@ -70,8 +77,6 @@ class DeltaTableAuditStore(AbstractAuditStore):
             ),
         )
 
-        self._delta_table_appender.append(df)
-
     @staticmethod
     def _format_field_value(field_info: FieldInfo, value: Any) -> Any:
         if value is None or field_info.type in {int, str, float, bool, datetime, date, list}:
@@ -82,18 +87,15 @@ class DeltaTableAuditStore(AbstractAuditStore):
             return json.dumps(value)
 
     def _infer_spark_type(self, field_info: FieldInfo) -> DataType | type[DataType]:
-        if field_info.type in {list, tuple, set}:
-            if not field_info.args or len(field_info.args) > 1:
-                raise AuditStoreError("Multi-typed collections are not supported")
-
-            return ArrayType(self._infer_spark_type(field_info.args[0]))
-
         type_map = {
-            int: LongType,
-            str: StringType,
-            bool: BooleanType,
-            float: DoubleType,
-            datetime: TimestampType,
-            date: DateType,
+            int: LongType(),
+            str: StringType(),
+            bool: BooleanType(),
+            float: DoubleType(),
+            datetime: TimestampType(),
+            date: DateType(),
         }
-        return type_map.get(field_info.type, StringType)
+        if field_info.type in {list, tuple, set}:
+            return ArrayType(type_map[field_info.args[0]])
+
+        return type_map.get(field_info.type, StringType())

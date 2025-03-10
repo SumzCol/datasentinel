@@ -37,6 +37,7 @@ class DeltaTableResultStore(AbstractResultStore):
         if include_failed_rows and not failed_rows_limit > 0:
             raise ResultStoreError("Failed rows limit must be greater than 0")
         self._failed_rows_limit = failed_rows_limit
+        self._include_failed_records = include_failed_rows
         self._delta_table_appender = DeltaTableAppender(
             table=table,
             schema=schema,
@@ -83,7 +84,10 @@ class DeltaTableResultStore(AbstractResultStore):
                         ),
                         rule_failed_rows_dataset=(
                             rule_metric.failed_rows_dataset.to_json(limit=self._failed_rows_limit)
-                            if rule_metric.failed_rows_dataset is not None
+                            if (
+                                rule_metric.failed_rows_dataset is not None
+                                and self._include_failed_records
+                            )
                             else None
                         ),
                         rule_status=rule_metric.status.value,
