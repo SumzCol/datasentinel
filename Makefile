@@ -28,7 +28,7 @@ lint:
 	pre-commit run --all-files --hook-stage manual
 
 type-check:
-	mypy dataguard
+	pyright dataguard
 
 unit-test:
 	pytest -m unit
