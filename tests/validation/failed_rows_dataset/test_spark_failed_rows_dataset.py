@@ -1,7 +1,7 @@
 import json
 
-import pytest
 from pyspark.sql import DataFrame, SparkSession
+import pytest
 
 from dataguard.validation.failed_rows_dataset.core import FailedRowsDatasetError
 from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset

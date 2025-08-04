@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 
-import pytest
 from pandas import DataFrame
+import pytest
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status

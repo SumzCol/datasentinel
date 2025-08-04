@@ -1,6 +1,6 @@
-import pytest
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
+import pytest
 
 
 def _setup_spark_session():

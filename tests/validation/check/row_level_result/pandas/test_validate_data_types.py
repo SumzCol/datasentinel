@@ -1,8 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import Mock
 
-import pytest
 from pandas import DataFrame
+import pytest
 
 from dataguard.validation.check.row_level_result.pandas_strategy import PandasValidationStrategy
 from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType

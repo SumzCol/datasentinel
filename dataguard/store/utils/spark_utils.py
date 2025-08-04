@@ -2,8 +2,7 @@ from pyspark.sql import SparkSession
 
 
 def get_spark() -> SparkSession:
-    """
-    Returns the SparkSession. In case databricks-connect is available we use it for
+    """Returns the SparkSession. In case databricks-connect is available we use it for
     extended configuration mechanisms and notebook compatibility,
     otherwise we use classic pyspark.
     """

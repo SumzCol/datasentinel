@@ -1,5 +1,5 @@
-import pytest
 from pyspark.sql import SparkSession
+import pytest
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status

@@ -1,5 +1,5 @@
-import logging
 from abc import ABC, abstractmethod
+import logging
 
 from dataguard.core import DataGuardError
 from dataguard.validation.result import DataValidationResult
@@ -56,6 +56,7 @@ class AbstractResultStoreManager(ABC):
 
         Args:
             enabled_only: Whether to only consider enabled result stores.
+
         Returns:
             The number of registered result stores
         """

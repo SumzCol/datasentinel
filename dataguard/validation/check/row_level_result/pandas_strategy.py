@@ -13,6 +13,7 @@ from dataguard.validation.check.row_level_result.validation_strategy import (
 from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset
 from dataguard.validation.rule.metric import RuleMetric
 
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 

@@ -2,8 +2,10 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-from cuallee import Check
-from cuallee import CheckLevel as CualleeCheckLevel
+from cuallee import (
+    Check,
+    CheckLevel as CualleeCheckLevel,
+)
 from typing_extensions import Self
 
 from dataguard.validation.check.core import (
@@ -25,18 +27,42 @@ class CualleeCheck(AbstractCheck):
     """Cuallee check implementation."""
 
     def __init__(self, level: CheckLevel, name: str):
+        """Initialize a new CualleeCheck instance.
+
+        Args:
+            level: The severity level of the check.
+            name: The name of the check.
+        """
         self._check = Check(level=CualleeCheckLevel(_cuallee_check_level(level=level)), name=name)
         super().__init__(level, name)
 
     def is_complete(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the specified column are complete (non-null).
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_complete(column=column, pct=pct)
         return self
 
     def is_empty(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the specified column are empty.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_empty(column=column, pct=pct)
         return self
 
     def are_complete(self, column: list[str], pct: float = 1.0) -> Self:
+        """Check if values in the specified columns are complete (non-null).
+
+        Args:
+            column: List of column names to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.are_complete(column=column, pct=pct)
         return self
 
@@ -47,12 +73,26 @@ class CualleeCheck(AbstractCheck):
         approximate: bool = False,
         ignore_nulls: bool = False,
     ) -> Self:
+        """Check if values in the specified column are unique.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+            approximate: If True, uses an approximate algorithm for better performance.
+            ignore_nulls: If True, null values are not counted when checking uniqueness.
+        """
         self._check.is_unique(
             column=column, pct=pct, approximate=approximate, ignore_nulls=ignore_nulls
         )
         return self
 
     def is_primary_key(self, column: str, pct: float = 1.0) -> Self:
+        """Check if the column can be used as a primary key.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_primary_key(column=column, pct=pct)
         return self
 
@@ -61,86 +101,221 @@ class CualleeCheck(AbstractCheck):
         column: list[str],
         pct: float = 1.0,
     ) -> Self:
+        """Check if the combination of columns is unique.
+
+        Args:
+            column: List of column names to check for uniqueness.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.are_unique(column=column, pct=pct)
         return self
 
     def is_composite_key(self, column: list[str], pct: float = 1.0) -> Self:
+        """Check if the combination of columns can be used as a composite key.
+
+        Args:
+            column: List of column names to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_composite_key(column=column, pct=pct)
         return self
 
     def is_greater_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+        """Check if values in the column are greater than the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The value to compare against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_greater_than(column=column, value=value, pct=pct)
         return self
 
     def is_positive(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the column are positive.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_positive(column=column, pct=pct)
         return self
 
     def is_greater_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+        """Check if values in the column are greater than or equal to the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The value to compare against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_greater_or_equal_than(column=column, value=value, pct=pct)
         return self
 
     def is_in_millions(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the column are in millions.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_in_millions(column=column, pct=pct)
         return self
 
     def is_in_billions(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the column are in billions.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_in_billions(column=column, pct=pct)
         return self
 
     def is_less_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+        """Check if values in the column are less than the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The value to compare against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_less_than(column=column, value=value, pct=pct)
         return self
 
     def is_negative(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the column are negative.
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_negative(column=column, pct=pct)
         return self
 
     def is_less_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+        """Check if values in the column are less than or equal to the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The value to compare against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_less_or_equal_than(column=column, value=value, pct=pct)
         return self
 
     def is_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+        """Check if values in the column are equal to the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The value to compare against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_equal_than(column=column, value=value, pct=pct)
         return self
 
     def has_pattern(self, column: str, value: str, pct: float = 1.0) -> Self:
+        """Check if values in the column match the specified pattern.
+
+        Args:
+            column: The name of the column to check.
+            value: The regex pattern to match against.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.has_pattern(column=column, value=value, pct=pct)
         return self
 
     def is_legit(self, column: str, pct: float = 1.0) -> Self:
+        """Check if values in the column are legitimate (non-null and non-blank).
+
+        Args:
+            column: The name of the column to check.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_legit(column=column, pct=pct)
         return self
 
     def has_min(self, column: str, value: float) -> Self:
+        """Check if the minimum value in the column equals the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The expected minimum value.
+        """
         self._check.has_min(column=column, value=value)
         return self
 
     def has_max(self, column: str, value: float) -> Self:
+        """Check if the maximum value in the column equals the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The expected maximum value.
+        """
         self._check.has_max(column=column, value=value)
         return self
 
     def has_std(self, column: str, value: float) -> Self:
+        """Check if the standard deviation of the column equals the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The expected standard deviation.
+        """
         self._check.has_std(column=column, value=value)
         return self
 
     def has_mean(self, column: str, value: float) -> Self:
+        """Check if the mean of the column equals the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The expected mean value.
+        """
         self._check.has_mean(column=column, value=value)
         return self
 
     def has_sum(self, column: str, value: float) -> Self:
+        """Check if the sum of the column equals the specified value.
+
+        Args:
+            column: The name of the column to check.
+            value: The expected sum.
+        """
         self._check.has_sum(column=column, value=value)
         return self
 
     def is_between(self, column: str, value: list, pct: float = 1.0) -> Self:
+        """Check if values in the column are between the specified range.
+
+        Args:
+            column: The name of the column to check.
+            value: A list of two values representing the range [min, max].
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.is_between(column=column, value=tuple(value), pct=pct)
         return self
 
     def not_contained_in(self, column: str, value: list, pct: float = 1.0) -> Self:
+        """Check if values in the column are not contained in the specified list.
+
+        Args:
+            column: The name of the column to check.
+            value: List of values that should not be present.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.not_contained_in(column=column, value=value, pct=pct)
         return self
 
     def not_in(self, column: str, value: list, pct: float = 1.0) -> Self:
+        """Check if values in the column are not in the specified list.
+
+        Args:
+            column: The name of the column to check.
+            value: List of values that should not be present.
+            pct: The minimum passing ratio required (0.0 to 1.0).
+        """
         self._check.not_in(column=column, value=tuple(value), pct=pct)
         return self
 

@@ -2,8 +2,8 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any, Optional, Union
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from dataguard.store.audit.row import BaseAuditRow
 

@@ -16,6 +16,8 @@ install-scripts-reqs: install-uv
 install-pre-commit:
 	pre-commit install --install-hooks
 
+install-all: install-base-reqs install-lint-reqs install-test-reqs install-pre-commit
+
 uninstall-pre-commit:
 	pre-commit uninstall
 

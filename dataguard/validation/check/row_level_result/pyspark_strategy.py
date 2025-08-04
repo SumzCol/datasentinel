@@ -2,8 +2,8 @@ import inspect
 import operator
 from typing import TYPE_CHECKING
 
-import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
+import pyspark.sql.functions as F
 from pyspark.sql.types import DateType, NumericType, StringType, TimestampType
 
 from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
@@ -13,6 +13,7 @@ from dataguard.validation.check.row_level_result.validation_strategy import (
 )
 from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 from dataguard.validation.rule.metric import RuleMetric
+
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -149,16 +150,14 @@ class PysparkValidationStrategy(ValidationStrategy):
         dataframe: DataFrame,
     ) -> dict[str, DataFrame]:
         """Compute rules through spark transform"""
-
         return {
             k: compute_instruction(dataframe)  # type: ignore
             for k, compute_instruction in self._compute_instructions.items()
         }
 
     def validate_data_types(self, df: DataFrame, rules: dict[str, Rule]) -> None:
-        """
-        Validate the datatype of each column according to the CheckDataType of the rule's method
-        """
+        """Validate the datatype of each column according to the CheckDataType of the
+        rule's method"""
         types_map = {
             RuleDataType.NUMERIC: NumericType,
             RuleDataType.STRING: StringType,

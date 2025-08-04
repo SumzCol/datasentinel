@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Literal
 from unittest.mock import patch
 
-import pytest
 from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame, SparkSession
+import pytest
 
 from dataguard.store.utils.deltatable_appender import DeltaTableAppender, DeltaTableAppenderError
 
@@ -245,8 +245,7 @@ class TestDeltaTableAppenderUnit:
     @pytest.mark.slow
     @pytest.mark.pyspark
     def test_error_on_exists_method(self):
-        """
-        Tests that an error is raised if a AnalysisException is raised when checking if a table
+        """Tests that an error is raised if a AnalysisException is raised when checking if a table
         exists and the error message does not contain the string 'is not a Delta table'
         """
         appender = DeltaTableAppender(

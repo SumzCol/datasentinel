@@ -3,6 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from dataguard.core import DataGuardError
 
+
 T = TypeVar("T")
 
 
@@ -27,8 +28,7 @@ class AbstractFailedRowsDataset(ABC, Generic[T]):
 
     @abstractmethod
     def to_dict(self, limit: int | None = None) -> list[dict[str, Any]]:
-        """
-        Returns bad records as a list of dictionaries
+        """Returns bad records as a list of dictionaries
 
         Args:
             limit: Limits the number of bad records to return
@@ -36,8 +36,7 @@ class AbstractFailedRowsDataset(ABC, Generic[T]):
 
     @abstractmethod
     def to_json(self, limit: int | None = None) -> str:
-        """
-        Returns bad records as JSON string
+        """Returns bad records as JSON string
 
         Args:
             limit: Limits the number of bad records to return

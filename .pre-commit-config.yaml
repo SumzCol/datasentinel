@@ -1,6 +1,17 @@
 default_stages: [pre-commit, manual]
 
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
+    hooks:
+      - id: ruff
+        name: "ruff on dataguard/, scripts/ and tests/"
+        args: [ "--fix", "--exit-non-zero-on-fix" ]
+        files: "^dataguard/|^tests/|^scripts/"
+      - id: ruff-format
+        name: "ruff format on dataguard/, scripts/ and tests/"
+        files: "^dataguard/|^tests/|^scripts/"
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -10,14 +21,3 @@ repos:
       - id: check-added-large-files
       - id: check-json
       - id: check-case-conflict
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.7
-    hooks:
-      - id: ruff
-        name: "ruff on dataguard/, scripts/ and tests/"
-        args: [ "--fix", "--exit-non-zero-on-fix" ]
-        files: "^dataguard/|^tests/|^scripts/"
-      - id: ruff-format
-        name: "ruff format on dataguard/, scripts/ and tests/"
-        files: "^dataguard/|^tests/|^scripts/"

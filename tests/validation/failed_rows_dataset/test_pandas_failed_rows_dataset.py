@@ -1,5 +1,5 @@
-import pytest
 from pandas import DataFrame
+import pytest
 
 from dataguard.validation.failed_rows_dataset.core import FailedRowsDatasetError
 from dataguard.validation.failed_rows_dataset.pandas import PandasFailedRowsDataset

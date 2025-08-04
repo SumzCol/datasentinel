@@ -1,5 +1,5 @@
-import pytest
 from pandas import DataFrame
+import pytest
 
 from dataguard.validation.check import CualleeCheck
 from dataguard.validation.status import Status

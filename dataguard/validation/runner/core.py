@@ -1,5 +1,5 @@
-import logging
 from abc import ABC, abstractmethod
+import logging
 
 from dataguard.core import DataGuardError
 from dataguard.notification.notifier.core import AbstractNotifierManager

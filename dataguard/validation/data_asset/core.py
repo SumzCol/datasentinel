@@ -3,6 +3,7 @@ from typing import Generic, TypeVar
 
 from dataguard.core import DataGuardError
 
+
 T = TypeVar("T")
 
 

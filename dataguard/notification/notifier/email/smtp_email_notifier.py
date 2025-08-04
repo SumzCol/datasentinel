@@ -1,3 +1,5 @@
+"""SMTP email notifier."""
+
 from email.message import EmailMessage
 from smtplib import SMTP
 from typing import Any
@@ -8,6 +10,8 @@ from dataguard.validation.result import DataValidationResult
 
 
 class SMTPEmailNotifier(AbstractNotifier):
+    """SMTP email notifier."""
+
     def __init__(  # noqa PLR0913
         self,
         name: str,
@@ -44,6 +48,7 @@ class SMTPEmailNotifier(AbstractNotifier):
         return message
 
     def notify(self, result: DataValidationResult):
+        """Send a notification using SMTP protocol."""
         message = self._define_recipients(self._renderer.render(result))
         try:
             with SMTP(self._server, self._port) as server:

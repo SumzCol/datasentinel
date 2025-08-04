@@ -1,5 +1,5 @@
-import enum
 from abc import ABC, abstractmethod
+import enum
 from typing import Any
 
 from dataguard.core import DataGuardError

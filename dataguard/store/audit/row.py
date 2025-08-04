@@ -6,6 +6,7 @@ from typing import Any, Union, get_args, get_origin
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
+
 _VALID_SCALAR_TYPES = {str, int, float, bool, datetime, date}
 _VALID_COLLECTION_TYPES = {list, tuple, set}
 _VALID_OPTIONAL_TYPES = {Union, UnionType}
@@ -15,8 +16,7 @@ _VALID_TYPES_STR = ",".join([t.__name__ for t in _VALID_TYPES])
 
 @dataclass
 class FieldInfo:
-    """
-    Information about a field in a row.
+    """Information about a field in a row.
 
     Attributes:
         annotation: The annotation/type of the field.

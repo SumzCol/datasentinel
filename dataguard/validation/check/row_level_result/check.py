@@ -1,7 +1,7 @@
-import importlib
-import inspect
 from collections.abc import Callable
 from datetime import date, datetime
+import importlib
+import inspect
 from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
@@ -20,6 +20,7 @@ from dataguard.validation.check.row_level_result.utils import (
     are_id_columns_in_rule_columns,
 )
 from dataguard.validation.check.utils import to_df_if_delta_table
+
 
 if TYPE_CHECKING:
     from dataguard.validation.check.row_level_result.validation_strategy import (

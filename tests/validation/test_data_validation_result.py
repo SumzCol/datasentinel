@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from unittest.mock import Mock, PropertyMock
 
-import pytest
 from pydantic import ValidationError
+import pytest
 from ulid import ULID
 
 from dataguard.validation.check.level import CheckLevel

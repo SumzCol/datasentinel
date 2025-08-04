@@ -1,117 +1,137 @@
-import logging
+"""Core components for creating and managing notifiers."""
+
 from abc import ABC, abstractmethod
+import logging
 
 from dataguard.core import DataGuardError
-from dataguard.validation.core import NotifyOnEvent
-from dataguard.validation.result import DataValidationResult
 
 
 class NotifierError(DataGuardError):
+    """Base exception for notifier-related errors."""
+
     pass
 
 
 class NotifierManagerError(DataGuardError):
+    """Base exception for notifier manager-related errors."""
+
     pass
 
 
 class NotifierAlreadyExistsError(NotifierManagerError):
+    """Raised when attempting to register an already existing notifier."""
+
     pass
 
 
 class NotifierNotFoundError(NotifierManagerError):
+    """Raised when a requested notifier is not found."""
+
     pass
 
 
 class AbstractNotifier(ABC):
-    def __init__(self, name: str, disabled: bool = False):
+    """Abstract base class for notifiers."""
+
+    def __init__(self, name, disabled=False):
+        """Initializes the AbstractNotifier.
+
+        Args:
+            name: The name of the notifier.
+            disabled: Whether the notifier is disabled.
+        """
         self._name = name
         self._disabled = disabled
 
     @property
-    def name(self) -> str:
+    def name(self):
+        """Gets the name of the notifier."""
         return self._name
 
     @property
-    def disabled(self) -> bool:
+    def disabled(self):
+        """Checks if the notifier is disabled."""
         return self._disabled
 
     @property
-    def _logger(self) -> logging.Logger:
+    def _logger(self):
         return logging.getLogger(__name__)
 
     @abstractmethod
-    def notify(self, result: DataValidationResult) -> None:
-        """Notify a data validation result"""
+    def notify(self, result):
+        """Sends a notification based on the data validation result.
+
+        Args:
+            result: The data validation result to notify.
+        """
 
 
 class AbstractNotifierManager(ABC):
+    """Abstract base class for notifier managers."""
+
     @property
-    def _logger(self) -> logging.Logger:
+    def _logger(self):
         return logging.getLogger(__name__)
 
     @abstractmethod
-    def count(self, enabled_only: bool = False) -> int:
-        """Return the number of registered notifiers
+    def count(self, enabled_only=False):
+        """Return the number of registered notifiers.
 
         Args:
             enabled_only: Whether to only consider enabled notifiers.
+
         Returns:
-            The number of registered notifiers
+            The number of registered notifiers.
         """
 
     @abstractmethod
-    def get(self, name: str) -> AbstractNotifier:
-        """Get notifier by name
+    def get(self, name):
+        """Get notifier by name.
 
         Args:
-            name: Notifier name
+            name: Notifier name.
 
         Returns:
-            AbstractNotifier: Notifier instance with the given name
+            Notifier instance with the given name.
         """
 
     @abstractmethod
-    def register(self, notifier: AbstractNotifier, replace: bool = False) -> None:
-        """Register notifier
+    def register(self, notifier, replace=False):
+        """Register notifier.
 
         Args:
-            notifier: Notifier to register
-            replace: Whether to replace an existing notifier if it already exists
+            notifier: Notifier to register.
+            replace: Whether to replace an existing notifier if it already exists.
 
         Raises:
-            NotifierAlreadyExistsError: When the notifier already exists and replace is False
+            NotifierAlreadyExistsError: When the notifier already exists and replace is False.
         """
 
     @abstractmethod
-    def remove(self, name: str) -> None:
-        """Remove notifier by name
+    def remove(self, name):
+        """Remove notifier by name.
 
         Args:
-            name: Name of the notifier to be removed
+            name: Name of the notifier to be removed.
 
         Raises:
-            NotifierNotFoundError: When a notifier with the given name was not registered before
+            NotifierNotFoundError: When a notifier with the given name was not registered before.
         """
 
     @abstractmethod
-    def exists(self, name: str) -> bool:
-        """Check if notifier exists
+    def exists(self, name):
+        """Check if notifier exists.
 
         Args:
-            name: Name of the notifier to check if its registered
+            name: Name of the notifier to check if its registered.
 
         Returns:
-            whether the notifier exists
+            Whether the notifier exists.
         """
 
     @abstractmethod
-    def notify_all_by_event(
-        self,
-        notifiers_by_events: dict[NotifyOnEvent, list[str]],
-        result: DataValidationResult,
-    ) -> None:
-        """
-        Notify a validation node result using the specified notifiers for each event.
+    def notify_all_by_event(self, notifiers_by_events, result):
+        """Notify a validation node result using the specified notifiers for each event.
 
         Args:
             notifiers_by_events: A dictionary where each key is

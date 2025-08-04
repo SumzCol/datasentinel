@@ -125,39 +125,14 @@ scripts = [
 
 # Lint dependencies
 lint = [
-  "ruff==0.9.7",
+  "ruff==0.11.12",
   "pre-commit>=2.9.2, <5.0",
-  "mypy~=1.15.0",
+  "pyright==1.1.403",
 ]
 
 all = [
   "dataguard[test,scripts,lint]"
 ]
-
-[tool.ruff]
-line-length = 98
-show-fixes = true
-lint.select = [
-    "F",    # Pyflakes
-    "W",    # pycodestyle
-    "E",    # pycodestyle
-    "I",    # isort
-    "UP",   # pyupgrade
-    "PL",   # Pylint
-    "T201", # Print Statement
-    "S",    # flake8-bandit
-    "TCH",  # flake8-type-checking
-    "RUF",  # Ruff-specific rules
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["UP007", "S101"]
-
-[tool.ruff.lint.pylint]
-max-args = 7  # Set the maximum number of arguments for a function
-
-[tool.ruff.lint.isort]
-known-first-party = ["dataguard"]
 
 [tool.mypy]
 plugins = ['pydantic.mypy']

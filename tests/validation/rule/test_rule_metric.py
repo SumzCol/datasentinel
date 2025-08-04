@@ -1,5 +1,5 @@
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status

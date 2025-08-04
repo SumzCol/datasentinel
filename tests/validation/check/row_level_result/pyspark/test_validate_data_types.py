@@ -1,8 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import Mock
 
-import pytest
 from pyspark.sql import SparkSession
+import pytest
 
 from dataguard.validation.check.row_level_result.pyspark_strategy import PysparkValidationStrategy
 from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType

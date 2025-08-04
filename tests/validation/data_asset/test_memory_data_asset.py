@@ -1,6 +1,6 @@
-import pytest
 from pandas import DataFrame
 from pyspark.sql import SparkSession
+import pytest
 
 from dataguard.validation.data_asset.core import DataAssetError
 from dataguard.validation.data_asset.memory import MemoryDataAsset

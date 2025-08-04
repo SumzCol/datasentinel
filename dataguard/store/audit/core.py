@@ -1,5 +1,5 @@
-import logging
 from abc import ABC, abstractmethod
+import logging
 
 from dataguard.core import DataGuardError
 from dataguard.store.audit.row import BaseAuditRow
@@ -60,6 +60,7 @@ class AbstractAuditStoreManager(ABC):
 
         Args:
             enabled_only: Whether to only consider enabled audit stores.
+
         Returns:
             The number of registered audit stores
         """

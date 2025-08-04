@@ -1,10 +1,19 @@
+from datetime import date, datetime
 import json
 from typing import Any
 from unittest.mock import Mock, patch
 
-import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.types import ArrayType, BooleanType, DoubleType, LongType, StringType
+from pyspark.sql.types import (
+    ArrayType,
+    BooleanType,
+    DateType,
+    DoubleType,
+    LongType,
+    StringType,
+    TimestampType,
+)
+import pytest
 
 from dataguard.store.audit.core import AuditStoreError
 from dataguard.store.audit.row import BaseAuditRow
@@ -94,19 +103,39 @@ class TestDeltaTableAuditStoreUnit:
             (str, "test", StringType(), "test"),
             (float, 1.0, DoubleType(), 1.0),
             (bool, True, BooleanType(), True),
+            (datetime, datetime(2022, 1, 1), TimestampType(), datetime(2022, 1, 1)),
+            (date, date(2022, 1, 1), DateType(), date(2022, 1, 1)),
             # Collection types
             (list[int], [1, 2], ArrayType(LongType()), [1, 2]),
             (list[str], ["test1", "test2"], ArrayType(StringType()), ["test1", "test2"]),
             (list[float], [1.0, 2.0], ArrayType(DoubleType()), [1.0, 2.0]),
             (list[bool], [True, False], ArrayType(BooleanType()), [True, False]),
+            (
+                list[datetime],
+                [datetime(2022, 1, 1)],
+                ArrayType(TimestampType()),
+                [datetime(2022, 1, 1)],
+            ),
             (tuple[int, ...], (1, 2), ArrayType(LongType()), [1, 2]),
             (tuple[str, ...], ("test1", "test2"), ArrayType(StringType()), ["test1", "test2"]),
             (tuple[float, ...], (1.0, 2.0), ArrayType(DoubleType()), [1.0, 2.0]),
             (tuple[bool, ...], (True, False), ArrayType(BooleanType()), [True, False]),
+            (
+                tuple[datetime, ...],
+                (datetime(2022, 1, 1),),
+                ArrayType(TimestampType()),
+                [datetime(2022, 1, 1)],
+            ),
             (set[int], {1, 2}, ArrayType(LongType()), [1, 2]),
             (set[str], {"test1", "test2"}, ArrayType(StringType()), ["test1", "test2"]),
             (set[float], {1.0, 2.0}, ArrayType(DoubleType()), [1.0, 2.0]),
             (set[bool], {True, False}, ArrayType(BooleanType()), [True, False]),
+            (
+                set[datetime],
+                {datetime(2022, 1, 1)},
+                ArrayType(TimestampType()),
+                [datetime(2022, 1, 1)],
+            ),
             (dict[str, Any], {"test1": 1}, StringType(), json.dumps({"test1": 1})),
         ],
     )

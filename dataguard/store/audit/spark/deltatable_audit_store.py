@@ -1,5 +1,5 @@
-import json
 from datetime import date, datetime
+import json
 from typing import Any, Literal
 
 from pyspark.sql import DataFrame, Row
@@ -96,6 +96,8 @@ class DeltaTableAuditStore(AbstractAuditStore):
             date: DateType(),
         }
         if field_info.type in {list, tuple, set}:
+            if field_info.args is None or len(field_info.args) != 1:  # pragma: no cover
+                raise AuditStoreError("Unsupported collection type")
             return ArrayType(type_map[field_info.args[0]])
 
         return type_map.get(field_info.type, StringType())

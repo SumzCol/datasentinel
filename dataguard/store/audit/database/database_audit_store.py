@@ -1,5 +1,5 @@
-import json
 from datetime import date, datetime
+import json
 from typing import Any, Literal
 
 from sqlalchemy import (
@@ -50,11 +50,11 @@ class DatabaseAuditStore(AbstractAuditStore):
 
     def append(self, row: BaseAuditRow) -> None:
         row_fields = row.row_fields
-        table = self._get_or_create_table(row_fields)
+        table = self._get_or_create_table(row_fields=row_fields)
         with self._session_maker() as session:
             try:
                 row_dict = {
-                    field: self._format_field_value(value)
+                    field: self._format_field_value(field_info=row_fields.get(field), value=value)
                     for field, value in row.to_dict().items()
                 }
                 insert_statement = table.insert().values(row_dict)

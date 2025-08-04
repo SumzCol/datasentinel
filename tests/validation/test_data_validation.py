@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from dataguard.validation.check.core import AbstractCheck
 from dataguard.validation.data_asset.core import AbstractDataAsset

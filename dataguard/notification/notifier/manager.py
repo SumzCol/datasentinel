@@ -1,3 +1,5 @@
+"""`NotifierManager` manages all the registered notifiers."""
+
 import threading
 
 from dataguard.notification.notifier.core import (
@@ -14,12 +16,16 @@ from dataguard.validation.status import Status
 
 
 class NotifierManager(AbstractNotifierManager):
+    """A central place to register and manage notifiers."""
+
     _lock = threading.Lock()
 
     def __init__(self) -> None:
+        """Initializes the NotifierManager to manage notifiers."""
         self._notifiers: dict[str, AbstractNotifier] = {}
 
     def count(self, enabled_only: bool = False) -> int:
+        """Return the number of registered notifiers, optionally filtered by enabled status."""
         return len(
             [
                 notifier
@@ -29,11 +35,28 @@ class NotifierManager(AbstractNotifierManager):
         )
 
     def get(self, name: str) -> AbstractNotifier:
+        """Get notifier by name.
+
+        Args:
+            name: Notifier name.
+
+        Returns:
+            Notifier instance with the given name.
+        """
         if not self.exists(name):
             raise NotifierNotFoundError(f"Notifier '{name}' does not exist.")
         return self._notifiers[name]
 
     def register(self, notifier: AbstractNotifier, replace: bool = False) -> None:
+        """Register notifier.
+
+        Args:
+            notifier: Notifier to register.
+            replace: Whether to replace an existing notifier if it already exists.
+
+        Raises:
+            NotifierAlreadyExistsError: When the notifier already exists and replace is False.
+        """
         if notifier.name in self._notifiers and not replace:
             raise NotifierAlreadyExistsError(
                 f"Notifier with name '{notifier.name}' already exists."

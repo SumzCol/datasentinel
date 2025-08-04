@@ -1,7 +1,7 @@
 from typing import Any
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
 
