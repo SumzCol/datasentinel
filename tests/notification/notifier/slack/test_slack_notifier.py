@@ -5,7 +5,7 @@ import pytest
 from dataguard.notification.notifier.core import NotifierError
 from dataguard.notification.notifier.slack import SlackNotifier
 from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.notification.renderer.slack.slack_message import SlackMessage
+from dataguard.notification.renderer.slack.slack_message_renderer import SlackMessage
 from dataguard.validation.result import DataValidationResult
 
 

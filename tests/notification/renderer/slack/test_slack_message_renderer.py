@@ -6,7 +6,7 @@ import pytest
 from ulid import ULID
 
 from dataguard.notification.renderer.core import RendererError
-from dataguard.notification.renderer.slack.slack_message_render import (
+from dataguard.notification.renderer.slack.slack_message_renderer import (
     SlackMessageRenderer,
 )
 from dataguard.validation.check.level import CheckLevel

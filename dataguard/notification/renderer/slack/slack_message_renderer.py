@@ -1,8 +1,15 @@
+from pydantic.dataclasses import dataclass
+
 from dataguard.notification.renderer.core import AbstractRenderer, RendererError
-from dataguard.notification.renderer.slack.slack_message import SlackMessage
 from dataguard.validation.result import DataValidationResult
 from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
+
+
+@dataclass
+class SlackMessage:
+    text: str
+    blocks: list[dict]
 
 
 class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
@@ -31,7 +38,6 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
         message = (
             f"{result.name} data validation {status_str}!, run id: {result.run_id}, "
             f"data asset: {result.data_asset}, "
-            f"data asset schema: {result.data_asset_schema}, "
             f"start time: {result.start_time.isoformat()}, "
             f"end time: {result.end_time.isoformat()}."
         )
@@ -54,14 +60,14 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
     @staticmethod
     def _render_rule_metric_info(rule_metric: RuleMetric) -> str:
         _value_or_col = (
-            f"column=[{', '.join(rule_metric.column)}]"
+            f"column: [{', '.join(rule_metric.column)}]"
             if not rule_metric.rule == "is_custom"
-            else f"value={rule_metric.value}"
+            else f"value: {rule_metric.value}"
         )
 
         return (
-            f"rule={rule_metric.rule}, {_value_or_col}, violations={rule_metric.violations}, "
-            f"rows={rule_metric.rows}"
+            f"id: {rule_metric.id}, rule: {rule_metric.rule}, {_value_or_col}, "
+            f"violations: {rule_metric.violations}, rows: {rule_metric.rows}"
         )
 
     def _render_rules_metric_blocks(self, rules_metric: list[RuleMetric]) -> list[dict]:
@@ -82,7 +88,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                 "text": {
                     "type": "plain_text",
                     "text": (
-                        "A data validation has passed!"
+                        "A data validation has passed! :partying_face:"
                         if result.status == Status.PASS
                         else "A data validation has failed! :alerta:"
                     ),
@@ -97,7 +103,6 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                             f"*Validation Name:* {result.name}",
                             f"*Run ID*: {result.run_id}",
                             f"*Data Asset*: {result.data_asset}",
-                            f"*Data Asset Schema*: {result.data_asset_schema}",
                             f"*Start Time*: {result.start_time.isoformat()}",
                             f"*End Time*: {result.end_time.isoformat()}",
                         ]
@@ -108,16 +113,16 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
 
         if result.status == Status.PASS:
             return blocks
-
+        blocks.append({"type": "divider"})
         blocks.append(
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"*Failed Checks "
+                        f"*Failed Checks* "
                         f"(Showing only {self._checks_display_limit} "
-                        f"of {result.failed_checks_count})*:"
+                        f"of {result.failed_checks_count}):"
                         if result.failed_checks_count > self._checks_display_limit
                         else "*Failed Checks*:"
                     ),
@@ -142,17 +147,6 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                                     "type": "text",
                                     "text": failed_check.name,
                                 },
-                            ],
-                        },
-                        {
-                            "type": "rich_text_section",
-                            "elements": [
-                                {
-                                    "type": "text",
-                                    "text": "Check Class: ",
-                                    "style": {"bold": True},
-                                },
-                                {"type": "text", "text": failed_check.class_name},
                             ],
                         },
                         {
@@ -187,10 +181,19 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                         },
                         {
                             "type": "rich_text_list",
-                            "style": "bullet",
+                            "style": "ordered",
                             "indent": 0,
                             "elements": [
                                 *self._render_rules_metric_blocks(failed_check.failed_rules)
+                            ],
+                        },
+                        {
+                            "type": "rich_text_section",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "  ",
+                                }
                             ],
                         },
                     ],

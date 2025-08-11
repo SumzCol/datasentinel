@@ -4,7 +4,7 @@ from slack_sdk import WebClient
 
 from dataguard.notification.notifier.core import AbstractNotifier, NotifierError
 from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.notification.renderer.slack.slack_message import SlackMessage
+from dataguard.notification.renderer.slack.slack_message_renderer import SlackMessage
 from dataguard.validation.result import DataValidationResult
 
 
@@ -32,6 +32,8 @@ class SlackNotifier(AbstractNotifier):
         message = self._renderer.render(result)
         try:
             client = WebClient(token=self._slack_token)
-            client.chat_postMessage(channel=self._channel, blocks=message.blocks)
+            client.chat_postMessage(
+                channel=self._channel, blocks=message.blocks, text=message.text
+            )
         except Exception as e:
             raise NotifierError(f"Error while sending slack message: {e!s}") from e

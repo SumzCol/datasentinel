@@ -82,7 +82,7 @@ class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
             zip_buffer.getvalue(),
             maintype="application",
             subtype="zip",
-            filename=(f"{result.name.replace(' ', '_').lower()}_failed_rows_{result.run_id}.zip"),
+            filename=f"{result.name.replace(' ', '_').lower()}_failed_rows_{result.run_id}.zip",
         )
         return message
 
@@ -102,12 +102,19 @@ class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
     ) -> ZipFile:
         for failed_check in result.failed_checks:
             is_excel_empty = True
-            excel_filename = (f"{failed_check.name}_failed_rows.xlsx").replace(" ", "_").lower()
+            excel_filename = f"{failed_check.name}_failed_rows.xlsx".replace(" ", "_").lower()
             excel_buffer = BytesIO()
+
+            rules_with_failed_rows = [
+                failed_rule
+                for failed_rule in failed_check.failed_rules
+                if failed_rule.failed_rows_dataset is not None
+            ]
+
+            if not rules_with_failed_rows:
+                continue
             with ExcelWriter(excel_buffer, engine="openpyxl") as writer:
-                for failed_rule in failed_check.failed_rules:
-                    if failed_rule.failed_rows_dataset is None:
-                        continue
+                for failed_rule in rules_with_failed_rows:
                     sheet_name = f"(idx={failed_rule.id}, rule={failed_rule.rule})"
                     sheet_name = sheet_name[:31]  # Excel sheet name limit is 31
 
