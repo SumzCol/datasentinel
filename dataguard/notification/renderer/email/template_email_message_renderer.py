@@ -1,8 +1,8 @@
 from email.message import EmailMessage
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Literal
-from zipfile import ZipFile
+from typing import ClassVar
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from jinja2 import Template
 from pandas import DataFrame, ExcelWriter
@@ -10,113 +10,140 @@ from pandas import DataFrame, ExcelWriter
 from dataguard.notification.renderer.core import AbstractRenderer, RendererError
 from dataguard.validation.failed_rows_dataset.core import AbstractFailedRowsDataset
 from dataguard.validation.result import DataValidationResult
+from dataguard.validation.status import Status
 
 
 class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
-    _MAX_FAILED_ROWS_LIMIT = 1000
+    _MAX_FAILED_ROWS_LIMIT = 100
+    _FAILED_ROWS_FILE_TYPES: ClassVar[set[str]] = {"csv", "excel"}
 
     def __init__(
         self,
         template_path: str,
         include_failed_rows: bool = False,
-        failed_rows_type: Literal["csv", "excel"] = "csv",
-        failed_rows_limit: int = 100,
+        failed_rows_file_type: str = "excel",
+        failed_rows_limit: int = 10,
     ):
-        if not 0 < failed_rows_limit <= self._MAX_FAILED_ROWS_LIMIT:
-            raise RendererError("Failed rows limit must be greater than 0 and less than 10000")
+        if include_failed_rows and not 0 < failed_rows_limit <= self._MAX_FAILED_ROWS_LIMIT:
+            raise RendererError(
+                f"Failed rows limit must be greater than 0 and less "
+                f"than {self._MAX_FAILED_ROWS_LIMIT}"
+            )
 
-        if failed_rows_type not in {"csv", "excel"}:
-            raise RendererError("Failed rows type must be 'csv' or 'excel'")
+        if failed_rows_file_type not in self._FAILED_ROWS_FILE_TYPES:
+            raise RendererError("Failed rows file type must be 'csv' or 'excel'")
 
         if not Path(template_path).is_file():
             raise RendererError(f"Template '{template_path}' file does not exist")
 
         self._include_failed_records = include_failed_rows
         self._failed_rows_limit = failed_rows_limit
-        self._failed_rows_type = failed_rows_type
-
-        with open(template_path) as f:
-            file_content = f.read()
-        self._template = Template(file_content)
+        self._failed_rows_type = failed_rows_file_type
+        self._template_path = template_path
 
     def render(self, result: DataValidationResult) -> EmailMessage:
         message = EmailMessage()
         try:
             message.set_content(self._render_email_content(result=result), subtype="html")
-
-            if self._include_failed_records:
-                message = self._add_failed_records_attachment(message=message, result=result)
+            message["Subject"] = (
+                f"'{result.data_asset}' passed data validation '{result.name}'!"
+                if result.status == Status.PASS
+                else f"'{result.data_asset}' failed data validation '{result.name}'!"
+            )
+            if self._include_failed_records and result.status == Status.FAIL:
+                message = self._add_failed_rows_attachment(message, result)
 
             return message
         except Exception as e:
             raise RendererError(f"Error while rendering email message: {e!s}") from e
 
-    def _render_email_content(self, result: DataValidationResult) -> str:
-        data_validation_dict = result.to_dict()
+    def _add_failed_rows_attachment(
+        self, message: EmailMessage, result: DataValidationResult
+    ) -> EmailMessage:
+        if all(
+            [
+                failed_rule.failed_rows_dataset is None
+                for failed_check in result.failed_checks
+                for failed_rule in failed_check.failed_rules
+            ]
+        ):
+            return message
 
-        return self._template.render(
-            **data_validation_dict,
+        methods_map = {
+            "csv": self._add_csv_failed_rows_attachment,
+            "excel": self._add_excel_failed_rows_attachment,
+        }
+
+        zip_buffer = BytesIO()
+        with ZipFile(zip_buffer, "w", ZIP_DEFLATED) as zip_file:
+            methods_map[self._failed_rows_type](result, zip_file)
+        zip_buffer.seek(0)
+        message.add_attachment(
+            zip_buffer.getvalue(),
+            maintype="application",
+            subtype="zip",
+            filename=(f"{result.name.replace(' ', '_').lower()}_failed_rows_{result.run_id}.zip"),
+        )
+        return message
+
+    def _render_email_content(self, result: DataValidationResult) -> str:
+        with open(self._template_path) as f:
+            file_content = f.read()
+        template = Template(file_content)
+        return template.render(
+            result=result,
         )
 
     def _failed_rows_to_pandas(self, failed_rows_dataset: AbstractFailedRowsDataset) -> DataFrame:
         return DataFrame(failed_rows_dataset.to_dict(limit=self._failed_rows_limit))
 
-    def _add_failed_records_attachment(
-        self, message: EmailMessage, result: DataValidationResult
-    ) -> EmailMessage:
-        zip_buffer = BytesIO()
-
-        with ZipFile(zip_buffer, "w") as zip_file:
-            for failed_check in result.failed_checks:
+    def _add_excel_failed_rows_attachment(
+        self, result: DataValidationResult, zip_file: ZipFile
+    ) -> ZipFile:
+        for failed_check in result.failed_checks:
+            is_excel_empty = True
+            excel_filename = (f"{failed_check.name}_failed_rows.xlsx").replace(" ", "_").lower()
+            excel_buffer = BytesIO()
+            with ExcelWriter(excel_buffer, engine="openpyxl") as writer:
                 for failed_rule in failed_check.failed_rules:
                     if failed_rule.failed_rows_dataset is None:
                         continue
-
-                    base_filename = (
-                        f"{result.run_id}_{failed_check.name}_{failed_rule.rule}_failed_rows"
-                    )
+                    sheet_name = f"(idx={failed_rule.id}, rule={failed_rule.rule})"
+                    sheet_name = sheet_name[:31]  # Excel sheet name limit is 31
 
                     df_failed_rows = self._failed_rows_to_pandas(failed_rule.failed_rows_dataset)
 
-                    if self._failed_rows_type == "excel":
-                        buffer = self._failed_rows_to_excel(df_failed_rows=df_failed_rows)
-                        # attachment_args = {
-                        #     "maintype": "application",
-                        #     "subtype": "vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        #     "filename": f"{base_filename}.xlsx"
-                        # }
-                        zip_file.writestr(f"{base_filename}.xlsx", buffer.getvalue())
-                    else:
-                        buffer = self._failed_rows_to_csv(df_failed_rows=df_failed_rows)
-                        # attachment_args = {
-                        #     "maintype": "text",
-                        #     "subtype": "csv",
-                        #     "filename": f"{base_filename}.csv"
-                        # }
-                        zip_file.writestr(f"{base_filename}.csv", buffer.getvalue())
+                    df_failed_rows.to_excel(writer, sheet_name=sheet_name, index=False)
+                    is_excel_empty = False
+            excel_buffer.seek(0)
 
-        message.add_attachment(
-            zip_buffer.getvalue(),
-            maintype="application",
-            subtype="zip",
-            filename="failed_rows.zip",
-        )
+            if is_excel_empty:
+                continue
+            zip_file.writestr(excel_filename, excel_buffer.read())
 
-        return message
+        return zip_file
 
-    @staticmethod
-    def _failed_rows_to_excel(df_failed_rows: DataFrame) -> BytesIO:
-        buffer = BytesIO()
-        with ExcelWriter(buffer) as writer:
-            df_failed_rows.to_excel(writer)
-        buffer.seek(0)
+    def _add_csv_failed_rows_attachment(
+        self, result: DataValidationResult, zip_file: ZipFile
+    ) -> ZipFile:
+        for failed_check in result.failed_checks:
+            for failed_rule in failed_check.failed_rules:
+                if failed_rule.failed_rows_dataset is None:
+                    continue
 
-        return buffer
+                csv_filename = (
+                    (f"{failed_check.name}_{failed_rule.id}_{failed_rule.rule}_failed_rows.csv")
+                    .replace(" ", "_")
+                    .lower()
+                )
 
-    @staticmethod
-    def _failed_rows_to_csv(df_failed_rows: DataFrame) -> StringIO:
-        buffer = StringIO()
-        df_failed_rows.to_csv(buffer, index=False)
-        buffer.seek(0)
+                csv_buffer = StringIO()
 
-        return buffer
+                df_failed_rows = self._failed_rows_to_pandas(failed_rule.failed_rows_dataset)
+                df_failed_rows.to_csv(csv_buffer, index=False)
+
+                csv_buffer.seek(0)
+
+                zip_file.writestr(csv_filename, csv_buffer.getvalue().encode("utf-8"))
+
+        return zip_file

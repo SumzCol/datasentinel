@@ -48,6 +48,10 @@ class DataValidationResult:
         )
 
     @property
+    def checks_count(self) -> int:
+        return len(self.check_results)
+
+    @property
     def failed_checks(self) -> list[CheckResult]:
         return [
             check_result

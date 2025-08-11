@@ -22,6 +22,7 @@ class SMTPEmailNotifier(AbstractNotifier):
         credentials: dict[str, Any],
         mail_rcp: list[str] | None = None,
         mail_rcp_cc: list[str] | None = None,
+        use_tls: bool = True,
         disabled: bool = False,
     ):
         super().__init__(name, disabled)
@@ -31,6 +32,7 @@ class SMTPEmailNotifier(AbstractNotifier):
         self._mail_rcp_cc = mail_rcp_cc if mail_rcp_cc else []
         self._domain = domain
         self._renderer = renderer
+        self._use_tls = use_tls
 
         if "username" not in credentials or "password" not in credentials:
             raise NotifierError("Username or password not found in credentials.")
@@ -53,9 +55,10 @@ class SMTPEmailNotifier(AbstractNotifier):
         try:
             with SMTP(self._server, self._port) as server:
                 server.ehlo(self._domain)
-                server.starttls()
-                server.ehlo(self._domain)
-                server.login(self._username, self._password)
+                if self._use_tls:
+                    server.starttls()
+                    server.ehlo(self._domain)
+                    server.login(self._username, self._password)
                 server.send_message(message)
                 server.quit()
         except Exception as e:

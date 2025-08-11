@@ -109,13 +109,22 @@ all-notifiers = [
   "dataguard[slack-slacknotifier]"
 ]
 
+# Renderers dependencies
+email-templateemailmessagerenderer = [
+  "openpyxl==3.1.5",
+  "Jinja2==3.1.5",
+]
+all-renderers = [
+  "dataguard[email-templateemailmessagerenderer]"
+]
+
 # Testing dependencies
 test = [
   "pytest>=7.2,<9.0",
   "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
   "coverage[toml]",
-  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]",
+  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers,all-renderers]",
 ]
 
 # Scripts dependencies

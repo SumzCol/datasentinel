@@ -37,19 +37,19 @@ class AbstractRunner(ABC):
         notifier_manager: AbstractNotifierManager,
     ) -> None:
         """Run a data validation."""
-        validation_node_result = self._run(data_validation=data_validation)
+        data_validation_result = self._run(data_validation=data_validation)
 
-        self._log_status(result=validation_node_result)
+        self._log_status(result=data_validation_result)
 
         notifier_manager.notify_all_by_event(
             notifiers_by_events=data_validation.notifiers_by_event,
-            result=validation_node_result,
+            result=data_validation_result,
         )
         result_store_manager.store_all(
-            result_stores=data_validation.result_stores, result=validation_node_result
+            result_stores=data_validation.result_stores, result=data_validation_result
         )
 
-        self._raise_exc_on_failed_critical_checks(result=validation_node_result)
+        self._raise_exc_on_failed_critical_checks(result=data_validation_result)
 
     @abstractmethod
     def _run(self, data_validation: DataValidation) -> DataValidationResult:

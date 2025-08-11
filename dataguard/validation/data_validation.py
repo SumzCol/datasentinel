@@ -31,6 +31,9 @@ class DataValidation:
     def validate_check_list(cls, check_list: list[AbstractCheck]) -> list[AbstractCheck]:
         if not check_list:
             raise ValueError("Data validation must have at least one check")
+
+        if len(set(check.name for check in check_list)) != len(check_list):
+            raise ValueError("Data validation checks must have unique names")
         return check_list
 
     @property
