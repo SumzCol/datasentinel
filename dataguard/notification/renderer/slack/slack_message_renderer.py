@@ -181,7 +181,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                         },
                         {
                             "type": "rich_text_list",
-                            "style": "ordered",
+                            "style": "bullet",
                             "indent": 0,
                             "elements": [
                                 *self._render_rules_metric_blocks(failed_check.failed_rules)
