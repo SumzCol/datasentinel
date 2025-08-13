@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+from importlib import resources
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import ClassVar
@@ -14,36 +15,49 @@ from dataguard.validation.status import Status
 
 
 class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
-    _MAX_FAILED_ROWS_LIMIT = 100
+    _MAX_FAILED_ROWS_LIMIT = 100000
     _FAILED_ROWS_FILE_TYPES: ClassVar[set[str]] = {"csv", "excel"}
 
     def __init__(
         self,
-        template_path: str,
+        template_path: str | None = None,
         include_failed_rows: bool = False,
         failed_rows_file_type: str = "excel",
         failed_rows_limit: int = 10,
     ):
-        if include_failed_rows and not 0 < failed_rows_limit <= self._MAX_FAILED_ROWS_LIMIT:
+        if failed_rows_file_type not in self._FAILED_ROWS_FILE_TYPES:
             raise RendererError(
-                f"Failed rows limit must be greater than 0 and less "
-                f"than {self._MAX_FAILED_ROWS_LIMIT}"
+                f"'{failed_rows_file_type}' is not a valid file type. "
+                f"Valid options are: {self._FAILED_ROWS_FILE_TYPES}"
+            )
+        if not 0 < failed_rows_limit <= self._MAX_FAILED_ROWS_LIMIT:
+            raise RendererError(
+                f"Failed rows limit must be between 1 and {self._MAX_FAILED_ROWS_LIMIT}."
             )
 
-        if failed_rows_file_type not in self._FAILED_ROWS_FILE_TYPES:
-            raise RendererError("Failed rows file type must be 'csv' or 'excel'")
+        try:
+            if template_path is None:
+                template_content = resources.read_text(
+                    "dataguard.notification.renderer.email.templates", "default.html"
+                )
+            else:
+                path = Path(template_path)
+                template_content = path.read_text()
 
-        if not Path(template_path).is_file():
-            raise RendererError(f"Template '{template_path}' file does not exist")
+            self._template = Template(template_content)
+        except (FileNotFoundError, OSError) as e:
+            error_source = (
+                "the default location" if template_path is None else f"'{template_path}'"
+            )
+            raise RendererError(f"Template could not be loaded from {error_source}.") from e
 
         self._include_failed_records = include_failed_rows
-        self._failed_rows_limit = failed_rows_limit
         self._failed_rows_type = failed_rows_file_type
-        self._template_path = template_path
+        self._failed_rows_limit = failed_rows_limit
 
     def render(self, result: DataValidationResult) -> EmailMessage:
-        message = EmailMessage()
         try:
+            message = EmailMessage()
             message.set_content(self._render_email_content(result=result), subtype="html")
             message["Subject"] = (
                 f"'{result.data_asset}' passed data validation '{result.name}'!"
@@ -87,10 +101,7 @@ class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
         return message
 
     def _render_email_content(self, result: DataValidationResult) -> str:
-        with open(self._template_path) as f:
-            file_content = f.read()
-        template = Template(file_content)
-        return template.render(
+        return self._template.render(
             result=result,
         )
 
@@ -115,7 +126,7 @@ class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
                 continue
             with ExcelWriter(excel_buffer, engine="openpyxl") as writer:
                 for failed_rule in rules_with_failed_rows:
-                    sheet_name = f"(idx={failed_rule.id}, rule={failed_rule.rule})"
+                    sheet_name = f"(id={failed_rule.id}, rule={failed_rule.rule})"
                     sheet_name = sheet_name[:31]  # Excel sheet name limit is 31
 
                     df_failed_rows = self._failed_rows_to_pandas(failed_rule.failed_rows_dataset)

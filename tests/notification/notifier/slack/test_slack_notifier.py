@@ -21,6 +21,7 @@ def mock_renderer():
 
 
 @pytest.mark.unit
+@pytest.mark.notifier
 class TestSlackNotifierUnit:
     def test_slack_notifier_initialization_success(self, mock_renderer):
         credentials = {"SLACK_TOKEN": "token"}

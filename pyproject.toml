@@ -143,6 +143,9 @@ all = [
   "dataguard[test,scripts,lint]"
 ]
 
+[tool.setuptools.package-data]
+"dataguard.notification.renderer.email.templates" = ["templates/*.html"]
+
 [tool.mypy]
 plugins = ['pydantic.mypy']
 no_warn_unused_ignores = true
@@ -167,10 +170,13 @@ markers = [
     "slow: marker for slow tests",
     "pandas: marker for pandas dependent tests",
     "pyspark: marker for pyspark dependent tests",
+    "session: marker for session tests",
+    "runners: marker for runners tests",
     "checks: marker for checks tests",
-    "resultstores: marker for resultstores tests",
-    "auditstores: marker for auditstores tests",
-    "notifiers: marker for notifiers tests",
+    "result_store: marker for result stores tests",
+    "audit_store: marker for audit stores tests",
+    "notifier: marker for notifiers tests",
+    "renderer: marker for renderers tests",
 ]
 testpaths = [
   "tests"

@@ -4,6 +4,7 @@ from dataguard.store.audit.database import DatabaseAuditStore
 
 
 @pytest.mark.unit
+@pytest.mark.audit_store
 class TestDatabaseAuditStoreUnit:
     def test_name_property(self):
         expected_name = "test"

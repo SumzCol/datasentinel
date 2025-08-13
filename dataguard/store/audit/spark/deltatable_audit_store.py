@@ -23,7 +23,7 @@ from dataguard.store.utils.spark_utils import get_spark
 
 
 class DeltaTableAuditStore(AbstractAuditStore):
-    def __init__(  # noqa PLR0913
+    def __init__(
         self,
         name: str,
         table: str,
@@ -31,14 +31,9 @@ class DeltaTableAuditStore(AbstractAuditStore):
         dataset_type: Literal["file", "table"],
         external_path: str | None = None,
         save_args: dict[str, Any] | None = None,
-        include_failed_rows: bool = False,
-        failed_rows_limit: int = 100,
         disabled: bool = False,
     ):
         super().__init__(name, disabled)
-        if include_failed_rows and not failed_rows_limit > 0:
-            raise AuditStoreError("Failed rows limit must be greater than 0")
-        self._failed_rows_limit = failed_rows_limit
         self._delta_table_appender = DeltaTableAppender(
             table=table,
             schema=schema,

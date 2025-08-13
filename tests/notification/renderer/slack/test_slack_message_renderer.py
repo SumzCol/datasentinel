@@ -84,6 +84,8 @@ def rule_metric_mock():
     return _create
 
 
+@pytest.mark.unit
+@pytest.mark.renderer
 class TestSlackMessageRendererUnit:
     def test_when_data_validation_pass(self, data_validation_result_mock):
         result = data_validation_result_mock(Status.PASS, datetime.now())

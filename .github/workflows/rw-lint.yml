@@ -31,7 +31,7 @@ jobs:
       - name: Install linting dependencies
         id: install-lint-reqs
         run: |
-          make install-lint-reqs
+          make install-lint
           make install-pre-commit
         shell: bash
       - name: Run lint

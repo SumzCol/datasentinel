@@ -1,22 +1,22 @@
 install-uv:
 	python -m pip install "uv==0.6.2"
 
-install-base-reqs: install-uv
+install: install-uv
 	uv pip install --system "dataguard @ ."
 
-install-lint-reqs: install-uv
+install-lint: install-uv
 	uv pip install --system "dataguard[lint] @ ."
 
-install-test-reqs: install-uv
+install-test: install-uv
 	uv pip install --system "dataguard[test] @ ."
 
-install-scripts-reqs: install-uv
+install-scripts: install-uv
 	uv pip install --system "dataguard[scripts] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks
 
-install-all: install-base-reqs install-lint-reqs install-test-reqs install-pre-commit
+install-all: install install-lint install-test install-pre-commit
 
 uninstall-pre-commit:
 	pre-commit uninstall

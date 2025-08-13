@@ -14,9 +14,9 @@ from dataguard.store.audit.core import AbstractAuditStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
-from dataguard.validation.data_validation import DataValidation
-from dataguard.validation.runner.core import AbstractRunner
-from dataguard.validation.runner.simple_runner import SimpleRunner
+from dataguard.validation.runner.core import AbstractWorkflowRunner
+from dataguard.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
+from dataguard.validation.workflow import ValidationWorkflow
 
 
 class DataGuardSession:
@@ -89,20 +89,20 @@ class DataGuardSession:
         """Return the audit store manager"""
         return self._audit_store_manager
 
-    def run_data_validation(
+    def run_validation_workflow(
         self,
-        data_validation: DataValidation,
-        runner: AbstractRunner | None = None,
+        validation_workflow: ValidationWorkflow,
+        runner: AbstractWorkflowRunner | None = None,
     ) -> None:
-        """Runs a data validation.
+        """Runs a validation workflow.
 
         Args:
-            data_validation: Data validation to run
-            runner: Runner to be used to run the data validation
+            validation_workflow: Validation workflow to run
+            runner: Runner to be used to run the validation workflow
         """
-        runner = runner or SimpleRunner()
+        runner = runner or SimpleWorkflowRunner()
         runner.run(
-            data_validation=data_validation,
+            validation_workflow=validation_workflow,
             notifier_manager=self._notifier_manager,
             result_store_manager=self._result_store_manager,
         )

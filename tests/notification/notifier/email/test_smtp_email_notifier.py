@@ -17,6 +17,7 @@ def mock_renderer():
 
 
 @pytest.mark.unit
+@pytest.mark.notifier
 class TestSMTPEmailNotifierUnit:
     def test_initialization_success(self, mock_renderer):
         credentials = {"username": "user@example.com", "password": "password123"}

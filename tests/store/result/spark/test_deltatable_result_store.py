@@ -58,6 +58,7 @@ def data_validation_result(spark: SparkSession) -> DataValidationResult:
 
 
 @pytest.mark.unit
+@pytest.mark.result_store
 class TestDeltaTableResultStoreUnit:
     @patch("dataguard.store.result.spark.deltatable_result_store.DeltaTableAppender")
     def test_successful_initialization(self, mock_delta_table_appender: Mock):

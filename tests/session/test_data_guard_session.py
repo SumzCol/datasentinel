@@ -11,12 +11,13 @@ from dataguard.store.audit.core import AbstractAuditStoreManager
 from dataguard.store.audit.manager import AuditStoreManager
 from dataguard.store.result.core import AbstractResultStoreManager
 from dataguard.store.result.manager import ResultStoreManager
-from dataguard.validation.data_validation import DataValidation
-from dataguard.validation.runner.core import AbstractRunner
-from dataguard.validation.runner.simple_runner import SimpleRunner
+from dataguard.validation.runner.core import AbstractWorkflowRunner
+from dataguard.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
+from dataguard.validation.workflow import ValidationWorkflow
 
 
 @pytest.mark.unit
+@pytest.mark.session
 class TestDataGuardSessionUnit:
     def teardown_method(self):
         # Code to run after each test method
@@ -158,24 +159,24 @@ class TestDataGuardSessionUnit:
 
     def test_run_data_validation_with_custom_runner_and_data_asset(self):
         session = DataGuardSession(name="test_session")
-        data_validation = Mock(spec=DataValidation)
-        runner = Mock(spec=AbstractRunner)
-        session.run_data_validation(data_validation=data_validation, runner=runner)
+        validation_workflow = Mock(spec=ValidationWorkflow)
+        runner = Mock(spec=AbstractWorkflowRunner)
+        session.run_validation_workflow(validation_workflow=validation_workflow, runner=runner)
 
         runner.run.assert_called_once_with(
-            data_validation=data_validation,
+            validation_workflow=validation_workflow,
             notifier_manager=session.notifier_manager,
             result_store_manager=session.result_store_manager,
         )
 
-    @patch.object(SimpleRunner, "run")
+    @patch.object(SimpleWorkflowRunner, "run")
     def test_run_data_validation_without_custom_runner(self, mock_run):
         session = DataGuardSession(name="test_session")
-        data_validation = Mock(spec=DataValidation)
-        session.run_data_validation(data_validation=data_validation)
+        validation_workflow = Mock(spec=ValidationWorkflow)
+        session.run_validation_workflow(validation_workflow=validation_workflow)
 
         mock_run.assert_called_once_with(
-            data_validation=data_validation,
+            validation_workflow=validation_workflow,
             notifier_manager=session.notifier_manager,
             result_store_manager=session.result_store_manager,
         )

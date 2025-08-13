@@ -32,6 +32,7 @@ def audit_row():
 
 
 @pytest.mark.unit
+@pytest.mark.audit_store
 class TestDeltaTableAuditStoreUnit:
     @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
     def test_successful_initialization(self, mock_delta_table_appender: Mock):
@@ -42,8 +43,6 @@ class TestDeltaTableAuditStoreUnit:
             dataset_type="file",
             external_path="s3a://test_path",
             save_args={"mode": "append"},
-            include_failed_rows=True,
-            failed_rows_limit=100,
             disabled=True,
         )
 
@@ -57,19 +56,6 @@ class TestDeltaTableAuditStoreUnit:
             external_path="s3a://test_path",
             save_args={"mode": "append"},
         )
-
-    @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
-    def test_error_on_invalid_failed_rows_limit_value(self, mock_delta_table_appender: Mock):
-        with pytest.raises(AuditStoreError, match="Failed rows limit must be greater than 0"):
-            DeltaTableAuditStore(
-                name="test",
-                table="test_table",
-                schema="s3a://test_schema",
-                dataset_type="file",
-                include_failed_rows=True,
-                failed_rows_limit=0,
-            )
-        mock_delta_table_appender.assert_not_called()
 
     @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
     def test_error_on_append(self, mock_delta_table_appender: Mock, audit_row):

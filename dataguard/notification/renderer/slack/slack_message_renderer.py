@@ -38,6 +38,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
         message = (
             f"{result.name} data validation {status_str}!, run id: {result.run_id}, "
             f"data asset: {result.data_asset}, "
+            f"data asset schema: {result.data_asset_schema}, "
             f"start time: {result.start_time.isoformat()}, "
             f"end time: {result.end_time.isoformat()}."
         )
@@ -67,7 +68,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
 
         return (
             f"id: {rule_metric.id}, rule: {rule_metric.rule}, {_value_or_col}, "
-            f"violations: {rule_metric.violations}, rows: {rule_metric.rows}"
+            f"evaluated rows: {rule_metric.rows}, violations: {rule_metric.violations}"
         )
 
     def _render_rules_metric_blocks(self, rules_metric: list[RuleMetric]) -> list[dict]:
@@ -88,7 +89,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                 "text": {
                     "type": "plain_text",
                     "text": (
-                        "A data validation has passed! :partying_face:"
+                        "A data validation has passed! :white_check_mark:"
                         if result.status == Status.PASS
                         else "A data validation has failed! :alerta:"
                     ),
@@ -100,9 +101,14 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
                     "type": "mrkdwn",
                     "text": "\n".join(
                         [
-                            f"*Validation Name:* {result.name}",
+                            f"*Name:* {result.name}",
                             f"*Run ID*: {result.run_id}",
                             f"*Data Asset*: {result.data_asset}",
+                            (
+                                f"*Data Asset Schema*: {result.data_asset_schema}"
+                                if result.data_asset_schema
+                                else ""
+                            ),
                             f"*Start Time*: {result.start_time.isoformat()}",
                             f"*End Time*: {result.end_time.isoformat()}",
                         ]

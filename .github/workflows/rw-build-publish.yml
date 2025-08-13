@@ -33,7 +33,7 @@ jobs:
         shell: bash
       - name: Install scripts dependencies
         run: |
-          make install-scripts-reqs
+          make install-scripts
         shell: bash
       - name: Build project
         run: |
