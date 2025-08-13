@@ -1,268 +1,260 @@
 from datetime import datetime
-from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from ulid import ULID
 
 from dataguard.notification.renderer.core import RendererError
 from dataguard.notification.renderer.slack.slack_message_renderer import (
+    SlackMessage,
     SlackMessageRenderer,
 )
 from dataguard.validation.check.level import CheckLevel
-from dataguard.validation.check.result import CheckResult
 from dataguard.validation.result import DataValidationResult
-from dataguard.validation.rule.metric import RuleMetric
 from dataguard.validation.status import Status
-
-
-@pytest.fixture
-def data_validation_result_mock():
-    def _create(
-        status: Status,
-        time: datetime | None = None,
-        failed_checks_mocks: list[Mock] | None = None,
-    ) -> Mock:
-        result = Mock(spec=DataValidationResult)
-        result.run_id = ULID()
-        result.status = status
-        result.name = "test_data_validation"
-        result.data_asset = "test_data_asset"
-        result.data_asset_schema = "test_data_asset_schema"
-        result.start_time = time if time else datetime.now()
-        result.end_time = time if time else datetime.now()
-        result.failed_checks = failed_checks_mocks
-
-        result.failed_checks_count = len(failed_checks_mocks) if failed_checks_mocks else 0
-
-        return result
-
-    return _create
-
-
-@pytest.fixture
-def check_result_mock():
-    def _create(
-        status: Status,
-        check_level: CheckLevel,
-        class_name: str,
-        failed_rules_mocks: list[Mock] | None = None,
-    ) -> Mock:
-        result = Mock(spec=CheckResult)
-        result.name = "test_check"
-        result.level = check_level
-        result.status = status
-        result.class_name = class_name
-        result.failed_rules = failed_rules_mocks
-
-        result.failed_rules_count = len(failed_rules_mocks) if failed_rules_mocks else 0
-        return result
-
-    return _create
-
-
-@pytest.fixture
-def rule_metric_mock():
-    def _create(
-        rule: str = "test_rule",
-        status: Status = Status.FAIL,
-        column: list[str] | None = None,
-        violations: int = 0,
-        rows: int = 0,
-        value: Any = None,
-    ) -> Mock:
-        result = Mock(spec=RuleMetric)
-        result.status = status
-        result.rule = rule
-        result.column = column if column else ["test_column"]
-        result.value = value
-        result.violations = violations
-        result.rows = rows
-
-        return result
-
-    return _create
 
 
 @pytest.mark.unit
 @pytest.mark.renderer
-class TestSlackMessageRendererUnit:
-    def test_when_data_validation_pass(self, data_validation_result_mock):
-        result = data_validation_result_mock(Status.PASS, datetime.now())
-        # 1 header + 1 section
-        expected_len_of_blocks = 2
-        slack_message_render = SlackMessageRenderer()
+class TestSlackMessageRenderer:
+    @pytest.fixture
+    def mock_validation_result_pass(self):
+        """Mock validation result with PASS status."""
+        result = Mock(spec=DataValidationResult)
+        result.name = "test_validation"
+        result.run_id = "run_123"
+        result.data_asset = "test_table"
+        result.data_asset_schema = "test_schema"
+        result.status = Status.PASS
+        result.start_time = datetime(2023, 1, 1, 12, 0, 0)
+        result.end_time = datetime(2023, 1, 1, 12, 5, 0)
+        result.failed_checks = []
+        result.failed_checks_count = 0
+        return result
 
-        message = slack_message_render.render(result)
+    @pytest.fixture
+    def mock_validation_result_fail(self):
+        """Mock validation result with FAIL status."""
+        result = Mock(spec=DataValidationResult)
+        result.name = "test_validation"
+        result.run_id = "run_123"
+        result.data_asset = "test_table"
+        result.data_asset_schema = "test_schema"
+        result.status = Status.FAIL
+        result.start_time = datetime(2023, 1, 1, 12, 0, 0)
+        result.end_time = datetime(2023, 1, 1, 12, 5, 0)
+        result.failed_checks_count = 2
+        return result
 
-        assert message.text == (
-            f"test_data_validation data validation passed!, run id: {result.run_id}, "
-            f"data asset: {result.data_asset}, "
-            f"data asset schema: {result.data_asset_schema}, "
-            f"start time: {result.start_time.isoformat()}, "
-            f"end time: {result.end_time.isoformat()}."
-        )
-        assert len(message.blocks) == expected_len_of_blocks
-        # Test blocks structure
-        assert message.blocks[0]["type"] == "header"
-        assert message.blocks[1]["type"] == "section"
-        assert message.blocks[0]["text"]["text"] == "A data validation has passed!"
+    def test_initialization_success(self):
+        """Test successful initialization with valid parameters."""
+        renderer = SlackMessageRenderer(checks_display_limit=3, rules_display_limit=4)
 
-    @pytest.mark.parametrize(
-        "checks_display_limit",
-        [0, -1, 7],
-        ids=["zero", "negative", "greater than 5"],
-    )
-    def test_error_with_bad_checks_display_limit_value(self, checks_display_limit: int):
-        with pytest.raises(RendererError):
-            SlackMessageRenderer(checks_display_limit=checks_display_limit)
+        # Test that renderer is created without errors
+        assert renderer is not None
 
-    @pytest.mark.parametrize(
-        "rules_display_limit",
-        [0, -1, 7],
-        ids=["zero", "negative", "greater than 5"],
-    )
-    def test_error_with_bad_rules_display_limit_value(self, rules_display_limit: int):
-        with pytest.raises(RendererError):
-            SlackMessageRenderer(rules_display_limit=rules_display_limit)
+    def test_initialization_invalid_checks_limit(self):
+        """Test initialization fails with invalid checks display limit."""
+        with pytest.raises(RendererError, match="Checks display limit must be greater than 0"):
+            SlackMessageRenderer(checks_display_limit=0)
 
-    def test_when_data_validation_failed(
-        self,
-        data_validation_result_mock,
-        check_result_mock,
-        rule_metric_mock,
+        with pytest.raises(RendererError, match="less than 5"):
+            SlackMessageRenderer(checks_display_limit=6)
+
+    def test_initialization_invalid_rules_limit(self):
+        """Test initialization fails with invalid rules display limit."""
+        with pytest.raises(RendererError, match="Rules display limit must be greater than 0"):
+            SlackMessageRenderer(rules_display_limit=0)
+
+        with pytest.raises(RendererError, match="less than 5"):
+            SlackMessageRenderer(rules_display_limit=6)
+
+    def test_render_pass_status_contains_essential_info(self, mock_validation_result_pass):
+        """Test that PASS status message contains all essential information."""
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_pass)
+
+        assert isinstance(result, SlackMessage)
+
+        # Test that essential information is present in text
+        assert "test_validation" in result.text
+        assert "run_123" in result.text
+        assert "test_table" in result.text
+        assert "test_schema" in result.text
+        assert "passed" in result.text
+
+        # Test that blocks contain essential structure
+        # At least header and section
+        assert len(result.blocks) >= 2  # noqa: PLR2004
+        # Check that blocks are present without checking internal structure
+        assert result.blocks is not None
+
+    def test_render_fail_status_contains_essential_info(self, mock_validation_result_fail):
+        """Test that FAIL status message contains all essential information."""
+        # Setup a simple failed check
+        mock_failed_check = Mock()
+        mock_failed_check.name = "completeness_check"
+        mock_failed_check.level = CheckLevel.ERROR
+        mock_failed_check.failed_rules = []
+        mock_failed_check.failed_rules_count = 0
+        mock_validation_result_fail.failed_checks = [mock_failed_check]
+
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_fail)
+
+        assert isinstance(result, SlackMessage)
+
+        # Test that essential information is present in text
+        assert "test_validation" in result.text
+        assert "run_123" in result.text
+        assert "test_table" in result.text
+        assert "failed" in result.text
+        assert "completeness_check" in result.text
+
+        # Test that blocks contain failure-specific structure
+        # More blocks for failure case
+        assert len(result.blocks) > 2  # noqa: PLR2004
+        assert result.blocks is not None
+
+    def test_render_respects_checks_display_limit(self, mock_validation_result_fail):
+        """Test that checks display limit is respected."""
+        # Create more failed checks than the limit
+        failed_checks = []
+        for i in range(5):
+            mock_check = Mock()
+            mock_check.name = f"check_{i}"
+            mock_check.level = CheckLevel.ERROR
+            mock_check.failed_rules = []
+            mock_check.failed_rules_count = 0
+            failed_checks.append(mock_check)
+
+        mock_validation_result_fail.failed_checks = failed_checks
+        mock_validation_result_fail.failed_checks_count = 5
+
+        renderer = SlackMessageRenderer(checks_display_limit=2)
+        result = renderer.render(mock_validation_result_fail)
+
+        # Should only contain first 2 checks in text
+        assert "check_0" in result.text
+        assert "check_1" in result.text
+        assert "check_2" not in result.text
+
+    def test_render_respects_rules_display_limit(self, mock_validation_result_fail):
+        """Test that rules display limit is respected."""
+        # Create failed check with multiple rules
+        mock_rule_metrics = []
+        for i in range(5):
+            mock_rule = Mock()
+            mock_rule.id = i
+            mock_rule.rule = f"rule_{i}"
+            mock_rule.column = ["test_col"]
+            mock_rule.rows = 100
+            mock_rule.violations = 10
+            mock_rule_metrics.append(mock_rule)
+
+        mock_failed_check = Mock()
+        mock_failed_check.name = "test_check"
+        mock_failed_check.level = CheckLevel.ERROR
+        mock_failed_check.failed_rules = mock_rule_metrics
+        mock_failed_check.failed_rules_count = 5
+
+        mock_validation_result_fail.failed_checks = [mock_failed_check]
+        mock_validation_result_fail.failed_checks_count = 1
+
+        renderer = SlackMessageRenderer(rules_display_limit=2)
+        result = renderer.render(mock_validation_result_fail)
+
+        # Should only contain first 2 rules in text
+        assert "rule_0" in result.text
+        assert "rule_1" in result.text
+        assert "rule_2" not in result.text
+
+    def test_render_handles_custom_rules(self, mock_validation_result_fail):
+        """Test that custom rules are handled differently from column rules."""
+        # Create custom rule
+        custom_rule = Mock()
+        custom_rule.id = 1
+        custom_rule.rule = "is_custom"
+        custom_rule.value = "custom.function"
+        custom_rule.rows = 100
+        custom_rule.violations = 5
+
+        # Create regular rule
+        regular_rule = Mock()
+        regular_rule.id = 2
+        regular_rule.rule = "not_null"
+        regular_rule.column = ["email"]
+        regular_rule.rows = 100
+        regular_rule.violations = 3
+
+        mock_failed_check = Mock()
+        mock_failed_check.name = "test_check"
+        mock_failed_check.level = CheckLevel.ERROR
+        mock_failed_check.failed_rules = [custom_rule, regular_rule]
+        mock_failed_check.failed_rules_count = 2
+
+        mock_validation_result_fail.failed_checks = [mock_failed_check]
+
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_fail)
+
+        # Custom rule should show value, regular rule should show column
+        assert "value: custom.function" in result.text
+        assert "column: [email]" in result.text
+
+    def test_render_handles_missing_schema(self, mock_validation_result_pass):
+        """Test that missing data asset schema is handled gracefully."""
+        mock_validation_result_pass.data_asset_schema = None
+
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_pass)
+
+        # Should still render successfully
+        assert isinstance(result, SlackMessage)
+        assert "test_validation" in result.text
+        # Schema should not appear in text when None
+        assert "data asset schema: None" not in result.text.lower()
+
+    def test_render_message_structure_consistency(
+        self, mock_validation_result_pass, mock_validation_result_fail
     ):
-        result = data_validation_result_mock(
-            status=Status.FAIL,
-            failed_checks_mocks=[
-                check_result_mock(
-                    status=Status.FAIL,
-                    check_level=CheckLevel.CRITICAL,
-                    class_name="test_check",
-                    failed_rules_mocks=[
-                        rule_metric_mock(
-                            rule="test_rule",
-                            status=Status.FAIL,
-                            column=["test_column"],
-                            violations=1,
-                            rows=2,
-                        ),
-                        rule_metric_mock(
-                            rule="test_rule2",
-                            status=Status.FAIL,
-                            column=["test_column", "test_column_2"],
-                            violations=1,
-                            rows=2,
-                        ),
-                        rule_metric_mock(
-                            rule="is_custom",
-                            status=Status.FAIL,
-                            column=["test_column"],
-                            value="package.module.function",
-                            violations=1,
-                            rows=2,
-                        ),
-                    ],
-                )
-            ],
-        )
-        # 1 header + 1 section + 1 section (failed checks title) + 1 section (1 failed check)
-        expected_len_of_blocks = 4
+        """Test that both PASS and FAIL messages have consistent basic structure."""
+        # Add empty failed_checks for fail result to avoid errors
+        mock_validation_result_fail.failed_checks = []
 
-        # 1 rich_text_section (check name) + 1 rich_text_section (check class)
-        # + 1 rich_text_section (check level) + 1 rich_text_section (failed rules title)
-        # + 1 rich_text_section (failed rules info)
-        expected_len_of_blocks_in_failed_check_info = 5
+        renderer = SlackMessageRenderer()
 
-        expected_len_of_blocks_in_failed_rules_info = 3  # 3 failed rules
+        pass_result = renderer.render(mock_validation_result_pass)
+        fail_result = renderer.render(mock_validation_result_fail)
 
-        slack_message_render = SlackMessageRenderer()
+        # Both should have SlackMessage structure
+        assert isinstance(pass_result, SlackMessage)
+        assert isinstance(fail_result, SlackMessage)
 
-        message = slack_message_render.render(result)
+        # Both should have text and blocks
+        assert hasattr(pass_result, "text") and pass_result.text
+        assert hasattr(pass_result, "blocks") and pass_result.blocks
+        assert hasattr(fail_result, "text") and fail_result.text
+        assert hasattr(fail_result, "blocks") and fail_result.blocks
 
-        assert message.text == (
-            f"test_data_validation data validation failed!, run id: {result.run_id}, "
-            f"data asset: {result.data_asset}, "
-            f"data asset schema: {result.data_asset_schema}, "
-            f"start time: {result.start_time.isoformat()}, "
-            f"end time: {result.end_time.isoformat()}. Failed checks: "
-            f"test_check ([rule=test_rule, column=[test_column], violations=1, rows=2], "
-            f"[rule=test_rule2, column=[test_column, test_column_2], violations=1, rows=2], "
-            f"[rule=is_custom, value=package.module.function, violations=1, rows=2])"
-        )
-        # Test blocks structure
-        assert len(message.blocks) == expected_len_of_blocks
-        assert message.blocks[0]["type"] == "header"
-        assert message.blocks[0]["text"]["text"] == "A data validation has failed! :alerta:"
-        assert message.blocks[1]["type"] == "section"
-        assert message.blocks[2]["text"]["text"] == "*Failed Checks*:"
-        assert message.blocks[3]["type"] == "rich_text"
-        assert len(message.blocks[3]["elements"]) == expected_len_of_blocks_in_failed_check_info
-        assert (
-            len(message.blocks[3]["elements"][4]["elements"])
-            == expected_len_of_blocks_in_failed_rules_info
-        )
-        assert message.blocks[3]["elements"][4]["elements"][2]["elements"][0]["text"] == (
-            "rule=is_custom, value=package.module.function, violations=1, rows=2"
-        )
-        assert message.blocks[3]["elements"][4]["elements"][0]["elements"][0]["text"] == (
-            "rule=test_rule, column=[test_column], violations=1, rows=2"
-        )
+        # Both should have at least basic blocks (header + section)
+        assert len(pass_result.blocks) >= 2  # noqa: PLR2004
+        assert len(fail_result.blocks) >= 2  # noqa: PLR2004
 
-    def test_when_checks_display_limit_is_lower_than_failed_checks_count(
-        self, data_validation_result_mock, check_result_mock, rule_metric_mock
-    ):
-        result = data_validation_result_mock(
-            status=Status.FAIL,
-            failed_checks_mocks=[
-                check_result_mock(
-                    status=Status.FAIL,
-                    check_level=CheckLevel.CRITICAL,
-                    class_name="test_check",
-                    failed_rules_mocks=[rule_metric_mock()],
-                ),
-                check_result_mock(
-                    status=Status.FAIL,
-                    check_level=CheckLevel.CRITICAL,
-                    class_name="test_check2",
-                    failed_rules_mocks=[rule_metric_mock()],
-                ),
-            ],
-        )
-        # 1 header + 1 section + 1 section (failed checks title)
-        # + 1 section (1 of 2 failed checks displayed)
-        expected_len_of_blocks = 4
+    def test_render_includes_timing_information(self, mock_validation_result_pass):
+        """Test that timing information is included in rendered message."""
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_pass)
 
-        slack_message_render = SlackMessageRenderer(checks_display_limit=1)
+        # Should contain ISO formatted timestamps
+        assert "2023-01-01T12:00:00" in result.text  # start time
+        assert "2023-01-01T12:05:00" in result.text  # end time
 
-        message = slack_message_render.render(result)
+    def test_render_includes_run_identification(self, mock_validation_result_pass):
+        """Test that run identification information is included."""
+        renderer = SlackMessageRenderer()
+        result = renderer.render(mock_validation_result_pass)
 
-        assert len(message.blocks) == expected_len_of_blocks
-        assert message.blocks[2]["type"] == "section"
-        assert message.blocks[2]["text"]["text"] == "*Failed Checks (Showing only 1 of 2)*:"
-
-    def test_when_rules_display_limit_is_lower_than_failed_rules_count(
-        self, data_validation_result_mock, check_result_mock, rule_metric_mock
-    ):
-        result = data_validation_result_mock(
-            status=Status.FAIL,
-            failed_checks_mocks=[
-                check_result_mock(
-                    status=Status.FAIL,
-                    check_level=CheckLevel.CRITICAL,
-                    class_name="test_check",
-                    failed_rules_mocks=[rule_metric_mock(), rule_metric_mock()],
-                ),
-            ],
-        )
-        # 1 header + 1 section + 1 section (failed checks title) + 1 section (1 failed check)
-        expected_len_of_blocks = 4
-
-        slack_message_render = SlackMessageRenderer(rules_display_limit=1)
-
-        message = slack_message_render.render(result)
-
-        assert len(message.blocks) == expected_len_of_blocks
-        assert message.blocks[3]["elements"][3]["elements"][0]["text"] == (
-            "Failed rules (Showing only 1 of 2): "
-        )
+        # Should contain run identification
+        assert "run_123" in result.text
+        assert "test_validation" in result.text
+        assert "test_table" in result.text

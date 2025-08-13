@@ -9,6 +9,7 @@ from dataguard.store.audit.row import BaseAuditRow
 
 
 @pytest.mark.unit
+@pytest.mark.audit_store
 class TestBaseAuditRowUnit:
     @pytest.mark.parametrize(
         "field_type, field_value",

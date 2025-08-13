@@ -24,6 +24,7 @@ def result_store():
 
 
 @pytest.mark.unit
+@pytest.mark.result_store
 class TestResultStoreManagerUnit:
     def test_count(self, result_store):
         manager = ResultStoreManager()

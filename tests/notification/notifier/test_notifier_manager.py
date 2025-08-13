@@ -26,6 +26,7 @@ def notifier_mock():
 
 
 @pytest.mark.unit
+@pytest.mark.notifier
 class TestNotifierManagerUnit:
     def test_count(self, notifier_mock):
         manager = NotifierManager()

@@ -85,6 +85,7 @@ class TestSlackNotifierUnit:
             mock_web_client.return_value.chat_postMessage.assert_called_once_with(
                 channel=channel,
                 blocks=[{"type": "section", "text": {"type": "mrkdwn", "text": "Test message"}}],
+                text="Test message",
             )
 
     def test_notify_failure(self, mock_renderer):

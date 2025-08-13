@@ -24,6 +24,7 @@ def audit_store():
 
 
 @pytest.mark.unit
+@pytest.mark.audit_store
 class TestAuditStoreManagerUnit:
     def test_count(self, audit_store):
         manager = AuditStoreManager()

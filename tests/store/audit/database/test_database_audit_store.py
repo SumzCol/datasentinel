@@ -314,3 +314,124 @@ class TestDatabaseAuditStore:
         assert call_args["dict_field"] == json.dumps({"key": "value"})
         # Verify None remained None
         assert call_args["none_field"] is None
+
+    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
+    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
+    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("dataguard.store.audit.database.database_audit_store.MetaData")
+    def test_append_raises_audit_store_error_on_sqlalchemy_error_in_get_or_create_table(
+        self,
+        mock_metadata_class,
+        mock_table_class,
+        mock_sessionmaker,
+        mock_create_engine,
+        valid_credentials,
+    ):
+        """
+        Test that append raises AuditStoreError when SQLAlchemyError occurs in
+        _get_or_create_table.
+        """
+        from sqlalchemy.exc import SQLAlchemyError
+
+        # Setup mocks
+        mock_engine = Mock()
+        mock_create_engine.return_value = mock_engine
+
+        mock_session = Mock()
+        mock_session_maker = Mock(return_value=mock_session)
+        mock_sessionmaker.return_value = mock_session_maker
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+
+        # Mock Table to raise SQLAlchemyError (not NoSuchTableError)
+        mock_table_class.side_effect = SQLAlchemyError("Database connection failed")
+
+        # Create store and audit row
+        store = DatabaseAuditStore(
+            name="test_store",
+            disabled=False,
+            table="test_table",
+            schema="test_schema",
+            credentials={"connection_string": "sqlite:///:memory:"},
+            if_table_not_exists="create",
+        )
+
+        audit_row = Mock(spec=BaseAuditRow)
+        audit_row.row_fields = {
+            "field1": FieldInfo(annotation=str, type=str, args=None, required=True, complex=False)
+        }
+        audit_row.to_dict.return_value = {"field1": "value1"}
+
+        # Test that SQLAlchemyError in _get_or_create_table raises AuditStoreError
+        with pytest.raises(AuditStoreError) as exc_info:
+            store.append(audit_row)
+
+        # Verify the error message
+        assert "There was an error while trying to get or create table 'test_table'" in str(
+            exc_info.value
+        )
+        assert "Database connection failed" in str(exc_info.value)
+
+    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
+    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
+    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("dataguard.store.audit.database.database_audit_store.MetaData")
+    def test_append_raises_audit_store_error_on_sqlalchemy_error_in_create_table(
+        self,
+        mock_metadata_class,
+        mock_table_class,
+        mock_sessionmaker,
+        mock_create_engine,
+        valid_credentials,
+    ):
+        """
+        Test that append raises AuditStoreError when SQLAlchemyError occurs in _create_table.
+        """
+        from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
+
+        # Setup mocks
+        mock_engine = Mock()
+        mock_create_engine.return_value = mock_engine
+
+        mock_session = Mock()
+        mock_session_maker = Mock(return_value=mock_session)
+        mock_sessionmaker.return_value = mock_session_maker
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+
+        # Mock Table to raise NoSuchTableError first (to trigger table creation)
+        # Then mock the second Table call (in _create_table) to raise SQLAlchemyError
+        mock_table_class.side_effect = [
+            NoSuchTableError("Table does not exist"),
+            SQLAlchemyError("Failed to create table"),
+        ]
+
+        mock_metadata = Mock()
+        mock_metadata_class.return_value = mock_metadata
+        mock_metadata.create_all.side_effect = SQLAlchemyError("Failed to create table")
+
+        # Create store and audit row
+        store = DatabaseAuditStore(
+            name="test_store",
+            disabled=False,
+            table="test_table",
+            schema="test_schema",
+            credentials={"connection_string": "sqlite:///:memory:"},
+            if_table_not_exists="create",
+        )
+
+        audit_row = Mock(spec=BaseAuditRow)
+        audit_row.row_fields = {
+            "field1": FieldInfo(annotation=str, type=str, args=None, required=True, complex=False)
+        }
+        audit_row.to_dict.return_value = {"field1": "value1"}
+
+        # Test that SQLAlchemyError in _create_table raises AuditStoreError
+        with pytest.raises(AuditStoreError) as exc_info:
+            store.append(audit_row)
+
+        # Verify the error message
+        assert "There was an error while trying to create table 'test_table'" in str(
+            exc_info.value
+        )
+        assert "Failed to create table" in str(exc_info.value)

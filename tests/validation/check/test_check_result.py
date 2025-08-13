@@ -20,6 +20,7 @@ def create_rule_metric(status: Status) -> RuleMetric:
 
 
 @pytest.mark.unit
+@pytest.mark.checks
 class TestCheckResultUnit:
     @pytest.mark.parametrize("expected_status", [Status.PASS, Status.FAIL])
     def test_status_property(self, expected_status: Status):
