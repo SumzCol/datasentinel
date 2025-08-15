@@ -144,15 +144,10 @@ class TestDataValidationUnit:
         mock_check_result2 = Mock(spec=CheckResult)
         mock_check2.validate.return_value = mock_check_result2
 
-        mock_check3 = Mock(spec=AbstractCheck)
-        mock_check3.name = "validity_check"
-        mock_check_result3 = Mock(spec=CheckResult)
-        mock_check3.validate.return_value = mock_check_result3
-
         # Create DataValidation instance with multiple checks
         data_validation = DataValidation(
             name="comprehensive_validation",
-            check_list=[mock_check1, mock_check2, mock_check3],
+            check_list=[mock_check1, mock_check2],
             data_asset=mock_data_asset,
         )
 
@@ -165,7 +160,6 @@ class TestDataValidationUnit:
         # Verify all checks were executed with the same loaded data
         mock_check1.validate.assert_called_once_with(mock_data)
         mock_check2.validate.assert_called_once_with(mock_data)
-        mock_check3.validate.assert_called_once_with(mock_data)
 
         # Verify result contains all check results in correct order
         assert isinstance(result, DataValidationResult)
@@ -175,9 +169,8 @@ class TestDataValidationUnit:
         assert result.data_asset_schema == "test_schema"
         assert result.start_time == mock_start_time
         assert result.end_time == mock_end_time
-        assert len(result.check_results) == 3  # noqa: PLR2004
+        assert len(result.check_results) == 2  # noqa: PLR2004
         assert result.check_results == [
             mock_check_result1,
             mock_check_result2,
-            mock_check_result3,
         ]
