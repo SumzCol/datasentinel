@@ -1,87 +1,59 @@
-from datetime import date, datetime
-
 from pandas import DataFrame
 import pytest
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status
+from tests.validation.check.row_level_result.utils.agnostic_check_tests_cases import (
+    are_unique_tests_cases_parameterize,
+)
 
 
 @pytest.mark.unit
 @pytest.mark.pandas
 class TestAreUniqueUnit:
     @pytest.mark.parametrize(
-        "data",
-        [
-            [(1, 1), (2, 2)],
-            [("a", "a"), ("b", "b")],
-            [(1.0, 1.0), (2.0, 2.0)],
-            [(date(2020, 1, 1), date(2020, 1, 1)), (date(2020, 1, 2), date(2020, 1, 2))],
-            [
-                (datetime(2020, 1, 1), datetime(2020, 1, 1)),
-                (datetime(2020, 1, 2), datetime(2020, 1, 2)),
-            ],
-        ],
+        **are_unique_tests_cases_parameterize(pass_outcome=True),
     )
-    def test_pass(self, check: RowLevelResultCheck, data: list[tuple]):
-        evaluated_columns = ["col1", "col2"]
+    def test_pass(
+        self,
+        check: RowLevelResultCheck,
+        data: list[tuple],
+        columns: list[str],
+        evaluated_column: list[str],
+        ignore_nulls: bool,
+        expected_violations: int,
+    ):
         evaluated_rows = len(data)
-        expected_violations = 0
 
-        df = DataFrame(data, columns=evaluated_columns)
-        result = check.are_unique(column=evaluated_columns).validate(df)
+        df = DataFrame(data=data, columns=columns)
+        result = check.are_unique(column=evaluated_column, ignore_nulls=ignore_nulls).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset is None
+        assert result.rule_metrics[0].column == evaluated_column
 
     @pytest.mark.parametrize(
-        "data",
-        [
-            [(1, 1), (1, 1)],
-            [("a", "a"), ("a", "a")],
-            [(1.0, 1.0), (1.0, 1.0)],
-            [(date(2020, 1, 1), date(2020, 1, 1)), (date(2020, 1, 1), date(2020, 1, 1))],
-            [
-                (datetime(2020, 1, 1), datetime(2020, 1, 1)),
-                (datetime(2020, 1, 1), datetime(2020, 1, 1)),
-            ],
-        ],
+        **are_unique_tests_cases_parameterize(pass_outcome=False),
     )
-    def test_fail(self, check: RowLevelResultCheck, data: list[tuple]):
-        evaluated_columns = ["col1", "col2"]
+    def test_fail(
+        self,
+        check: RowLevelResultCheck,
+        data: list[tuple],
+        columns: list[str],
+        evaluated_column: list[str],
+        ignore_nulls: bool,
+        expected_violations: int,
+    ):
         evaluated_rows = len(data)
-        expected_violations = 1
 
-        df = DataFrame(data, columns=evaluated_columns)
-        result = check.are_unique(column=evaluated_columns).validate(df)
+        df = DataFrame(data=data, columns=columns)
+        result = check.are_unique(column=evaluated_column, ignore_nulls=ignore_nulls).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == evaluated_columns
-
-    @pytest.mark.parametrize(
-        "ignore_nulls, result_status",
-        [
-            (False, Status.FAIL),
-            (True, Status.PASS),
-        ],
-    )
-    def test_with_ignoring_nulls_param(
-        self,
-        check: RowLevelResultCheck,
-        ignore_nulls: bool,
-        result_status: Status,
-    ):
-        data = [(1, 1), (1, None), (1, None), (None, 1), (None, 1), (None, None), (None, None)]
-        evaluated_columns = ["col1", "col2"]
-
-        df = DataFrame(data=data, columns=evaluated_columns)
-        result = check.are_unique(column=evaluated_columns, ignore_nulls=ignore_nulls).validate(
-            df
-        )
-
-        assert result.status == result_status
+        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == columns
+        assert result.rule_metrics[0].column == evaluated_column

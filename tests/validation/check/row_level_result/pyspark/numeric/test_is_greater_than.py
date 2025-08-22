@@ -3,53 +3,68 @@ import pytest
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status
+from tests.validation.check.row_level_result.utils.numeric_check_tests_cases import (
+    is_greater_than_tests_cases_parameterize,
+)
 
 
 @pytest.mark.unit
 @pytest.mark.slow
 @pytest.mark.pyspark
 class TestIsGreaterThanUnit:
-    def test_pass(self, check: RowLevelResultCheck, spark: SparkSession):
-        data = [(1.00000000001,), (2.0,)]
+    @pytest.mark.parametrize(
+        **is_greater_than_tests_cases_parameterize(pass_outcome=True),
+    )
+    def test_pass(
+        self,
+        check: RowLevelResultCheck,
+        spark: SparkSession,
+        data: list[tuple],
+        columns: list[str],
+        evaluated_column: str,
+        id_columns: list[str],
+        rule_value: float | int,
+        expected_violations: int,
+    ):
         evaluated_rows = len(data)
-        expected_violations = 0
-        evaluated_column = "col"
 
-        df = spark.createDataFrame(data=data, schema=[evaluated_column])
-        result = check.is_greater_than(column=evaluated_column, value=1.0).validate(df)
+        df = spark.createDataFrame(data=data, schema=columns)
+        result = check.is_greater_than(
+            column=evaluated_column, value=rule_value, id_columns=id_columns
+        ).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset is None
+        assert result.rule_metrics[0].column == [evaluated_column]
+        assert result.rule_metrics[0].id_columns == id_columns
 
     @pytest.mark.parametrize(
-        "data, schema, id_columns",
-        [
-            ([(0.9999999999,)], ["col"], []),
-            ([(1.0,)], ["col"], ["col"]),
-            ([(1, 0.98)], ["id", "col"], ["id"]),
-        ],
+        **is_greater_than_tests_cases_parameterize(pass_outcome=False),
     )
-    def test_fail_with_and_without_id_columns(
+    def test_fail(
         self,
         check: RowLevelResultCheck,
         spark: SparkSession,
         data: list[tuple],
-        schema: list[str],
+        columns: list[str],
+        evaluated_column: str,
         id_columns: list[str],
+        rule_value: float | int,
+        expected_violations: int,
     ):
         evaluated_rows = len(data)
-        evaluated_column = "col"
-        expected_violations = 1
 
-        df = spark.createDataFrame(data=data, schema=schema)
+        df = spark.createDataFrame(data=data, schema=columns)
         result = check.is_greater_than(
-            column=evaluated_column, value=1.0, id_columns=id_columns
+            column=evaluated_column, value=rule_value, id_columns=id_columns
         ).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert result.rule_metrics[0].failed_rows_dataset.data.columns == schema
+        assert result.rule_metrics[0].failed_rows_dataset.data.columns == columns
+        assert result.rule_metrics[0].column == [evaluated_column]
+        assert result.rule_metrics[0].id_columns == id_columns

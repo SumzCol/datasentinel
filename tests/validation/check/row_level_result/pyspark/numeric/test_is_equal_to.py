@@ -24,9 +24,9 @@ class TestIsEqualToUnit:
         evaluated_column: str,
         id_columns: list[str],
         rule_value: float | int,
+        expected_violations: int,
     ):
         evaluated_rows = len(data)
-        expected_violations = 0
 
         df = spark.createDataFrame(data=data, schema=columns)
         result = check.is_equal_to(
@@ -52,9 +52,9 @@ class TestIsEqualToUnit:
         evaluated_column: str,
         id_columns: list[str],
         rule_value: float | int,
+        expected_violations: int,
     ):
         evaluated_rows = len(data)
-        expected_violations = 1
 
         df = spark.createDataFrame(data=data, schema=columns)
         result = check.is_equal_to(
