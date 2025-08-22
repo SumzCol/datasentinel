@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 import logging
 
 from dataguard.core import DataGuardError
+from dataguard.validation.core import NotifyOnEvent
+from dataguard.validation.result import DataValidationResult
 
 
 class NotifierError(DataGuardError):
@@ -74,7 +76,7 @@ class AbstractNotifierManager(ABC):
         return logging.getLogger(__name__)
 
     @abstractmethod
-    def count(self, enabled_only=False):
+    def count(self, enabled_only=False) -> int:
         """Return the number of registered notifiers.
 
         Args:
@@ -85,7 +87,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def get(self, name):
+    def get(self, name) -> AbstractNotifier:
         """Get notifier by name.
 
         Args:
@@ -96,7 +98,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def register(self, notifier, replace=False):
+    def register(self, notifier: AbstractNotifier, replace: bool = False) -> None:
         """Register notifier.
 
         Args:
@@ -108,7 +110,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def remove(self, name):
+    def remove(self, name) -> None:
         """Remove notifier by name.
 
         Args:
@@ -119,7 +121,7 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def exists(self, name):
+    def exists(self, name) -> bool:
         """Check if notifier exists.
 
         Args:
@@ -130,7 +132,11 @@ class AbstractNotifierManager(ABC):
         """
 
     @abstractmethod
-    def notify_all_by_event(self, notifiers_by_events, result):
+    def notify_all_by_event(
+        self,
+        notifiers_by_events: dict[NotifyOnEvent, list[str]],
+        result: DataValidationResult,
+    ):
         """Notify a validation node result using the specified notifiers for each event.
 
         Args:

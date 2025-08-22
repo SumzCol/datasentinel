@@ -11,7 +11,7 @@ def get_spark() -> SparkSession:
         # the remote session is instantiated using the databricks module
         # If the databricks-connect module is installed, we use a remote session
         # pylint: disable=import-outside-toplevel
-        from databricks.connect import DatabricksSession
+        from databricks.connect import DatabricksSession  # type: ignore
 
         # We can't test this as there's no Databricks test env available
         spark = DatabricksSession.builder.getOrCreate()  # pragma: no cover

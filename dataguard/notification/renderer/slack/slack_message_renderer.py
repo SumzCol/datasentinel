@@ -61,7 +61,7 @@ class SlackMessageRenderer(AbstractRenderer[SlackMessage]):
     @staticmethod
     def _render_rule_metric_info(rule_metric: RuleMetric) -> str:
         _value_or_col = (
-            f"column: [{', '.join(rule_metric.column)}]"
+            f"column: [{', '.join(rule_metric.column or [])}]"
             if not rule_metric.rule == "is_custom"
             else f"value: {rule_metric.value}"
         )

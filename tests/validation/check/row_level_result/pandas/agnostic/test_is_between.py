@@ -1,117 +1,71 @@
-from datetime import date, datetime
+from typing import Any
 
 from pandas import DataFrame
 import pytest
 
 from dataguard.validation.check import RowLevelResultCheck
 from dataguard.validation.status import Status
+from tests.validation.check.row_level_result.utils.agnostic_check_tests_cases import (
+    is_between_tests_cases_parameterize,
+)
 
 
 @pytest.mark.unit
 @pytest.mark.pandas
 class TestIsBetweenUnit:
     @pytest.mark.parametrize(
-        "data, value",
-        [
-            # String
-            ([("a",)], ["a", "b"]),
-            # Integer
-            ([(1,)], [1, 2]),
-            # Float
-            ([(1.0,)], [1.0, 2.0]),
-            # Date
-            ([(date(2020, 1, 1),)], [date(2020, 1, 1), date(2020, 1, 2)]),
-            # Timestamp
-            ([(datetime(2020, 1, 1),)], [datetime(2020, 1, 1), datetime(2020, 1, 2)]),
-        ],
+        **is_between_tests_cases_parameterize(pass_outcome=True),
     )
-    def test_pass(self, check: RowLevelResultCheck, data: list[tuple], value: list) -> None:
+    def test_pass(
+        self,
+        check: RowLevelResultCheck,
+        data: list[tuple],
+        columns: list[str],
+        evaluated_column: str,
+        min_value: Any,
+        max_value: Any,
+    ):
         evaluated_rows = len(data)
-        expected_violations = 0
-        evaluated_column = "col"
 
-        df = DataFrame(data=data, columns=[evaluated_column])
+        df = DataFrame(data=data, columns=columns)
         result = check.is_between(
-            column=evaluated_column, lower_bound=value[0], upper_bound=value[1]
+            column=evaluated_column, lower_bound=min_value, upper_bound=max_value
         ).validate(df)
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
-        assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].violations == 0
         assert result.rule_metrics[0].failed_rows_dataset is None
+        assert result.rule_metrics[0].column == [evaluated_column]
 
     @pytest.mark.parametrize(
-        "data, schema, id_columns, value",
-        [
-            # String
-            ([("c",)], ["col"], [], ["a", "b"]),
-            (
-                [(1, "c")],
-                ["id", "col"],
-                ["id"],
-                ["a", "b"],
-            ),
-            # Int
-            ([(3,)], ["col"], [], [1, 2]),
-            (
-                [(1, 0)],
-                ["id", "col"],
-                ["id"],
-                [1, 2],
-            ),
-            # Float
-            ([(2.0000001,)], ["col"], [], [1.0, 2.0]),
-            (
-                [(1, 0.9999999)],
-                ["id", "col"],
-                ["id"],
-                [1.0, 2.0],
-            ),
-            # Date
-            ([(date(2019, 12, 31),)], ["col"], [], [date(2020, 1, 1), date(2020, 1, 2)]),
-            (
-                [(1, date(2020, 1, 3))],
-                ["id", "col"],
-                ["id"],
-                [date(2020, 1, 1), date(2020, 1, 2)],
-            ),
-            # Timestamp
-            (
-                [(datetime(2020, 12, 31),)],
-                ["col"],
-                [],
-                [datetime(2020, 1, 1), datetime(2020, 1, 2)],
-            ),
-            (
-                [(1, datetime(2020, 1, 3))],
-                ["id", "col"],
-                ["id"],
-                [datetime(2020, 1, 1), datetime(2020, 1, 2)],
-            ),
-        ],
+        **is_between_tests_cases_parameterize(pass_outcome=False),
     )
-    def test_fail_with_and_without_id_columns(
+    def test_fail(
         self,
         check: RowLevelResultCheck,
         data: list[tuple],
-        schema: list[str],
+        columns: list[str],
+        evaluated_column: str,
         id_columns: list[str],
-        value: list,
-    ) -> None:
+        min_value: Any,
+        max_value: Any,
+        expected_violations: int,
+    ):
         evaluated_rows = len(data)
-        expected_violations = 1
-        evaluated_column = "col"
 
-        df = DataFrame(data=data, columns=schema)
+        df = DataFrame(data=data, columns=columns)
         result = check.is_between(
             column=evaluated_column,
             id_columns=id_columns,
-            lower_bound=value[0],
-            upper_bound=value[1],
+            lower_bound=min_value,
+            upper_bound=max_value,
         ).validate(df)
 
         assert result.status == Status.FAIL
         assert result.rule_metrics[0].rows == evaluated_rows
         assert result.rule_metrics[0].violations == expected_violations
         assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
-        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == schema
+        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == columns
+        assert result.rule_metrics[0].column == [evaluated_column]
+        assert result.rule_metrics[0].id_columns == id_columns

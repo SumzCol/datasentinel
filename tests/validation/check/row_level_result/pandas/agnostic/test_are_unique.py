@@ -21,7 +21,6 @@ class TestAreUniqueUnit:
         columns: list[str],
         evaluated_column: list[str],
         ignore_nulls: bool,
-        expected_violations: int,
     ):
         evaluated_rows = len(data)
 
@@ -30,7 +29,7 @@ class TestAreUniqueUnit:
 
         assert result.status == Status.PASS
         assert result.rule_metrics[0].rows == evaluated_rows
-        assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].violations == 0
         assert result.rule_metrics[0].failed_rows_dataset is None
         assert result.rule_metrics[0].column == evaluated_column
 

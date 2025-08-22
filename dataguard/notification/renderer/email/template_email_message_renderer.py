@@ -105,7 +105,7 @@ class TemplateEmailMessageRenderer(AbstractRenderer[EmailMessage]):
             result=result,
         )
 
-    def _failed_rows_to_pandas(self, failed_rows_dataset: AbstractFailedRowsDataset) -> DataFrame:
+    def _failed_rows_to_pandas(self, failed_rows_dataset: AbstractFailedRowsDataset) -> DataFrame:  # type: ignore
         return DataFrame(failed_rows_dataset.to_dict(limit=self._failed_rows_limit))
 
     def _add_excel_failed_rows_attachment(

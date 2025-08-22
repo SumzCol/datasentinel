@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from dataguard.core import DataGuardError
 from dataguard.notification.notifier.core import AbstractNotifierManager
 from dataguard.store.result.core import AbstractResultStoreManager
-from dataguard.validation.result import DataValidationResult
 from dataguard.validation.workflow import ValidationWorkflow
 
 
@@ -28,5 +27,5 @@ class AbstractWorkflowRunner(ABC):
         validation_workflow: ValidationWorkflow,
         notifier_manager: AbstractNotifierManager,
         result_store_manager: AbstractResultStoreManager,
-    ) -> DataValidationResult:
+    ) -> None:
         """Run a validation workflow."""
