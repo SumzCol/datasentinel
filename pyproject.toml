@@ -146,20 +146,14 @@ all = [
 [tool.setuptools.package-data]
 "dataguard.notification.renderer.email.templates" = ["templates/*.html"]
 
-[tool.mypy]
-plugins = ['pydantic.mypy']
-no_warn_unused_ignores = true
-ignore_missing_imports = true
-disable_error_code = ['misc']
-exclude = ['^docs/']
-
 [tool.pyright]
 include = ['dataguard']
 exclude = [
     "**/node_modules",
     "**/__pycache__",
     ".git",
-    ".ruff_cache"
+    ".ruff_cache",
+    "^docs/"
 ]
 typeCheckingMode = "off"
 useLibraryCodeForTypes = true
