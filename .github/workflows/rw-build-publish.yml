@@ -22,7 +22,7 @@ jobs:
     outputs:
       new_release: ${{ steps.set-outputs.outputs.new_release }}
       is_pre_release: ${{ steps.set-outputs.outputs.is_pre_release }}
-      version: ${{ steps.get-version.outputs.version }}
+      version: ${{ steps.set-outputs.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,11 +84,13 @@ jobs:
               # Pre-release version
               echo "new_release=true" >> $GITHUB_OUTPUT
               echo "is_pre_release=true" >> $GITHUB_OUTPUT
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
               echo "Is pre-release version: $VERSION"
             else
               # Standard release version
               echo "new_release=true" >> $GITHUB_OUTPUT
               echo "is_pre_release=false" >> $GITHUB_OUTPUT
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
               echo "Is standard release version: $VERSION"
             fi
           fi
