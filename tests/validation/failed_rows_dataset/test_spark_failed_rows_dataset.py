@@ -3,8 +3,8 @@ import json
 from pyspark.sql import DataFrame, SparkSession
 import pytest
 
-from dataguard.validation.failed_rows_dataset.core import FailedRowsDatasetError
-from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
+from datasentinel.validation.failed_rows_dataset.core import FailedRowsDatasetError
+from datasentinel.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
 
 
 @pytest.fixture(scope="class")

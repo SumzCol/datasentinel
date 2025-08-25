@@ -2,16 +2,16 @@ from unittest.mock import Mock, PropertyMock
 
 import pytest
 
-from dataguard.notification.notifier.core import (
+from datasentinel.notification.notifier.core import (
     AbstractNotifier,
     NotifierAlreadyExistsError,
     NotifierError,
     NotifierNotFoundError,
 )
-from dataguard.notification.notifier.manager import NotifierManager
-from dataguard.validation.core import NotifyOnEvent
-from dataguard.validation.result import DataValidationResult
-from dataguard.validation.status import Status
+from datasentinel.notification.notifier.manager import NotifierManager
+from datasentinel.validation.core import NotifyOnEvent
+from datasentinel.validation.result import DataValidationResult
+from datasentinel.validation.status import Status
 
 
 @pytest.fixture

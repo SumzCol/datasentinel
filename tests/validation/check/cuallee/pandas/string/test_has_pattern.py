@@ -1,8 +1,8 @@
 from pandas import DataFrame
 import pytest
 
-from dataguard.validation.check import CualleeCheck
-from dataguard.validation.status import Status
+from datasentinel.validation.check import CualleeCheck
+from datasentinel.validation.status import Status
 
 
 @pytest.mark.unit

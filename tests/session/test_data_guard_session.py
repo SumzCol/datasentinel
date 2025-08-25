@@ -3,17 +3,17 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from dataguard.notification.notifier.core import AbstractNotifierManager
-from dataguard.notification.notifier.manager import NotifierManager
-from dataguard.session.core import SessionAlreadyExistsError, SessionNotSpecifiedError
-from dataguard.session.data_guard_session import DataGuardSession
-from dataguard.store.audit.core import AbstractAuditStoreManager
-from dataguard.store.audit.manager import AuditStoreManager
-from dataguard.store.result.core import AbstractResultStoreManager
-from dataguard.store.result.manager import ResultStoreManager
-from dataguard.validation.runner.core import AbstractWorkflowRunner
-from dataguard.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
-from dataguard.validation.workflow import ValidationWorkflow
+from datasentinel.notification.notifier.core import AbstractNotifierManager
+from datasentinel.notification.notifier.manager import NotifierManager
+from datasentinel.session.core import SessionAlreadyExistsError, SessionNotSpecifiedError
+from datasentinel.session.data_guard_session import DataGuardSession
+from datasentinel.store.audit.core import AbstractAuditStoreManager
+from datasentinel.store.audit.manager import AuditStoreManager
+from datasentinel.store.result.core import AbstractResultStoreManager
+from datasentinel.store.result.manager import ResultStoreManager
+from datasentinel.validation.runner.core import AbstractWorkflowRunner
+from datasentinel.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
+from datasentinel.validation.workflow import ValidationWorkflow
 
 
 @pytest.mark.unit

@@ -1,8 +1,8 @@
 from pydantic import ValidationError
 import pytest
 
-from dataguard.validation.rule.metric import RuleMetric
-from dataguard.validation.status import Status
+from datasentinel.validation.rule.metric import RuleMetric
+from datasentinel.validation.status import Status
 
 
 @pytest.mark.unit

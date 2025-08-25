@@ -1,6 +1,6 @@
-# DataGuard
+# DataSentinel
 
-**DataGuard** is a comprehensive suite designed to perform data quality validations and log audit data in various destinations. It ensures that your data meets predefined standards and provides comprehensive audit logs for tracking and transparency.
+**DataSentinel** is a comprehensive suite designed to perform data quality validations and log audit data in various destinations. It ensures that your data meets predefined standards and provides comprehensive audit logs for tracking and transparency.
 
 ## Features
 
@@ -11,7 +11,7 @@
 
 ## Installation
 
-To install **DataGuard**, run the following command:
+To install **DataSentinel**, run the following command:
 
 ```sh
-pip install dataguard
+pip install datasentinel

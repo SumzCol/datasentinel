@@ -1,8 +1,8 @@
 from pandas import DataFrame
 import pytest
 
-from dataguard.validation.check import RowLevelResultCheck
-from dataguard.validation.status import Status
+from datasentinel.validation.check import RowLevelResultCheck
+from datasentinel.validation.status import Status
 from tests.validation.check.row_level_result.utils.agnostic_check_tests_cases import (
     are_unique_tests_cases_parameterize,
 )

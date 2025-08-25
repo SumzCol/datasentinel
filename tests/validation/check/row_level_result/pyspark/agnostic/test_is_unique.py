@@ -3,8 +3,8 @@ from datetime import date, datetime, timedelta
 from pyspark.sql import SparkSession
 import pytest
 
-from dataguard.validation.check import RowLevelResultCheck
-from dataguard.validation.status import Status
+from datasentinel.validation.check import RowLevelResultCheck
+from datasentinel.validation.status import Status
 
 
 @pytest.mark.unit

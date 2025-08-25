@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 from pydantic import ValidationError
 import pytest
 
-from dataguard.store.audit.row import BaseAuditRow
+from datasentinel.store.audit.row import BaseAuditRow
 
 
 @pytest.mark.unit

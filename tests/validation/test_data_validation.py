@@ -5,11 +5,11 @@ from pydantic import ValidationError
 import pytest
 from ulid import ULID
 
-from dataguard.validation.check.core import AbstractCheck
-from dataguard.validation.check.result import CheckResult
-from dataguard.validation.data_asset.core import AbstractDataAsset
-from dataguard.validation.data_validation import DataValidation
-from dataguard.validation.result import DataValidationResult
+from datasentinel.validation.check.core import AbstractCheck
+from datasentinel.validation.check.result import CheckResult
+from datasentinel.validation.data_asset.core import AbstractDataAsset
+from datasentinel.validation.data_validation import DataValidation
+from datasentinel.validation.result import DataValidationResult
 
 
 @pytest.mark.unit

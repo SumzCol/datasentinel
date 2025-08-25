@@ -5,9 +5,9 @@ from unittest.mock import Mock, patch
 import pytest
 from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
 
-from dataguard.store.audit.core import AuditStoreError
-from dataguard.store.audit.database.database_audit_store import DatabaseAuditStore
-from dataguard.store.audit.row import BaseAuditRow, FieldInfo
+from datasentinel.store.audit.core import AuditStoreError
+from datasentinel.store.audit.database.database_audit_store import DatabaseAuditStore
+from datasentinel.store.audit.row import BaseAuditRow, FieldInfo
 
 
 @pytest.mark.unit

@@ -6,13 +6,13 @@ from pyspark.sql import SparkSession
 import pytest
 from ulid import ULID
 
-from dataguard.store.result.core import ResultStoreError
-from dataguard.store.result.spark.deltatable_result_store import DeltaTableResultStore
-from dataguard.validation.check.level import CheckLevel
-from dataguard.validation.check.result import CheckResult
-from dataguard.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
-from dataguard.validation.result import DataValidationResult
-from dataguard.validation.rule.metric import RuleMetric
+from datasentinel.store.result.core import ResultStoreError
+from datasentinel.store.result.spark.deltatable_result_store import DeltaTableResultStore
+from datasentinel.validation.check.level import CheckLevel
+from datasentinel.validation.check.result import CheckResult
+from datasentinel.validation.failed_rows_dataset.spark import SparkFailedRowsDataset
+from datasentinel.validation.result import DataValidationResult
+from datasentinel.validation.rule.metric import RuleMetric
 
 
 @pytest.fixture(scope="function")

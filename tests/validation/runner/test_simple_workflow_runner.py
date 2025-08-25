@@ -2,15 +2,15 @@ from unittest.mock import Mock
 
 import pytest
 
-from dataguard.notification.notifier.core import AbstractNotifierManager
-from dataguard.store.result.core import AbstractResultStoreManager
-from dataguard.validation.check.level import CheckLevel
-from dataguard.validation.check.result import CheckResult
-from dataguard.validation.result import DataValidationResult
-from dataguard.validation.runner.core import CriticalCheckFailedError
-from dataguard.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
-from dataguard.validation.status import Status
-from dataguard.validation.workflow import ValidationWorkflow
+from datasentinel.notification.notifier.core import AbstractNotifierManager
+from datasentinel.store.result.core import AbstractResultStoreManager
+from datasentinel.validation.check.level import CheckLevel
+from datasentinel.validation.check.result import CheckResult
+from datasentinel.validation.result import DataValidationResult
+from datasentinel.validation.runner.core import CriticalCheckFailedError
+from datasentinel.validation.runner.simple_workflow_runner import SimpleWorkflowRunner
+from datasentinel.validation.status import Status
+from datasentinel.validation.workflow import ValidationWorkflow
 
 
 @pytest.mark.unit

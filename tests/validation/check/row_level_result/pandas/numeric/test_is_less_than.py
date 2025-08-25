@@ -1,8 +1,8 @@
 from pandas import DataFrame
 import pytest
 
-from dataguard.validation.check import RowLevelResultCheck
-from dataguard.validation.status import Status
+from datasentinel.validation.check import RowLevelResultCheck
+from datasentinel.validation.status import Status
 from tests.validation.check.row_level_result.utils.numeric_check_tests_cases import (
     is_less_than_tests_cases_parameterize,
 )

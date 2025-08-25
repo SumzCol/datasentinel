@@ -1,7 +1,7 @@
 import pytest
 
-from dataguard.validation.check import RowLevelResultCheck
-from dataguard.validation.check.core import BadArgumentError
+from datasentinel.validation.check import RowLevelResultCheck
+from datasentinel.validation.check.core import BadArgumentError
 
 
 @pytest.mark.unit

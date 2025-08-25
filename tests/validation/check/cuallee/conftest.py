@@ -1,7 +1,7 @@
 import pytest
 
-from dataguard.validation.check import CualleeCheck
-from dataguard.validation.check.level import CheckLevel
+from datasentinel.validation.check import CualleeCheck
+from datasentinel.validation.check.level import CheckLevel
 
 
 @pytest.fixture(scope="function")

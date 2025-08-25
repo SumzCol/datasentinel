@@ -2,14 +2,14 @@ from unittest.mock import Mock
 
 import pytest
 
-from dataguard.store.result.core import (
+from datasentinel.store.result.core import (
     AbstractResultStore,
     ResultStoreAlreadyExistsError,
     ResultStoreError,
     ResultStoreNotFoundError,
 )
-from dataguard.store.result.manager import ResultStoreManager
-from dataguard.validation.result import DataValidationResult
+from datasentinel.store.result.manager import ResultStoreManager
+from datasentinel.validation.result import DataValidationResult
 
 
 @pytest.fixture

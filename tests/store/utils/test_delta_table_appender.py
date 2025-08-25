@@ -6,7 +6,10 @@ from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame, SparkSession
 import pytest
 
-from dataguard.store.utils.deltatable_appender import DeltaTableAppender, DeltaTableAppenderError
+from datasentinel.store.utils.deltatable_appender import (
+    DeltaTableAppender,
+    DeltaTableAppenderError,
+)
 
 
 @pytest.fixture

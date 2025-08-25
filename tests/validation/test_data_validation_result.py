@@ -5,10 +5,10 @@ from pydantic import ValidationError
 import pytest
 from ulid import ULID
 
-from dataguard.validation.check.level import CheckLevel
-from dataguard.validation.check.result import CheckResult
-from dataguard.validation.result import DataValidationResult
-from dataguard.validation.status import Status
+from datasentinel.validation.check.level import CheckLevel
+from datasentinel.validation.check.result import CheckResult
+from datasentinel.validation.result import DataValidationResult
+from datasentinel.validation.status import Status
 
 
 @pytest.mark.unit

@@ -25,7 +25,7 @@ force-sort-within-sections = true
 force-wrap-aliases = true
 combine-as-imports = true
 lines-after-imports = 2
-known-first-party = ["dataguard"]
+known-first-party = ["datasentinel"]
 known-third-party = ["pyspark", "pandas"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 

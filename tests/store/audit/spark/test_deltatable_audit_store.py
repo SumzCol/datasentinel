@@ -15,9 +15,9 @@ from pyspark.sql.types import (
 )
 import pytest
 
-from dataguard.store.audit.core import AuditStoreError
-from dataguard.store.audit.row import BaseAuditRow
-from dataguard.store.audit.spark.deltatable_audit_store import DeltaTableAuditStore
+from datasentinel.store.audit.core import AuditStoreError
+from datasentinel.store.audit.row import BaseAuditRow
+from datasentinel.store.audit.spark.deltatable_audit_store import DeltaTableAuditStore
 
 
 @pytest.fixture(scope="function")

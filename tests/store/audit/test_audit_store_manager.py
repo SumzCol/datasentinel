@@ -2,14 +2,14 @@ from unittest.mock import Mock
 
 import pytest
 
-from dataguard.store.audit.core import (
+from datasentinel.store.audit.core import (
     AbstractAuditStore,
     AuditStoreAlreadyExistsError,
     AuditStoreError,
     AuditStoreNotFoundError,
 )
-from dataguard.store.audit.manager import AuditStoreManager
-from dataguard.store.audit.row import BaseAuditRow
+from datasentinel.store.audit.manager import AuditStoreManager
+from datasentinel.store.audit.row import BaseAuditRow
 
 
 @pytest.fixture

@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from dataguard.notification.notifier.core import NotifierError
-from dataguard.notification.notifier.email import SMTPEmailNotifier
-from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.validation.result import DataValidationResult
+from datasentinel.notification.notifier.core import NotifierError
+from datasentinel.notification.notifier.email import SMTPEmailNotifier
+from datasentinel.notification.renderer.core import AbstractRenderer
+from datasentinel.validation.result import DataValidationResult
 
 
 @pytest.fixture

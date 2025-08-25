@@ -2,11 +2,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from dataguard.notification.notifier.core import NotifierError
-from dataguard.notification.notifier.slack import SlackNotifier
-from dataguard.notification.renderer.core import AbstractRenderer
-from dataguard.notification.renderer.slack.slack_message_renderer import SlackMessage
-from dataguard.validation.result import DataValidationResult
+from datasentinel.notification.notifier.core import NotifierError
+from datasentinel.notification.notifier.slack import SlackNotifier
+from datasentinel.notification.renderer.core import AbstractRenderer
+from datasentinel.notification.renderer.slack.slack_message_renderer import SlackMessage
+from datasentinel.validation.result import DataValidationResult
 
 
 @pytest.fixture

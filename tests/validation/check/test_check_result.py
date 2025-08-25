@@ -2,10 +2,10 @@ from datetime import datetime
 
 import pytest
 
-from dataguard.validation.check.level import CheckLevel
-from dataguard.validation.check.result import CheckResult
-from dataguard.validation.rule.metric import RuleMetric
-from dataguard.validation.status import Status
+from datasentinel.validation.check.level import CheckLevel
+from datasentinel.validation.check.result import CheckResult
+from datasentinel.validation.rule.metric import RuleMetric
+from datasentinel.validation.status import Status
 
 
 def create_rule_metric(status: Status) -> RuleMetric:

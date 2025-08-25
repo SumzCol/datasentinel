@@ -4,8 +4,10 @@ from unittest.mock import Mock
 from pandas import DataFrame
 import pytest
 
-from dataguard.validation.check.row_level_result.pandas_strategy import PandasValidationStrategy
-from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
+from datasentinel.validation.check.row_level_result.pandas_strategy import (
+    PandasValidationStrategy,
+)
+from datasentinel.validation.check.row_level_result.rule import Rule, RuleDataType
 
 
 @pytest.fixture(scope="function")

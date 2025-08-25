@@ -4,8 +4,10 @@ from unittest.mock import Mock
 from pyspark.sql import SparkSession
 import pytest
 
-from dataguard.validation.check.row_level_result.pyspark_strategy import PysparkValidationStrategy
-from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
+from datasentinel.validation.check.row_level_result.pyspark_strategy import (
+    PysparkValidationStrategy,
+)
+from datasentinel.validation.check.row_level_result.rule import Rule, RuleDataType
 
 
 @pytest.fixture(scope="function")

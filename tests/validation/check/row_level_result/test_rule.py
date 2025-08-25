@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import ValidationError
 import pytest
 
-from dataguard.validation.check.row_level_result.rule import Rule, RuleDataType
+from datasentinel.validation.check.row_level_result.rule import Rule, RuleDataType
 
 
 @pytest.mark.unit

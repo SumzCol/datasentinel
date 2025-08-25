@@ -4,8 +4,11 @@ import click
 
 
 def validate_version(ctx, param, value) -> str:
-    if not re.match(r"^\d{1,}\.\d{1,}\.\d{1,}$", value):
-        raise ValueError(f"Version '{value}' is not in the format x.y.z")
+    # Updated regex to accept standard versions (x.y.z) and pre-release versions (alpha, beta, rc)
+    if not re.match(r"^\d{1,}\.\d{1,}\.\d{1,}((a|alpha|b|beta|rc|c)\d+)?$", value):
+        raise ValueError(
+            f"Version '{value}' is not in the format x.y.z or x.y.z(a|alpha|b|beta|rc).n"
+        )
 
     return value
 
@@ -23,7 +26,7 @@ def validate_version(ctx, param, value) -> str:
     "-v",
     type=str,
     required=True,
-    help="Version in the format x.y.z to extract release notes for",
+    help="Version in the format x.y.z or x.y.z(a|alpha|b|beta|rc).n to extract release notes for",
     callback=validate_version,
 )
 @click.option(
