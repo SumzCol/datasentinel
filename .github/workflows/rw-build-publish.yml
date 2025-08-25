@@ -141,16 +141,16 @@ jobs:
           -o $RELEASE_NOTES_FILE -v ${{ needs.is-new-release-check.outputs.version }}
         shell: bash
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ inputs.version }}
-          name: ${{ inputs.version }}
-          body_path: ${{ env.RELEASE_NOTES_FILE }}
-          draft: false
-          prerelease: ${{ needs.is-new-release-check.outputs.is_pre_release }}
-
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages_dir: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.is-new-release-check.outputs.version }}
+          name: ${{ needs.is-new-release-check.outputs.version }}
+          body_path: ${{ env.RELEASE_NOTES_FILE }}
+          draft: false
+          prerelease: ${{ needs.is-new-release-check.outputs.is_pre_release }}
