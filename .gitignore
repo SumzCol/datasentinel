@@ -170,3 +170,6 @@ cython_debug/
 
 
 .notebooks/**
+
+# Avoid commiting the content of the spark warehouse if it was created for testing purposes
+spark-warehouse/**

@@ -1,0 +1,52 @@
+from pandas import DataFrame
+import pytest
+
+from datasentinel.validation.check import RowLevelResultCheck
+from datasentinel.validation.status import Status
+
+
+@pytest.mark.unit
+class TestHasPatternUnit:
+    def test_pass(self, check: RowLevelResultCheck):
+        data = [("spark",)]
+        evaluated_rows = len(data)
+        expected_violations = 0
+        evaluated_column = "col"
+        df = DataFrame(data=data, columns=[evaluated_column])
+
+        result = check.has_pattern(column=evaluated_column, value=r"^s.+k$").validate(df)
+
+        assert result.status == Status.PASS
+        assert result.rule_metrics[0].rows == evaluated_rows
+        assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].failed_rows_dataset is None
+
+    @pytest.mark.parametrize(
+        "data, schema, id_columns",
+        [
+            ([("pandas",)], ["col"], []),
+            ([("pandas",)], ["col"], ["col"]),
+            ([(1, "pandas")], ["id", "col"], ["id"]),
+        ],
+    )
+    def test_fail_with_and_without_id_columns(
+        self,
+        check: RowLevelResultCheck,
+        data: list[tuple],
+        schema: list[str],
+        id_columns: list[str],
+    ):
+        evaluated_rows = len(data)
+        evaluated_column = "col"
+        expected_violations = 1
+        df = DataFrame(data=data, columns=schema)
+
+        result = check.has_pattern(
+            column=evaluated_column, value=r"^s.+k$", id_columns=id_columns
+        ).validate(df)
+
+        assert result.status == Status.FAIL
+        assert result.rule_metrics[0].rows == evaluated_rows
+        assert result.rule_metrics[0].violations == expected_violations
+        assert result.rule_metrics[0].failed_rows_dataset.count() == expected_violations
+        assert list(result.rule_metrics[0].failed_rows_dataset.data.columns) == schema

@@ -1,2 +1,0 @@
-class DataGuardError(Exception):
-    pass

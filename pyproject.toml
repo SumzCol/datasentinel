@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dataguard"
-description = "Data Guard is a powerful tool to monitor data pipelines and ensure data quality."
+name = "datasentinel"
+description = "DataSentinel is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
     { name = "Sumz SAS" },
 ]
@@ -34,17 +34,17 @@ dependencies = [
 dynamic = ["version", "readme"]
 
 [project.urls]
-"Homepage" = "https://github.com/SumzCol/dataguard"
-"Bug Tracker" = "https://github.com/SumzCol/dataguard"
+"Homepage" = "https://github.com/SumzCol/datasentinel"
+"Bug Tracker" = "https://github.com/SumzCol/datasentinel"
 
 [tool.setuptools.dynamic]
-version = {attr = "dataguard.__version__"}
+version = {attr = "datasentinel.__version__"}
 readme = {file = "README.md", content-type = "text/markdown"}
 
 [project.optional-dependencies]
 # Base dependencies
 pyspark-base = [
-  "pyspark>=3.4.0"
+  "pyspark>=3.4.0, <4.0"
 ]
 deltatable-base = [
   "delta-spark>=3.1.0, <4.0"
@@ -61,33 +61,33 @@ pyspark-cualleecheck = [
   "cuallee[pyspark]~=0.15.2",
 ]
 cualleecheck = [
-  "dataguard[pyspark-cualleecheck,pandas-cualleecheck]"
+  "datasentinel[pyspark-cualleecheck,pandas-cualleecheck]"
 ]
 pandas-rowlevelresultcheck = [
-  "dataguard[pandas-base]",
+  "datasentinel[pandas-base]",
 ]
 pyspark-rowlevelresultcheck = [
-  "dataguard[pyspark-base]",
+  "datasentinel[pyspark-base]",
 ]
 rowlevelresultcheck = [
-  "dataguard[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck]"
+  "datasentinel[pyspark-rowlevelresultcheck,pandas-rowlevelresultcheck]"
 ]
 pandas-checks = [
-  "dataguard[pandas-cualleecheck,pandas-rowlevelresultcheck]",
+  "datasentinel[pandas-cualleecheck,pandas-rowlevelresultcheck]",
 ]
 pyspark-checks = [
-  "dataguard[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
+  "datasentinel[pyspark-cualleecheck,pyspark-rowlevelresultcheck]",
 ]
 all-checks = [
-  "dataguard[pandas-checks,pyspark-checks]"
+  "datasentinel[pandas-checks,pyspark-checks]"
 ]
 
 # Result stores dependencies
 spark-deltatableresultstore = [
-  "dataguard[pyspark-base,deltatable-base]",
+  "datasentinel[pyspark-base,deltatable-base]",
 ]
 all-resultstores = [
-  "dataguard[spark-deltatableresultstore]"
+  "datasentinel[spark-deltatableresultstore]"
 ]
 
 # Audit stores dependencies
@@ -95,25 +95,27 @@ database-databaseauditstore = [
   "SQLAlchemy>=1.4, <3.0",
 ]
 spark-deltatableauditstore = [
-  "dataguard[pyspark-base,deltatable-base]",
+  "datasentinel[pyspark-base,deltatable-base]",
 ]
 all-auditstores = [
-  "dataguard[database-databaseauditstore,spark-deltatableauditstore]"
+  "datasentinel[database-databaseauditstore,spark-deltatableauditstore]"
 ]
 
 # Notifiers dependencies
 slack-slacknotifier = [
   "slack-sdk~=3.34.0"
 ]
-#email-smtpemailnotifier = [
-#  "smtplib"
-#]
 all-notifiers = [
-  "dataguard[slack-slacknotifier]"
+  "datasentinel[slack-slacknotifier]"
 ]
 
-all = [
-  "dataguard[all-checks,all-resultstores,all-auditstores,all-notifiers]"
+# Renderers dependencies
+email-templateemailmessagerenderer = [
+  "openpyxl==3.1.5",
+  "Jinja2==3.1.5",
+]
+all-renderers = [
+  "datasentinel[email-templateemailmessagerenderer]"
 ]
 
 # Testing dependencies
@@ -121,45 +123,99 @@ test = [
   "pytest>=7.2,<9.0",
   "pytest-cov>=3,<7",
   "pendulum >= 2.1.2",
-  "dataguard[all]",
+  "coverage[toml]",
+  "datasentinel[all-checks,all-resultstores,all-auditstores,all-notifiers,all-renderers]",
+]
+
+# Scripts dependencies
+scripts = [
+    "click==8.1.0"
 ]
 
 # Lint dependencies
 lint = [
-  "ruff==0.9.7",
+  "ruff==0.11.12",
   "pre-commit>=2.9.2, <5.0",
-  "mypy~=1.15.0",
+  "pyright==1.1.403",
 ]
 
+all = [
+  "datasentinel[test,scripts,lint]"
+]
+
+[tool.setuptools.package-data]
+"datasentinel.notification.renderer.email.templates" = ["templates/*.html"]
+
+[tool.pyright]
+include = ['datasentinel']
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    ".git",
+    ".ruff_cache",
+    "^docs/"
+]
+typeCheckingMode = "off"
+useLibraryCodeForTypes = true
+reportMissingImports = "none"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportPrivateUsage = true
+reportUntypedFunctionDecorator = true
+reportUntypedClassDecorator = true
+reportUntypedBaseClass = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
+reportOptionalCall = false
+reportOptionalIterable = false
+reportOptionalContextManager = false
+reportOptionalOperand = false
+reportNoneNameAccess = false
+pythonVersion = "3.10"
+pythonPlatform = "All"
+
 [tool.pytest.ini_options]
+addopts="""
+--cov-context test  \
+--cov-config pyproject.toml \
+--cov-report xml:coverage.xml \
+--cov-report term-missing \
+--cov datasentinel \
+--cov tests \
+--no-cov-on-fail \
+-ra \
+-W ignore"""
 markers = [
-    "unit: mark a test as a unit test",
-    "functional: mark a test as a functional test",
+    "unit: marker for unit tests",
+    "functional: marker for functional tests",
+    "slow: marker for slow tests",
+    "pandas: marker for pandas dependent tests",
+    "pyspark: marker for pyspark dependent tests",
+    "session: marker for session tests",
+    "runners: marker for runners tests",
+    "checks: marker for checks tests",
+    "result_store: marker for result stores tests",
+    "audit_store: marker for audit stores tests",
+    "notifier: marker for notifiers tests",
+    "renderer: marker for renderers tests",
 ]
 testpaths = [
   "tests"
 ]
 
-#[tool.ruff]
-#line-length = 98
-#show-fixes = true
-#lint.select = [
-#    "F",    # Pyflakes
-#    "W",    # pycodestyle
-#    "E",    # pycodestyle
-#    "I",    # isort
-#    "UP",   # pyupgrade
-#    "PL",   # Pylint
-#    "T201", # Print Statement
-#    "S",    # flake8-bandit
-#    "TCH",  # flake8-type-checking
-#    "RUF",  # Ruff-specific rules
-#]
-#lint.ignore = ["E501"]
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+omit = [
+    "tests/*",
+]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "__all__"]
 
-[tool.mypy]
-strict = true
-allow_any_generics = true
-no_warn_unused_ignores = true
-ignore_missing_imports = true
-exclude = ['^docs/']
+[tool.coverage.run]
+concurrency = ["multiprocessing", "thread"]
+parallel = true
+sigterm = true

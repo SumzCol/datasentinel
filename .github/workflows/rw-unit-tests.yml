@@ -24,7 +24,7 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: |
-          make install-test-reqs
+          make install-test
         shell: bash
       - name: Run unit tests
         run: make unit-test
