@@ -69,7 +69,9 @@ class TestSMTPEmailNotifierUnit:
 
         mock_result = MagicMock(spec=DataValidationResult)
 
-        with patch("dataguard.notification.notifier.email.smtp_email_notifier.SMTP") as mock_smtp:
+        with patch(
+            "datasentinel.notification.notifier.email.smtp_email_notifier.SMTP"
+        ) as mock_smtp:
             mock_smtp_instance = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_smtp_instance
 
@@ -97,7 +99,9 @@ class TestSMTPEmailNotifierUnit:
 
         mock_result = MagicMock(spec=DataValidationResult)
 
-        with patch("dataguard.notification.notifier.email.smtp_email_notifier.SMTP") as mock_smtp:
+        with patch(
+            "datasentinel.notification.notifier.email.smtp_email_notifier.SMTP"
+        ) as mock_smtp:
             mock_smtp_instance = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_smtp_instance
             mock_smtp_instance.login.side_effect = Exception("Mock Exception")

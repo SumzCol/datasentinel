@@ -1,4 +1,4 @@
-"""`dataguard.notification.notifier.slack` contains Slack notifier implementations."""
+"""`datasentinel.notification.notifier.slack` contains Slack notifier implementations."""
 
 from .slack_notifier import SlackNotifier
 

@@ -11,7 +11,6 @@ from datasentinel.validation.check.core import (
     BadArgumentError,
     DataframeType,
     EmptyCheckError,
-    UnsupportedDataframeTypeError,
 )
 from datasentinel.validation.check.level import CheckLevel
 from datasentinel.validation.check.result import CheckResult
@@ -283,14 +282,12 @@ class RowLevelResultCheck(AbstractCheck):
         validation_strategy: ValidationStrategy
         if df_type == DataframeType.PYSPARK:
             validation_strategy = importlib.import_module(
-                "dataguard.validation.check.row_level_result.pyspark_strategy"
+                "datasentinel.validation.check.row_level_result.pyspark_strategy"
             ).PysparkValidationStrategy()
         elif df_type == DataframeType.PANDAS:
             validation_strategy = importlib.import_module(
-                "dataguard.validation.check.row_level_result.pandas_strategy"
+                "datasentinel.validation.check.row_level_result.pandas_strategy"
             ).PandasValidationStrategy()
-        else:
-            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
         validation_strategy.validate_data_types(df, self._rules)
         start_time = datetime.now()

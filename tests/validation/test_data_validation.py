@@ -63,8 +63,8 @@ class TestDataValidationUnit:
         assert data_validation.check_exists(check_name)
         assert not data_validation.check_exists("non_existing_check")
 
-    @patch("dataguard.validation.data_validation.datetime")
-    @patch("dataguard.validation.data_validation.ULID")
+    @patch("datasentinel.validation.data_validation.datetime")
+    @patch("datasentinel.validation.data_validation.ULID")
     def test_run_successful_execution(self, mock_ulid, mock_datetime):
         """Test that run method successfully orchestrates data loading, check execution,
         and result creation."""
@@ -113,8 +113,8 @@ class TestDataValidationUnit:
         assert result.end_time == mock_end_time
         assert result.check_results == [mock_check_result]
 
-    @patch("dataguard.validation.data_validation.datetime")
-    @patch("dataguard.validation.data_validation.ULID")
+    @patch("datasentinel.validation.data_validation.datetime")
+    @patch("datasentinel.validation.data_validation.ULID")
     def test_run_multiple_checks_execution(self, mock_ulid, mock_datetime):
         """Test that run method executes all checks and collects their results properly."""
         # Setup mock datetime

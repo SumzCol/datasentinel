@@ -1,6 +1,6 @@
-# DataSentinel
+# Data Sentinel
 
-**DataSentinel** is a comprehensive suite designed to perform data quality validations and log audit data in various destinations. It ensures that your data meets predefined standards and provides comprehensive audit logs for tracking and transparency.
+**Data Sentinel** is a comprehensive suite designed to perform data quality validations and log audit data in various destinations. It ensures that your data meets predefined standards and provides comprehensive audit logs for tracking and transparency.
 
 ## Features
 
@@ -11,7 +11,7 @@
 
 ## Installation
 
-To install **DataSentinel**, run the following command:
+To install **Data Sentinel**, run the following command:
 
 ```sh
 pip install datasentinel

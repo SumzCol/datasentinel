@@ -66,9 +66,9 @@ class TestDatabaseAuditStore:
                 credentials=invalid_credentials,
             )
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
     def test_append_successful_row_insertion(
         self,
         mock_table_class,
@@ -110,9 +110,9 @@ class TestDatabaseAuditStore:
         mock_session.commit.assert_called_once()
         mock_session.rollback.assert_not_called()
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
     def test_append_database_error_raises_audit_store_error(
         self,
         mock_table_class,
@@ -158,9 +158,9 @@ class TestDatabaseAuditStore:
         # Verify rollback was called
         mock_session.rollback.assert_called_once()
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
     def test_append_creates_table_when_not_exists_and_create_mode(
         self,
         mock_table_class,
@@ -207,9 +207,9 @@ class TestDatabaseAuditStore:
         mock_session.execute.assert_called_once()
         mock_session.commit.assert_called_once()
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
     def test_append_raises_error_when_table_not_exists_and_error_mode(
         self,
         mock_table_class,
@@ -245,9 +245,9 @@ class TestDatabaseAuditStore:
         with pytest.raises(AuditStoreError, match="Table 'audit_table' does not exist"):
             store.append(mock_audit_row)
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
     def test_append_handles_complex_data_types(
         self, mock_table_class, mock_sessionmaker, mock_create_engine, valid_credentials
     ):
@@ -315,10 +315,10 @@ class TestDatabaseAuditStore:
         # Verify None remained None
         assert call_args["none_field"] is None
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
-    @patch("dataguard.store.audit.database.database_audit_store.MetaData")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.MetaData")
     def test_append_raises_audit_store_error_on_sqlalchemy_error_in_get_or_create_table(
         self,
         mock_metadata_class,
@@ -372,10 +372,10 @@ class TestDatabaseAuditStore:
         )
         assert "Database connection failed" in str(exc_info.value)
 
-    @patch("dataguard.store.audit.database.database_audit_store.create_engine")
-    @patch("dataguard.store.audit.database.database_audit_store.sessionmaker")
-    @patch("dataguard.store.audit.database.database_audit_store.Table")
-    @patch("dataguard.store.audit.database.database_audit_store.MetaData")
+    @patch("datasentinel.store.audit.database.database_audit_store.create_engine")
+    @patch("datasentinel.store.audit.database.database_audit_store.sessionmaker")
+    @patch("datasentinel.store.audit.database.database_audit_store.Table")
+    @patch("datasentinel.store.audit.database.database_audit_store.MetaData")
     def test_append_raises_audit_store_error_on_sqlalchemy_error_in_create_table(
         self,
         mock_metadata_class,

@@ -76,7 +76,7 @@ class TestSlackNotifierUnit:
         mock_result = Mock(spec=DataValidationResult)
 
         with patch(
-            "dataguard.notification.notifier.slack.slack_notifier.WebClient"
+            "datasentinel.notification.notifier.slack.slack_notifier.WebClient"
         ) as mock_web_client:
             notifier.notify(mock_result)
 
@@ -101,7 +101,7 @@ class TestSlackNotifierUnit:
         mock_result = Mock(spec=DataValidationResult)
 
         with patch(
-            "dataguard.notification.notifier.slack.slack_notifier.WebClient"
+            "datasentinel.notification.notifier.slack.slack_notifier.WebClient"
         ) as mock_web_client:
             mock_web_client.return_value.chat_postMessage.side_effect = Exception("Mock Error")
 

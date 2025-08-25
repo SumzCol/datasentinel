@@ -37,7 +37,7 @@ class TestTemplateEmailMessageRenderer:
         return result
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_initialization_with_default_template(self, mock_read_text):
         """Test successful initialization with default template."""
@@ -46,10 +46,10 @@ class TestTemplateEmailMessageRenderer:
         TemplateEmailMessageRenderer()
 
         mock_read_text.assert_called_once_with(
-            "dataguard.notification.renderer.email.templates", "default.html"
+            "datasentinel.notification.renderer.email.templates", "default.html"
         )
 
-    @patch("dataguard.notification.renderer.email.template_email_message_renderer.Path")
+    @patch("datasentinel.notification.renderer.email.template_email_message_renderer.Path")
     def test_initialization_with_custom_template(self, mock_path_class):
         """Test successful initialization with custom template path."""
         mock_path = Mock()
@@ -62,7 +62,7 @@ class TestTemplateEmailMessageRenderer:
         mock_path.read_text.assert_called_once()
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_initialization_template_not_found_default(self, mock_read_text):
         """Test initialization fails when default template is not found."""
@@ -71,7 +71,7 @@ class TestTemplateEmailMessageRenderer:
         with pytest.raises(RendererError):
             TemplateEmailMessageRenderer()
 
-    @patch("dataguard.notification.renderer.email.template_email_message_renderer.Path")
+    @patch("datasentinel.notification.renderer.email.template_email_message_renderer.Path")
     def test_initialization_template_not_found_custom(self, mock_path_class):
         """Test initialization fails when custom template is not found."""
         mock_path = Mock()
@@ -97,7 +97,7 @@ class TestTemplateEmailMessageRenderer:
             TemplateEmailMessageRenderer(failed_rows_limit=100001)
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_pass_status_email(self, mock_read_text, mock_validation_result_pass):
         """Test rendering email for PASS status validation."""
@@ -112,7 +112,7 @@ class TestTemplateEmailMessageRenderer:
         assert "Status: PASS" in content
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_fail_status_email(self, mock_read_text, mock_validation_result_fail):
         """Test rendering email for FAIL status validation."""
@@ -127,7 +127,7 @@ class TestTemplateEmailMessageRenderer:
         assert "Status: FAIL" in content
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_with_failed_rows_attachment_excel(
         self, mock_read_text, mock_validation_result_fail
@@ -160,11 +160,11 @@ class TestTemplateEmailMessageRenderer:
 
         with (
             patch(
-                "dataguard.notification.renderer.email.template_email_message_renderer.ExcelWriter",
+                "datasentinel.notification.renderer.email.template_email_message_renderer.ExcelWriter",
                 return_value=mock_excel_writer,
             ),
             patch(
-                "dataguard.notification.renderer.email.template_email_message_renderer.DataFrame"
+                "datasentinel.notification.renderer.email.template_email_message_renderer.DataFrame"
             ) as mock_df_class,
         ):
             # Mock DataFrame creation
@@ -181,7 +181,7 @@ class TestTemplateEmailMessageRenderer:
         assert attachments[0].get_filename().endswith(".zip")
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_with_failed_rows_attachment_csv(
         self, mock_read_text, mock_validation_result_fail
@@ -208,7 +208,7 @@ class TestTemplateEmailMessageRenderer:
         )
 
         with patch(
-            "dataguard.notification.renderer.email.template_email_message_renderer.DataFrame"
+            "datasentinel.notification.renderer.email.template_email_message_renderer.DataFrame"
         ) as mock_df_class:
             # Mock DataFrame creation
             mock_df = Mock()
@@ -224,7 +224,7 @@ class TestTemplateEmailMessageRenderer:
         assert attachments[0].get_filename().endswith(".zip")
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_no_attachment_when_no_failed_rows(
         self, mock_read_text, mock_validation_result_fail
@@ -249,7 +249,7 @@ class TestTemplateEmailMessageRenderer:
         assert len(attachments) == 0
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_template_error_handling(self, mock_read_text, mock_validation_result_pass):
         """Test that template rendering errors are properly handled."""
@@ -263,7 +263,7 @@ class TestTemplateEmailMessageRenderer:
         assert isinstance(result, EmailMessage)
 
     @patch(
-        "dataguard.notification.renderer.email.template_email_message_renderer.resources.read_text"
+        "datasentinel.notification.renderer.email.template_email_message_renderer.resources.read_text"
     )
     def test_render_general_error_handling(self, mock_read_text, mock_validation_result_pass):
         """Test that general rendering errors raise RendererError."""

@@ -34,7 +34,7 @@ def audit_row():
 @pytest.mark.unit
 @pytest.mark.audit_store
 class TestDeltaTableAuditStoreUnit:
-    @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
+    @patch("datasentinel.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
     def test_successful_initialization(self, mock_delta_table_appender: Mock):
         store = DeltaTableAuditStore(
             name="test",
@@ -57,7 +57,7 @@ class TestDeltaTableAuditStoreUnit:
             save_args={"mode": "append"},
         )
 
-    @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
+    @patch("datasentinel.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
     def test_error_on_append(self, mock_delta_table_appender: Mock, audit_row):
         store = DeltaTableAuditStore(
             name="test",
@@ -125,7 +125,7 @@ class TestDeltaTableAuditStoreUnit:
             (dict[str, Any], {"test1": 1}, StringType(), json.dumps({"test1": 1})),
         ],
     )
-    @patch("dataguard.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
+    @patch("datasentinel.store.audit.spark.deltatable_audit_store.DeltaTableAppender")
     def test_audit_row_to_df(
         self,
         mock_delta_table_appender: Mock,
@@ -146,7 +146,7 @@ class TestDeltaTableAuditStoreUnit:
 
         audit_row = audit_row(field_type=field_type, field_value=field_value)
 
-        with patch("dataguard.store.utils.spark_utils.get_spark", return_value=spark):
+        with patch("datasentinel.store.utils.spark_utils.get_spark", return_value=spark):
             store.append(audit_row)
 
         result_df = mock_delta_table_appender.return_value.append.call_args.args[0]

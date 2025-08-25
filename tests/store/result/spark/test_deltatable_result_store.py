@@ -60,7 +60,7 @@ def data_validation_result(spark: SparkSession) -> DataValidationResult:
 @pytest.mark.unit
 @pytest.mark.result_store
 class TestDeltaTableResultStoreUnit:
-    @patch("dataguard.store.result.spark.deltatable_result_store.DeltaTableAppender")
+    @patch("datasentinel.store.result.spark.deltatable_result_store.DeltaTableAppender")
     def test_successful_initialization(self, mock_delta_table_appender: Mock):
         store = DeltaTableResultStore(
             name="test",
@@ -84,7 +84,7 @@ class TestDeltaTableResultStoreUnit:
             save_args={"mode": "append"},
         )
 
-    @patch("dataguard.store.result.spark.deltatable_result_store.DeltaTableAppender")
+    @patch("datasentinel.store.result.spark.deltatable_result_store.DeltaTableAppender")
     def test_error_on_invalid_failed_rows_limit_value(self, mock_delta_table_appender: Mock):
         with pytest.raises(ResultStoreError, match="Failed rows limit must be greater than 0"):
             DeltaTableResultStore(
@@ -97,7 +97,7 @@ class TestDeltaTableResultStoreUnit:
             )
         mock_delta_table_appender.assert_not_called()
 
-    @patch("dataguard.store.result.spark.deltatable_result_store.DeltaTableAppender")
+    @patch("datasentinel.store.result.spark.deltatable_result_store.DeltaTableAppender")
     def test_error_on_store(self, mock_delta_table_appender: Mock):
         store = DeltaTableResultStore(
             name="test",
@@ -128,7 +128,7 @@ class TestDeltaTableResultStoreUnit:
             False,
         ],
     )
-    @patch("dataguard.store.result.spark.deltatable_result_store.DeltaTableAppender")
+    @patch("datasentinel.store.result.spark.deltatable_result_store.DeltaTableAppender")
     def test_result_df(
         self,
         mock_delta_table_appender: Mock,
@@ -146,7 +146,7 @@ class TestDeltaTableResultStoreUnit:
             include_failed_rows=include_failed_rows,
             failed_rows_limit=failed_rows_limit,
         )
-        with patch("dataguard.store.utils.spark_utils.get_spark", return_value=spark):
+        with patch("datasentinel.store.utils.spark_utils.get_spark", return_value=spark):
             store.store(result=data_validation_result)
         result_df = mock_delta_table_appender.return_value.append.call_args.args[0]
         row = result_df.collect()[0]

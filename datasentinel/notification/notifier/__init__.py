@@ -1,1 +1,1 @@
-"""`dataguard.notification.notifier` provides functionality for sending notifications."""
+"""`datasentinel.notification.notifier` provides functionality for sending notifications."""
