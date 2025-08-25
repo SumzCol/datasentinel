@@ -17,10 +17,10 @@ on:
         type: string
 
 jobs:
-  is-release-check:
+  is-new-release-check:
     runs-on: ubuntu-latest
     outputs:
-      publish: ${{ steps.set-outputs.outputs.new_release }}
+      new_release: ${{ steps.set-outputs.outputs.new_release }}
       is_pre_release: ${{ steps.set-outputs.outputs.is_pre_release }}
       version: ${{ steps.get-version.outputs.version }}
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Extract release version
         id: get-version
         run: |
-          echo "VERSION=$(python scripts/gh_actions/extract_release_version.py -f dataguard/__init__.py)" >> $GITHUB_OUTPUT
+          echo "VERSION=$(python scripts/gh_actions/extract_release_version.py -f datasentinel/__init__.py)" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
         uses: mukunku/tag-exists-action@v1.6.0
@@ -77,23 +77,26 @@ jobs:
             # If tag exists or pypi version exists, set both outputs to false
             echo "new_release=false" >> $GITHUB_OUTPUT
             echo "is_pre_release=false" >> $GITHUB_OUTPUT
+            echo "Tag or Pypi version exists: $VERSION"
           else
             # Check if version contains pre-release indicators
             if [[ $VERSION =~ .*(a|alpha|b|beta|rc|c)[0-9]+ ]]; then
               # Pre-release version
               echo "new_release=true" >> $GITHUB_OUTPUT
               echo "is_pre_release=true" >> $GITHUB_OUTPUT
+              echo "Is pre-release version: $VERSION"
             else
               # Standard release version
               echo "new_release=true" >> $GITHUB_OUTPUT
               echo "is_pre_release=false" >> $GITHUB_OUTPUT
+              echo "Is standard release version: $VERSION"
             fi
           fi
 
   build-and-publish:
-    needs: is-release-check
+    needs: is-new-release-check
     if: |
-      needs.is-release-check.outputs.publish == 'true'
+      needs.is-new-release-check.outputs.new_release == 'true'
     runs-on: ${{ inputs.os }}
     env:
       RELEASE_NOTES_FILE: release_notes.md
@@ -103,7 +106,8 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ inputs.python-version }}
         uses: actions/setup-python@v5
@@ -122,14 +126,14 @@ jobs:
 
       - name: Build project
         run: |
-          make build
+          make package
         shell: bash
 
       - name: Extract release notes
         run: |
           python scripts/gh_actions/extract_release_notes.py \
           -f ${{ inputs.changelog-file }} \
-          -o $RELEASE_NOTES_FILE -v ${{ needs.is-release-check.outputs.version }}
+          -o $RELEASE_NOTES_FILE -v ${{ needs.is-new-release-check.outputs.version }}
         shell: bash
 
       - name: Create GitHub Release
@@ -139,7 +143,7 @@ jobs:
           name: ${{ inputs.version }}
           body_path: ${{ env.RELEASE_NOTES_FILE }}
           draft: false
-          prerelease: ${{ needs.is-release-check.outputs.is_pre_release }}
+          prerelease: ${{ needs.is-new-release-check.outputs.is_pre_release }}
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
