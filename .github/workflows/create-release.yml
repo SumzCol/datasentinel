@@ -102,7 +102,7 @@ jobs:
       url: https://pypi.org/project/datasentinel
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
