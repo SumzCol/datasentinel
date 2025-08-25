@@ -44,18 +44,18 @@ jobs:
       - name: Extract release version
         id: get-version
         run: |
-          echo "VERSION=$(python scripts/gh_actions/extract_release_version.py -f datasentinel/__init__.py)" >> $GITHUB_OUTPUT
+          python scripts/gh_actions/extract_release_version.py -f datasentinel/__init__.py
 
       - name: Check if tag exists
         uses: mukunku/tag-exists-action@v1.6.0
         id: tag-exists
         with:
-          tag: ${{ steps.get-version.outputs.version }}
+          tag: ${{ env.DATA_SENTINEL_VERSION }}
 
       - name: Check if Pypi version exists
         id: pypi-version-exists
         env:
-          VERSION: ${{ steps.get-version.outputs.version }}
+          VERSION: ${{ env.DATA_SENTINEL_VERSION }}
         run: |
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/datasentinel/${VERSION}/json")
 
@@ -69,7 +69,7 @@ jobs:
       - name: Set outputs
         id: set-outputs
         env:
-          VERSION: ${{ steps.get-version.outputs.version }}
+          VERSION: ${{ env.DATA_SENTINEL_VERSION }}
           TAG_EXISTS: ${{ steps.tag-exists.outputs.exists }}
           PYPI_VERSION_EXISTS: ${{ steps.pypi-version-exists.outputs.exists }}
         run: |
@@ -105,9 +105,12 @@ jobs:
       url: https://pypi.org/project/datasentinel
     permissions:
       id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python ${{ inputs.python-version }}
         uses: actions/setup-python@v5
