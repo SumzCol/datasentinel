@@ -3,18 +3,18 @@
 from abc import ABC, abstractmethod
 import logging
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.validation.core import NotifyOnEvent
 from datasentinel.validation.result import DataValidationResult
 
 
-class NotifierError(DataGuardError):
+class NotifierError(DataSentinelError):
     """Base exception for notifier-related errors."""
 
     pass
 
 
-class NotifierManagerError(DataGuardError):
+class NotifierManagerError(DataSentinelError):
     """Base exception for notifier manager-related errors."""
 
     pass

@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.validation.result import DataValidationResult
 
 
 T = TypeVar("T")
 
 
-class RendererError(DataGuardError):
+class RendererError(DataSentinelError):
     pass
 
 

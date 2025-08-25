@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 import logging
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.validation.result import DataValidationResult
 
 
-class ResultStoreError(DataGuardError):
+class ResultStoreError(DataSentinelError):
     pass
 
 
-class ResultStoreManagerError(DataGuardError):
+class ResultStoreManagerError(DataSentinelError):
     pass
 
 

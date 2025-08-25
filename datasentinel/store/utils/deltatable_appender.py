@@ -5,11 +5,11 @@ from delta import DeltaTable
 from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.store.utils.spark_utils import get_spark
 
 
-class DeltaTableAppenderError(DataGuardError):
+class DeltaTableAppenderError(DataSentinelError):
     pass
 
 

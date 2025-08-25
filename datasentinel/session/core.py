@@ -1,13 +1,13 @@
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 
 
-class DataGuardSessionError(DataGuardError):
+class DataSentinelSessionError(DataSentinelError):
     pass
 
 
-class SessionAlreadyExistsError(DataGuardSessionError):
+class SessionAlreadyExistsError(DataSentinelSessionError):
     pass
 
 
-class SessionNotSpecifiedError(DataGuardSessionError):
+class SessionNotSpecifiedError(DataSentinelSessionError):
     pass

@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 import logging
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.store.audit.row import BaseAuditRow
 
 
-class AuditStoreError(DataGuardError):
+class AuditStoreError(DataSentinelError):
     pass
 
 
-class AuditStoreManagerError(DataGuardError):
+class AuditStoreManagerError(DataSentinelError):
     pass
 
 

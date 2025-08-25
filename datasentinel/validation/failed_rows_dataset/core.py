@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 
 
 T = TypeVar("T")
 
 
-class FailedRowsDatasetError(DataGuardError):
+class FailedRowsDatasetError(DataSentinelError):
     pass
 
 

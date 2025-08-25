@@ -19,10 +19,10 @@ from datasentinel.validation.runner.simple_workflow_runner import SimpleWorkflow
 from datasentinel.validation.workflow import ValidationWorkflow
 
 
-class DataGuardSession:
-    """Entry point to access all the functionalities of DataGuard."""
+class DataSentinelSession:
+    """Entry point to access all the functionalities of DataSentinel."""
 
-    _active_sessions: ClassVar[dict[str, "DataGuardSession"]] = {}
+    _active_sessions: ClassVar[dict[str, "DataSentinelSession"]] = {}
     _lock = threading.Lock()
 
     def __init__(
@@ -32,26 +32,26 @@ class DataGuardSession:
         result_store_manager: AbstractResultStoreManager | None = None,
         audit_store_manager: AbstractAuditStoreManager | None = None,
     ):
-        if name in DataGuardSession._active_sessions:
+        if name in DataSentinelSession._active_sessions:
             raise SessionAlreadyExistsError(f"A session with name '{name}' already exists")
         self.name = name
         self._notifier_manager = notifier_manager or NotifierManager()
         self._result_store_manager = result_store_manager or ResultStoreManager()
         self._audit_store_manager = audit_store_manager or AuditStoreManager()
-        DataGuardSession._active_sessions[name] = self
+        DataSentinelSession._active_sessions[name] = self
 
     @property
     def _logger(self) -> logging.Logger:  # pragma: no cover
         return logging.getLogger(__name__)
 
     @classmethod
-    def get_or_create(cls, name: str | None = None, **kwargs) -> "DataGuardSession":
-        """Get or create a new DataGuard session
+    def get_or_create(cls, name: str | None = None, **kwargs) -> "DataSentinelSession":
+        """Get or create a new DataSentinel session
 
         Args:
             name: Name of session to be created or retrieved if a session exists with the
                 same name
-            **kwargs: Additional arguments passed to the DataGuardSession constructor.
+            **kwargs: Additional arguments passed to the DataSentinelSession constructor.
 
         Returns:
             The session created or retrieved

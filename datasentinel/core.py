@@ -1,7 +1,7 @@
-"""Core module for DataGuard."""
+"""Core module for DataSentinel."""
 
 
-class DataGuardError(Exception):
-    """Base exception for DataGuard errors."""
+class DataSentinelError(Exception):
+    """Base exception for DataSentinel errors."""
 
     pass

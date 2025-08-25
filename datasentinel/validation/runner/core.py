@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.notification.notifier.core import AbstractNotifierManager
 from datasentinel.store.result.core import AbstractResultStoreManager
 from datasentinel.validation.workflow import ValidationWorkflow
 
 
-class RunnerError(DataGuardError):
+class RunnerError(DataSentinelError):
     """Base class for runner errors."""
 
 

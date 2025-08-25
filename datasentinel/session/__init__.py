@@ -1,4 +1,4 @@
-from .data_guard_session import DataGuardSession
+from .data_sentinel_session import DataSentinelSession
 
 
-__all__ = ["DataGuardSession"]
+__all__ = ["DataSentinelSession"]

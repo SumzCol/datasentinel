@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 import enum
 from typing import Any
 
-from datasentinel.core import DataGuardError
+from datasentinel.core import DataSentinelError
 from datasentinel.validation.check.level import CheckLevel
 from datasentinel.validation.check.result import CheckResult
 from datasentinel.validation.check.utils import get_type
 
 
-class CheckError(DataGuardError):
+class CheckError(DataSentinelError):
     pass
 
 
