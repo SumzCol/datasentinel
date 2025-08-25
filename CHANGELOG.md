@@ -1,4 +1,4 @@
-# 0.0.1
+# 0.1.0
 ## Major features and improvements
 
 ### Core Framework
