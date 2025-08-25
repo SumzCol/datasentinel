@@ -1,5 +1,5 @@
 install-uv:
-	python -m pip install "uv~=0.6.2"
+	python -m pip install "uv~=0.8.13"
 
 install: install-uv
 	uv pip install --system "datasentinel @ ."
