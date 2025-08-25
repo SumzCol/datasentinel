@@ -21,7 +21,7 @@ install-all: install install-lint install-test install-pre-commit
 uninstall-pre-commit:
 	pre-commit uninstall
 
-build:
+package:
 	python -m pip install build && python -m build --wheel
 
 lint:

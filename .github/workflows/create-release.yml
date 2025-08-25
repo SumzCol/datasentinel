@@ -13,5 +13,5 @@ jobs:
     uses: ./.github/workflows/rw-build-publish.yml
     with:
       os: "ubuntu-latest"
-      python-version: "3.10"
+      python-version: "3.10.18"
       changelog-file: "CHANGELOG.md"
