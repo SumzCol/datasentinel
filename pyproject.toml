@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datasentinel"
-description = "DataSentinel is a powerful tool to monitor data pipelines and ensure data quality."
+description = "Data Sentinel is a powerful tool to monitor data pipelines and ensure data quality."
 authors = [
     { name = "Sumz SAS" },
 ]
