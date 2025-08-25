@@ -18,7 +18,7 @@ from datasentinel.validation.workflow import ValidationWorkflow
 
 @pytest.mark.unit
 @pytest.mark.session
-class TestDataGuardSessionUnit:
+class TestDataSentinelSessionUnit:
     def teardown_method(self):
         # Code to run after each test method
         DataSentinelSession._active_sessions.clear()
