@@ -5,7 +5,7 @@ import lazy_loader as lazy
 
 try:
     from .slack_message_renderer import SlackMessageRenderer  # noqa: F401
-except (ImportError, RuntimeError):
+except (ImportError, RuntimeError):  # pragma: no cover
     SlackMessageRenderer: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(

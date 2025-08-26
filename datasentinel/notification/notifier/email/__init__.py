@@ -7,7 +7,7 @@ import lazy_loader as lazy
 
 try:
     from .smtp_email_notifier import SMTPEmailNotifier  # noqa: F401
-except (ImportError, RuntimeError):
+except (ImportError, RuntimeError):  # pragma: no cover
     SMTPEmailNotifier: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(

@@ -5,7 +5,7 @@ import lazy_loader as lazy
 
 try:
     from .deltatable_result_store import DeltaTableResultStore  # noqa: F401
-except (ImportError, RuntimeError):
+except (ImportError, RuntimeError):  # pragma: no cover
     DeltaTableResultStore: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
