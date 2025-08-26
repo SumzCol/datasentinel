@@ -1,4 +1,16 @@
-from .deltatable_audit_store import DeltaTableAuditStore
+from typing import Any
+
+import lazy_loader as lazy
 
 
-__all__ = ["DeltaTableAuditStore"]
+try:
+    from .deltatable_audit_store import DeltaTableAuditStore  # noqa: F401
+except (ImportError, RuntimeError):
+    DeltaTableAuditStore: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "deltatable_audit_store": ["DeltaTableAuditStore"],
+    },
+)

@@ -1,4 +1,16 @@
-from .slack_message_renderer import SlackMessageRenderer
+from typing import Any
+
+import lazy_loader as lazy
 
 
-__all__ = ["SlackMessageRenderer"]
+try:
+    from .slack_message_renderer import SlackMessageRenderer  # noqa: F401
+except (ImportError, RuntimeError):
+    SlackMessageRenderer: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "slack_message_renderer": ["SlackMessageRenderer"],
+    },
+)

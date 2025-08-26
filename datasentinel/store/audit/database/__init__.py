@@ -1,4 +1,16 @@
-from .database_audit_store import DatabaseAuditStore
+from typing import Any
+
+import lazy_loader as lazy
 
 
-__all__ = ["DatabaseAuditStore"]
+try:
+    from .database_audit_store import DatabaseAuditStore  # noqa: F401
+except (ImportError, RuntimeError):
+    DatabaseAuditStore: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "database_audit_store": ["DatabaseAuditStore"],
+    },
+)
