@@ -1,4 +1,9 @@
-# 0.1.1
+# 0.1.2
+## Bug fixes and other changes
+### Added dependency
+- Added toolz package as a dependency.
+
+0.1.1
 ## Bug fixes and other changes
 ### Lazy loading
 - Added lazy module loading for checks, notifiers, renderers, audit stores, and result stores modules, allowing users to import specific components without requiring all optional dependencies to be installed.
