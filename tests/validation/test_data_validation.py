@@ -169,7 +169,7 @@ class TestDataValidationUnit:
         assert result.data_asset_schema == "test_schema"
         assert result.start_time == mock_start_time
         assert result.end_time == mock_end_time
-        assert len(result.check_results) == 2  # noqa: PLR2004
+        assert len(result.check_results) == 2
         assert result.check_results == [
             mock_check_result1,
             mock_check_result2,
