@@ -1,3 +1,8 @@
+# 0.1.3
+## Bug fixes and other changes
+### Email renderer default template
+- Corrected the path to the default email renderer template. The previous, incorrect path excluded the template from the package wheel, which caused "template not found" errors.
+
 # 0.1.2
 ## Bug fixes and other changes
 ### Added dependency
