@@ -145,7 +145,7 @@ all = [
 ]
 
 [tool.setuptools.package-data]
-"datasentinel.notification.renderer.email.templates" = ["templates/*.html"]
+"datasentinel.notification.renderer.email.templates" = ["*.html"]
 
 [tool.pyright]
 include = ['datasentinel']
