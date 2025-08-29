@@ -11,7 +11,6 @@ from typing_extensions import Self
 from datasentinel.validation.check.core import (
     AbstractCheck,
     DataframeType,
-    UnsupportedDataframeTypeError,
 )
 from datasentinel.validation.check.level import CheckLevel
 from datasentinel.validation.check.result import CheckResult
@@ -20,7 +19,8 @@ from datasentinel.validation.rule.metric import RuleMetric
 
 
 def _cuallee_check_level(level: CheckLevel) -> CualleeCheckLevel:
-    return CualleeCheckLevel.WARNING if level.WARNING else CualleeCheckLevel.ERROR
+    # Correct:
+    return CualleeCheckLevel.WARNING if level == CheckLevel.WARNING else CualleeCheckLevel.ERROR
 
 
 class CualleeCheck(AbstractCheck):
@@ -33,7 +33,7 @@ class CualleeCheck(AbstractCheck):
             level: The severity level of the check.
             name: The name of the check.
         """
-        self._check = Check(level=CualleeCheckLevel(_cuallee_check_level(level=level)), name=name)
+        self._check = Check(level=_cuallee_check_level(level=level), name=name)
         super().__init__(level, name)
 
     def is_complete(self, column: str, pct: float = 1.0) -> Self:
@@ -141,7 +141,7 @@ class CualleeCheck(AbstractCheck):
         self._check.is_positive(column=column, pct=pct)
         return self
 
-    def is_greater_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+    def is_greater_or_equal_to(self, column: str, value: float, pct: float = 1.0) -> Self:
         """Check if values in the column are greater than or equal to the specified value.
 
         Args:
@@ -193,7 +193,7 @@ class CualleeCheck(AbstractCheck):
         self._check.is_negative(column=column, pct=pct)
         return self
 
-    def is_less_or_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+    def is_less_or_equal_to(self, column: str, value: float, pct: float = 1.0) -> Self:
         """Check if values in the column are less than or equal to the specified value.
 
         Args:
@@ -204,7 +204,7 @@ class CualleeCheck(AbstractCheck):
         self._check.is_less_or_equal_than(column=column, value=value, pct=pct)
         return self
 
-    def is_equal_than(self, column: str, value: float, pct: float = 1.0) -> Self:
+    def is_equal_to(self, column: str, value: float, pct: float = 1.0) -> Self:
         """Check if values in the column are equal to the specified value.
 
         Args:
@@ -396,15 +396,15 @@ class CualleeCheck(AbstractCheck):
         self._check.is_inside_interquartile_range(column=column, value=value, pct=pct)
         return self
 
-    def has_max_by(self, column_source: str, column_target: str, values: float | str) -> Self:
+    def has_max_by(self, column_source: str, column_target: str, value: float | str) -> Self:
         self._check.has_max_by(
-            column_source=column_source, column_target=column_target, value=values
+            column_source=column_source, column_target=column_target, value=value
         )
         return self
 
-    def has_min_by(self, column_source: str, column_target: str, values: float | str) -> Self:
+    def has_min_by(self, column_source: str, column_target: str, value: float | str) -> Self:
         self._check.has_min_by(
-            column_source=column_source, column_target=column_target, value=values
+            column_source=column_source, column_target=column_target, value=value
         )
         return self
 
@@ -412,10 +412,10 @@ class CualleeCheck(AbstractCheck):
         self,
         column_left: str,
         column_right: str,
-        values: float,
+        value: float,
     ) -> Self:
         self._check.has_correlation(
-            column_left=column_left, column_right=column_right, value=values
+            column_left=column_left, column_right=column_right, value=value
         )
         return self
 
@@ -578,7 +578,11 @@ class CualleeCheck(AbstractCheck):
                 id=row["id"],
                 rule=row["rule"],
                 column=self._format_rule_column(self._check.rules[i].column),
-                value=(self._check.rules[i].value if not row["rule"] == "is_custom" else None),
+                value=(
+                    self._check.rules[i].value
+                    if not row["rule"] == "is_custom" and not self._check.rules[i].value == "N/A"
+                    else None
+                ),
                 function=(self._check.rules[i].value if row["rule"] == "is_custom" else None),
                 rows=row["rows"],
                 violations=row["violations"],
@@ -599,8 +603,6 @@ class CualleeCheck(AbstractCheck):
             rule_metrics = self._get_rule_metrics_pyspark(cuallee_result=cuallee_result)
         elif df_type == DataframeType.PANDAS:
             rule_metrics = self._get_rule_metrics_pandas(cuallee_result=cuallee_result)
-        else:
-            raise UnsupportedDataframeTypeError(f"Unsupported dataframe type: {df_type.value}")
 
         return CheckResult(
             name=self.name,

@@ -46,6 +46,22 @@ class TestDataValidationResultUnit:
                 check_results=[],
             )
 
+    def test_checks_count_property(self):
+        check_result = Mock(spec=CheckResult)
+        type(check_result).status = PropertyMock(return_value=Status.FAIL)
+
+        result = DataValidationResult(
+            run_id=ULID(),
+            name="test_name",
+            data_asset="test_data_asset",
+            start_time=datetime.now(),
+            end_time=datetime.now(),
+            check_results=[check_result],
+        )
+
+        assert result.failed_checks == [check_result]
+        assert result.checks_count == 1
+
     def test_failed_checks_property(self):
         check_result = Mock(spec=CheckResult)
         type(check_result).status = PropertyMock(return_value=Status.FAIL)

@@ -203,7 +203,7 @@ class TestDatabaseAuditStore:
         store.append(mock_audit_row)
 
         # Verify table creation was attempted (Table called twice)
-        assert mock_table_class.call_count == 2  # noqa: PLR2004
+        assert mock_table_class.call_count == 2
         mock_session.execute.assert_called_once()
         mock_session.commit.assert_called_once()
 

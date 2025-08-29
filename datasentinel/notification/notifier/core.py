@@ -56,7 +56,7 @@ class AbstractNotifier(ABC):
         return self._disabled
 
     @property
-    def _logger(self):
+    def _logger(self):  # pragma: no cover
         return logging.getLogger(__name__)
 
     @abstractmethod

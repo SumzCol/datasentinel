@@ -145,7 +145,7 @@ all = [
 ]
 
 [tool.setuptools.package-data]
-"datasentinel.notification.renderer.email.templates" = ["templates/*.html"]
+"datasentinel.notification.renderer.email.templates" = ["*.html"]
 
 [tool.pyright]
 include = ['datasentinel']
@@ -209,7 +209,7 @@ testpaths = [
 ]
 
 [tool.coverage.report]
-fail_under = 90
+fail_under = 95
 show_missing = true
 omit = [
     "tests/*",

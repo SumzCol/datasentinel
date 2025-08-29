@@ -84,7 +84,7 @@ class TestSlackMessageRenderer:
 
         # Test that blocks contain essential structure
         # At least header and section
-        assert len(result.blocks) >= 2  # noqa: PLR2004
+        assert len(result.blocks) >= 2
         # Check that blocks are present without checking internal structure
         assert result.blocks is not None
 
@@ -112,7 +112,7 @@ class TestSlackMessageRenderer:
 
         # Test that blocks contain failure-specific structure
         # More blocks for failure case
-        assert len(result.blocks) > 2  # noqa: PLR2004
+        assert len(result.blocks) > 2
         assert result.blocks is not None
 
     def test_render_respects_checks_display_limit(self, mock_validation_result_fail):
@@ -237,8 +237,8 @@ class TestSlackMessageRenderer:
         assert hasattr(fail_result, "blocks") and fail_result.blocks
 
         # Both should have at least basic blocks (header + section)
-        assert len(pass_result.blocks) >= 2  # noqa: PLR2004
-        assert len(fail_result.blocks) >= 2  # noqa: PLR2004
+        assert len(pass_result.blocks) >= 2
+        assert len(fail_result.blocks) >= 2
 
     def test_render_includes_timing_information(self, mock_validation_result_pass):
         """Test that timing information is included in rendered message."""

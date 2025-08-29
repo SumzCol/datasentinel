@@ -1,7 +1,7 @@
 import pytest
 
 from datasentinel.validation.check import RowLevelResultCheck
-from datasentinel.validation.check.core import BadArgumentError
+from datasentinel.validation.check.core import BadArgumentError, EmptyCheckError
 
 
 @pytest.mark.unit
@@ -38,3 +38,11 @@ class TestRowLevelResultCheckUnit:
             check.is_custom(fn=invalid_fn)
         with pytest.raises(BadArgumentError):
             check.is_custom(fn=invalid_fn2)
+
+    def test_error_on_empty_check(self, check: RowLevelResultCheck):
+        with pytest.raises(EmptyCheckError):
+            check.validate(None)
+
+    def test_error_on_invalid_dataframe_type(self, check: RowLevelResultCheck):
+        with pytest.raises(ValueError):
+            check.is_complete(column="name", id_columns=["id"]).validate(1)
