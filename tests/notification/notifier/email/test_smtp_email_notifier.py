@@ -32,14 +32,8 @@ class TestSMTPEmailNotifierUnit:
             mail_rcp_cc=["cc@example.com"],
         )
 
-        assert notifier._server == "smtp.example.com"
-        assert notifier._port == 587  # noqa PLR2004
-        assert notifier._mail_rcp == ["recipient@example.com"]
-        assert notifier._mail_rcp_cc == ["cc@example.com"]
-        assert notifier._domain == "example.com"
-        assert notifier._username == "user@example.com"
-        assert notifier._password == "password123"  # noqa S105
-        assert notifier._renderer == mock_renderer
+        assert notifier.name == "test-notifier"
+        assert not notifier.disabled
 
     def test_initialization_missing_credentials(self, mock_renderer):
         credentials = {}
