@@ -141,7 +141,7 @@ lint = [
 ]
 
 all = [
-  "datasentinel[test,scripts,lint]"
+  "datasentinel[all-checks,all-resultstores,all-auditstores,all-notifiers,all-renderers]"
 ]
 
 [tool.setuptools.package-data]
