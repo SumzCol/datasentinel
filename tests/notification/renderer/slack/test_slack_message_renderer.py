@@ -177,6 +177,7 @@ class TestSlackMessageRenderer:
         custom_rule.value = "custom.function"
         custom_rule.rows = 100
         custom_rule.violations = 5
+        type(custom_rule).function_as_string = "custom.function"
 
         # Create regular rule
         regular_rule = Mock()
@@ -198,7 +199,7 @@ class TestSlackMessageRenderer:
         result = renderer.render(mock_validation_result_fail)
 
         # Custom rule should show value, regular rule should show column
-        assert "value: custom.function" in result.text
+        assert "function: custom.function" in result.text
         assert "column: [email]" in result.text
 
     def test_render_handles_missing_schema(self, mock_validation_result_pass):

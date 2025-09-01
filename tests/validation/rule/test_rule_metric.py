@@ -22,10 +22,17 @@ class TestRuleMetricUnit:
         def function():
             pass
 
-        assert (
-            RuleMetric.function_to_string(function)
-            == f"{function.__module__}.{function.__name__}"
+        rule_metric = RuleMetric(
+            id=1,
+            rule="test_rule",
+            rows=10,
+            violations=0,
+            pass_rate=1.0,
+            pass_threshold=1.0,
+            function=function,
         )
+
+        assert rule_metric.function_as_string == f"{function.__module__}.{function.__name__}"
 
     @pytest.mark.parametrize(
         "pass_rate, pass_threshold, expected_status",

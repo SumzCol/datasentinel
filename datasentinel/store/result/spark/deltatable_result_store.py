@@ -17,7 +17,6 @@ from datasentinel.store.result.core import AbstractResultStore, ResultStoreError
 from datasentinel.store.utils.deltatable_appender import DeltaTableAppender
 from datasentinel.store.utils.spark_utils import get_spark
 from datasentinel.validation.result import DataValidationResult
-from datasentinel.validation.rule.metric import RuleMetric
 
 
 class DeltaTableResultStore(AbstractResultStore):
@@ -70,11 +69,7 @@ class DeltaTableResultStore(AbstractResultStore):
                         rule_column=rule_metric.column,
                         rule_id_columns=rule_metric.id_columns,
                         rule_value=str(rule_metric.value) if rule_metric.value else None,
-                        rule_function=(
-                            RuleMetric.function_to_string(rule_metric.function)
-                            if rule_metric.function
-                            else None
-                        ),
+                        rule_function=rule_metric.function_as_string,
                         rule_rows=rule_metric.rows,
                         rule_violations=rule_metric.violations,
                         rule_pass_rate=rule_metric.pass_rate,

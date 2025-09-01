@@ -153,9 +153,8 @@ class TestDeltaTableResultStoreUnit:
 
         assert result_df.count() == 1
         assert row.run_id == str(data_validation_result.run_id)
-        assert row.rule_function == RuleMetric.function_to_string(
-            data_validation_result.check_results[0].rule_metrics[0].function
-        )
+        rule_metric = data_validation_result.check_results[0].rule_metrics[0]
+        assert row.rule_function == rule_metric.function_as_string
         assert row.rule_options == json.dumps(
             data_validation_result.check_results[0].rule_metrics[0].options
         )

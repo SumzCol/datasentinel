@@ -74,9 +74,9 @@ class RuleMetric:
         """Return the status of the rule."""
         return Status.PASS if self.pass_rate >= self.pass_threshold else Status.FAIL
 
-    @staticmethod
-    def function_to_string(function: Callable) -> str:
-        return f"{function.__module__}.{function.__name__}"
+    @property
+    def function_as_string(self) -> str | None:
+        return f"{self.function.__module__}.{self.function.__name__}" if self.function else None
 
     def to_dict(self) -> dict[str, Any]:
         """Return the rule metric as a dictionary."""
