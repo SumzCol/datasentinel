@@ -1,3 +1,12 @@
+# 0.2.0
+
+## Bug fixes and other changes
+### Rule metric function
+- Added `function_as_string` property to `RuleMetric` class to return the function as a string, effectively replacing the old static method `function_to_string`.
+
+### Slack message renderer
+- Fixed a bug where `SlackMessageRenderer` rendered the validation function name as None for custom function-based data quality validations.
+
 # 0.1.4
 
 ## Bug fixes and other changes
