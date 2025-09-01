@@ -1,3 +1,9 @@
+# 0.1.4
+
+## Bug fixes and other changes
+### Optional dependencies
+- `pip install datasentinel[all]` now installs all optional runtime dependencies only; testing and linting dependencies have been excluded.
+
 # 0.1.3
 ## Bug fixes and other changes
 ### Email renderer default template
